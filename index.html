@@ -2237,7 +2237,7 @@ async function syncMusic(d){if(d.fromCache)return;const list=d.list.filter(x=>x&
 addEventListener('cloudmusic',e=>syncMusic(e.detail));
 window.mtDiag=async()=>{notice('Probando la nube…','Un momento');let r;try{r=window.Cloud&&Cloud.musicDiag?await Cloud.musicDiag():'La nube no cargó. Abre el juego desde el enlace web con internet e inicia sesión.'}catch(e){r='Error: '+String(e.message||e)}alert(r)};
 window.mtPubAll=async()=>{const ks=Object.keys(MT.meta).filter(k=>!MT.meta[k].v);if(!ks.length)return;if(!(window.Cloud&&Cloud.musicPut)){notice('Sin conexión','Inicia sesión para publicar.');return}
- for(const k of ks){try{const r=await idb('readonly',s=>s.get(k));if(!r)continue;if(r.size>15*1048576){notice('Muy grande',r.name+' pasa de 15 MB');continue}
+ for(const k of ks){try{const r=await idb('readonly',s=>s.get(k));if(!r)continue;if(r.size>60*1048576){notice('Muy grande',r.name+' pasa de 60 MB');continue}
   const v=Date.now();syncing[k]=v;notice('Publicando…',r.name);await Cloud.musicPut(k,r.blob,r.tr,v,r.name);r.v=v;await idb('readwrite',s=>s.put(r));MT.meta[k].v=v}
   catch(e){delete syncing[k];MT.cloudErr=String(e.message||e);notice('No se pudo publicar',MT.cloudErr)}}
  notice('Listo','Las canciones ya están disponibles para todas las cuentas');musUI()};
@@ -2268,7 +2268,7 @@ document.addEventListener('keydown',e=>{if(e.key=='Escape'&&$('musw')&&!(e.targe
 const fi=document.createElement('input');fi.type='file';fi.accept='audio/mpeg,audio/mp3,.mp3,audio/*';fi.style.display='none';document.body.appendChild(fi);
 fi.onchange=async()=>{const f=fi.files[0],k=fi._k;fi.value='';if(!f||!k)return;
  if(!(/audio/.test(f.type)||/\.mp3$/i.test(f.name))){notice('Archivo no válido','Elige un archivo de audio MP3.');return}
- if(f.size>15*1048576){notice('Archivo muy grande','El máximo es 15 MB por canción para poder publicarla a todos.');return}
+ if(f.size>60*1048576){notice('Archivo muy grande','El máximo es 60 MB por canción.');return}
  try{await ready;const old=MT.meta[k],tr=old?old.tr:2000;let v=0,msg=f.name;
   if(window.Cloud&&Cloud.musicPut){v=Date.now();syncing[k]=v;notice('Publicando para todos…',f.name);
    try{await Cloud.musicPut(k,f,tr,v);MT.cloudErr=''}catch(e){v=0;delete syncing[k];MT.cloudErr=String(e.message||e);msg=f.name+' (solo en este dispositivo: '+MT.cloudErr+')'}}else MT.cloudErr='La nube no está disponible. Inicia sesión y abre el juego desde el enlace web (GitHub Pages) con internet.';
