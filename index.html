@@ -2225,7 +2225,7 @@ setInterval(()=>{try{
 ['pointerdown','keydown'].forEach(t=>document.addEventListener(t,()=>{if(MT.cur&&!MT.hold){const a=MT.el[MT.cur];if(a&&a.paused)a.play().catch(()=>{})}},true));
 /* sincronización con la nube: lo que publica el administrador lo reciben todas las cuentas */
 const syncing={};
-async function syncMusic(d){if(d.fromCache)return;const list=d.list,keys=new Set(list.map(x=>x.k));
+async function syncMusic(d){if(d.fromCache)return;const list=d.list.filter(x=>x&&x.k&&x.n&&x.v),keys=new Set(list.map(x=>x.k));
  try{await ready}catch(e){}
  for(const x of list){const m=MT.meta[x.k];
   if(m&&m.v===x.v){if(m.tr!==x.tr){try{const r=await idb('readonly',s=>s.get(x.k));if(r){r.tr=x.tr;await idb('readwrite',s=>s.put(r))}m.tr=x.tr}catch(e){}}continue}
@@ -2235,10 +2235,11 @@ async function syncMusic(d){if(d.fromCache)return;const list=d.list,keys=new Set
   catch(e){console.warn('Música: no se pudo descargar',x.k,e)}finally{if(syncing[x.k]===x.v)delete syncing[x.k]}}
  for(const k of Object.keys(MT.meta)){if(MT.meta[k].v&&!keys.has(k)&&!syncing[k]){try{await idb('readwrite',s=>s.delete(k))}catch(e){}if(MT.pv===k)mtStopPv();delete MT.meta[k];dropEl(k);if($('musw'))musUI()}}}
 addEventListener('cloudmusic',e=>syncMusic(e.detail));
+window.mtDiag=async()=>{notice('Probando la nube…','Un momento');let r;try{r=window.Cloud&&Cloud.musicDiag?await Cloud.musicDiag():'La nube no cargó. Abre el juego desde el enlace web con internet e inicia sesión.'}catch(e){r='Error: '+String(e.message||e)}alert(r)};
 window.mtPubAll=async()=>{const ks=Object.keys(MT.meta).filter(k=>!MT.meta[k].v);if(!ks.length)return;if(!(window.Cloud&&Cloud.musicPut)){notice('Sin conexión','Inicia sesión para publicar.');return}
  for(const k of ks){try{const r=await idb('readonly',s=>s.get(k));if(!r)continue;if(r.size>15*1048576){notice('Muy grande',r.name+' pasa de 15 MB');continue}
   const v=Date.now();syncing[k]=v;notice('Publicando…',r.name);await Cloud.musicPut(k,r.blob,r.tr,v,r.name);r.v=v;await idb('readwrite',s=>s.put(r));MT.meta[k].v=v}
-  catch(e){delete syncing[k];notice('No se pudo publicar',String(e.message||e))}}
+  catch(e){delete syncing[k];MT.cloudErr=String(e.message||e);notice('No se pudo publicar',MT.cloudErr)}}
  notice('Listo','Las canciones ya están disponibles para todas las cuentas');musUI()};
 /* interfaz del menú lateral */
 const fab=document.createElement('button');fab.id='mfab';fab.setAttribute('aria-label','Música');fab.textContent='♪';
@@ -2254,7 +2255,7 @@ function musUI(){let w=$('musw');const keep=w&&w.querySelector('.menu')?w.queryS
  const tot=Object.values(MT.meta).reduce((a,m)=>a+m.size,0);
  const h=`<div class="panel side menu" style="width:min(420px,94vw)!important"><div class="mhd"><span class="mem">♪</span><div><h1>Música</h1><span class="m">Modo administrador · ${Object.keys(MT.meta).length} pistas · ${sz(tot)}</span></div><button class="mx" aria-label="Cerrar" onclick="musClose()">✕</button></div>
  ${MT.err?`<div class="note warn" style="margin-top:14px">${MT.err} Las canciones no se podrán guardar.</div>`:''}
- <div class="sx">Volumen</div><input type="range" min="0" max="100" value="${Math.round(MT.MV*100)}" oninput="mtVol(this.value)" aria-label="Volumen" style="padding:0">
+ ${MT.cloudErr?`<div class="note warn" style="margin-top:14px">No se publicó para todos: ${esc(MT.cloudErr)}</div>`:''}<div style="margin-top:14px"><button onclick="mtDiag()">Probar nube</button></div><div class="sx">Volumen</div><input type="range" min="0" max="100" value="${Math.round(MT.MV*100)}" oninput="mtVol(this.value)" aria-label="Volumen" style="padding:0">
  <p class="m hint">Las canciones que subas se publican para TODAS las cuentas (se descargan solas y quedan guardadas en cada dispositivo). Cada canción hace su transición al empezar y al irse la anterior.</p>
  ${Object.values(MT.meta).some(m=>!m.v)?`<div class="note" style="margin-top:14px">Hay canciones que solo suenan en este dispositivo. <button onclick="mtPubAll()">Publicar para todos</button></div>`:''}<div class="sx">Secciones</div>${MTS.map(s=>row(s[0],s[1],s[2])).join('')}
  <div class="sx">Jefes específicos</div>${sp.map(k=>row(k,lvName(k),'Solo suena en ese jefe; tiene prioridad sobre «Jefes (general)».')).join('')||'<p class="m hint">Aún no hay jefes con música propia.</p>'}
@@ -2270,7 +2271,7 @@ fi.onchange=async()=>{const f=fi.files[0],k=fi._k;fi.value='';if(!f||!k)return;
  if(f.size>15*1048576){notice('Archivo muy grande','El máximo es 15 MB por canción para poder publicarla a todos.');return}
  try{await ready;const old=MT.meta[k],tr=old?old.tr:2000;let v=0,msg=f.name;
   if(window.Cloud&&Cloud.musicPut){v=Date.now();syncing[k]=v;notice('Publicando para todos…',f.name);
-   try{await Cloud.musicPut(k,f,tr,v)}catch(e){v=0;delete syncing[k];msg=f.name+' (solo en este dispositivo: '+String(e.message||e)+')'}}
+   try{await Cloud.musicPut(k,f,tr,v);MT.cloudErr=''}catch(e){v=0;delete syncing[k];MT.cloudErr=String(e.message||e);msg=f.name+' (solo en este dispositivo: '+MT.cloudErr+')'}}else MT.cloudErr='La nube no está disponible. Inicia sesión y abre el juego desde el enlace web (GitHub Pages) con internet.';
   await idb('readwrite',s=>s.put({k,name:f.name,size:f.size,tr,v,blob:f}));
   MT.meta[k]={name:f.name,size:f.size,tr,v};dropEl(k);if(MT.pv===k)mtStopPv();
   notice(v?'Publicada para todas las cuentas':'Canción guardada',msg)}catch(e){notice('No se pudo guardar',String(e.message||e))}musUI()};
@@ -3531,6 +3532,17 @@ Object.assign(window.Cloud,{
   return new Blob(ps.map(p=>{if(!p.exists())throw new Error('Falta un trozo');return p.data().d.toUint8Array()}),{type:'audio/mpeg'})},
  async musicTr(k,tr){await setDoc(doc(db,'musica',mid(k)),{tr},{merge:true})},
  async musicDel(k){const r=doc(db,'musica',mid(k)),o=await getDoc(r);await deleteDoc(r);if(o.exists())await delParts(k,o.data().v,o.data().n||0)}
+});
+Object.assign(window.Cloud,{
+ async musicDiag(){if(!uid)return 'No hay sesión iniciada. Entra a tu cuenta e inténtalo otra vez.';
+  const L=['Cuenta: '+window.Cloud.name];let adm=null;
+  try{const a=await getDoc(doc(db,'config','admin'));adm=a.exists()?a.data().uid:null}catch(e){L.push('✗ No pude leer config/admin: '+(e.code||e.message))}
+  if(!adm){try{await setDoc(doc(db,'config','admin'),{uid});adm=uid;window.Cloud.admUid=uid;L.push('✓ Tu cuenta no estaba registrada como administradora: ya la registré.')}catch(e){L.push('✗ No pude registrar al administrador: '+(e.code||e.message))}}
+  else if(adm!==uid)L.push('✗ El administrador registrado es OTRA cuenta, por eso esta no puede publicar. En Firebase borra el documento config/admin, vuelve aquí y toca Probar nube.');
+  else L.push('✓ Esta cuenta es la administradora.');
+  try{await setDoc(doc(db,'musica','_prueba'),{k:'_prueba',t:Date.now()});await deleteDoc(doc(db,'musica','_prueba'));L.push('✓ Puedo escribir en la nube: todo listo para publicar.')}
+  catch(e){L.push('✗ No puedo escribir en la nube ('+(e.code||e.message)+'). Revisa que publicaste las reglas nuevas en Firebase y que esta cuenta sea la administradora.')}
+  return L.join('\n')}
 });
 function musicListen(){if(mun)return;mun=onSnapshot(collection(db,'musica'),sn=>dispatchEvent(new CustomEvent('cloudmusic',{detail:{fromCache:sn.metadata.fromCache,list:sn.docs.map(d=>d.data())}})),e=>console.warn('musica',e))}
 function musicStop(){if(mun){mun();mun=null}}
