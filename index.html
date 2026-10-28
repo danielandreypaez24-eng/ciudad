@@ -1,4 +1,9 @@
 <!DOCTYPE html>
+<!--
+  NOTA PARA PUBLICAR: este archivo SIEMPRE debe llamarse exactamente "index.html".
+  Nunca le pongas numeración (index-5.html, index (2).html, etc.).
+  Si el nombre trae un número, quítalo antes de subirlo a GitHub; si no, GitHub Pages no lo muestra.
+-->
 <html lang="es"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Ciudad</title>
@@ -576,7 +581,65 @@ body.onscr #game *{animation:none!important}
  .rsn{font-size:10px}.rss{font-size:12px}
  .rsl{width:min(250px,62vw)}
 }
+
+.accbar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:16px;padding:10px 12px;border:1px solid var(--l);background:var(--s)}
+.accb,.bell{border:0;background:transparent;padding:0;display:flex;align-items:center;gap:10px;text-align:left;color:var(--t);position:relative;letter-spacing:0}
+.accb:hover:not(:disabled),.bell:hover:not(:disabled){background:transparent;color:var(--t)}
+.av{display:inline-flex;align-items:center;justify-content:center;border-radius:50%;color:#fff;font-weight:600;flex:0 0 auto;text-transform:uppercase;line-height:1}
+.bdg{font-style:normal;background:var(--r);color:#fff;border-radius:9px;min-width:18px;height:18px;padding:0 5px;font-size:11px;display:inline-flex;align-items:center;justify-content:center}
+.bell .bdg{position:absolute;top:-7px;right:-9px}
+#accov{position:fixed;inset:0;z-index:98;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;padding:12px}
+.accp{width:100%;max-width:420px;max-height:92vh;border:1px solid var(--t)}
+.accx{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.accid{display:flex;align-items:center;gap:14px}.accn{font-size:18px;font-weight:600;word-break:break-all}
+.sw{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}.swb{width:28px;height:28px;border-radius:50%;padding:0;border:2px solid transparent}
+.swb:hover:not(:disabled){background:inherit;color:inherit}.swb.on{outline:2px solid var(--t);outline-offset:2px}
+.accT td{padding:8px 0}.sm{padding:3px 8px;font-size:11px;margin-left:6px}
+.tabs{display:flex;gap:6px;margin:14px 0 10px}.tabs button{flex:1;padding:7px 4px;font-size:12px}.tabs .on{background:var(--t);color:var(--bg)}
+.fr{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--l)}.fr .gr{flex:1;min-width:0}.fr .gr b{word-break:break-all}
+.fr .bt{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.srch{display:flex;gap:6px}.srch input{flex:1}
+.nt{min-height:20px;margin:8px 0;font-size:12px}.nt.er{color:var(--r)}
+.subh{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--m);margin:12px 0 2px}
+#acct{position:fixed;left:50%;top:calc(10px + env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:100;background:var(--t);color:var(--bg);padding:10px 14px;max-width:92vw;cursor:pointer;box-shadow:0 4px 18px rgba(0,0,0,.3);font-size:13px}
+
+.ld{position:fixed;inset:0;z-index:200;background:radial-gradient(ellipse at 50% 45%,#120d2e 0,#07060f 55%,#020206 100%);overflow:hidden;transition:opacity .55s ease;contain:strict;color:#8a93ff}
+.ld.out{opacity:0;pointer-events:none}
+.ld *{box-sizing:border-box}
+.ldstage{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;padding:20px}
+.ldring{width:112px;height:112px;overflow:visible}
+.ldring circle,.ldring path{fill:none;stroke-width:6;stroke-dasharray:100;stroke-dashoffset:100}
+.ldring .tr{stroke:rgba(138,147,255,.14);stroke-dashoffset:0;stroke-dasharray:none;stroke-width:5}
+.ldring .w{stroke:#e6e9ff;animation:ldw 4s infinite}
+.ldring .p{stroke:#8a4dff;animation:ldp 4s infinite}
+.ldring .c{stroke:#e6e9ff;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;animation:ldc 4s infinite}
+.ldsub{font-size:12px;letter-spacing:.5em;margin-right:-.5em;color:#7e7ab8;text-transform:uppercase}
+.ldtt{font-size:clamp(30px,9vw,46px);font-weight:700;letter-spacing:.14em;margin-right:-.14em;color:#e6e9ff}
+.ldbar{display:none}
+.ldm{color:#8c8aa8;font-size:12px;letter-spacing:.14em;text-transform:uppercase;min-height:16px}
+@keyframes ldw{0%{stroke-dashoffset:100;opacity:1}32%,96%{stroke-dashoffset:0;opacity:1}100%{stroke-dashoffset:0;opacity:0}}
+@keyframes ldp{0%,32%{stroke-dashoffset:100;opacity:1}62%,96%{stroke-dashoffset:0;opacity:1}100%{stroke-dashoffset:0;opacity:0}}
+@keyframes ldc{0%,62%{stroke-dashoffset:100;opacity:0}63%{stroke-dashoffset:100;opacity:1}82%,96%{stroke-dashoffset:0;opacity:1}100%{stroke-dashoffset:0;opacity:0}}
+.ld.hold .ldring *{animation-play-state:paused}
+@media(prefers-reduced-motion:reduce){.ldring .w,.ldring .p,.ldring .c{animation:none;stroke-dashoffset:0}}
+@keyframes up{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.fx #slots>*{animation:up .55s ease both}
+.fx #slots>*:nth-child(2){animation-delay:.06s}.fx #slots>*:nth-child(3){animation-delay:.12s}.fx #slots>*:nth-child(4){animation-delay:.18s}.fx #slots>*:nth-child(5){animation-delay:.26s}.fx #slots>*:nth-child(6){animation-delay:.34s}.fx #slots>*:nth-child(7){animation-delay:.42s}
+#slots{counter-reset:sl}
+#slots h1{font-size:24px;letter-spacing:.22em;margin-bottom:4px}
+.slot{counter-increment:sl;padding:14px;margin-bottom:10px;border:1px solid var(--l);background:var(--s);transition:border-color .2s,transform .2s}
+.slot:hover{border-color:var(--a);transform:translateY(-1px)}
+.slot::before{content:counter(sl);flex:0 0 auto;width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:color-mix(in srgb,var(--a) 18%,transparent);color:var(--a);font-weight:600;font-size:16px}
+.slot>div:first-child{flex:1;min-width:0}
+
+.pc{border:1px solid var(--t);background:var(--s);padding:6px;font-size:11px;text-align:center;flex:1;min-width:0;transition:transform .15s,background .15s}
+.pc.hit{background:color-mix(in srgb,var(--r) 35%,var(--s));transform:scale(.95)}.pc.atk{transform:translateY(-6px)}.pc.dead{opacity:.25}
+.pc .hb2{height:5px;background:var(--l);margin-top:4px}.pc .hb2 i{display:block;height:100%;background:var(--r);transition:width .3s}
+.pcs{display:flex;gap:6px;margin:6px 0}.pvl{min-height:38px;text-align:center;margin:10px 0;font-size:12px}
+.mg{display:grid;grid-template-columns:repeat(15,18px);grid-auto-rows:18px;border-left:1px solid var(--l);border-top:1px solid var(--l);width:max-content;margin:8px auto;background:var(--s)}
+.mg i{border-right:1px solid var(--l);border-bottom:1px solid var(--l);display:flex;align-items:center;justify-content:center;color:var(--a)}
 </style></head><body>
+<div class="ld" id="ld"><div class="ldstage"><svg class="ldring" viewBox="0 0 112 112" aria-hidden="true"><circle class="tr" cx="56" cy="56" r="44"/><circle class="w" cx="56" cy="56" r="44" pathLength="100" transform="rotate(-90 56 56)"/><circle class="p" cx="56" cy="56" r="44" pathLength="100" transform="rotate(-90 56 56)"/><path class="c" pathLength="100" transform="translate(-1.14 3.63)" d="M40 67H72A9 9 0 0 0 73 49A13 13 0 0 0 48 46A10 10 0 0 0 40 67"/></svg><div class="ldtt">CIUDAD</div><div class="ldsub">Forja tu leyenda</div><div class="ldbar"><i id="ldf"></i></div><div class="ldm" id="ldm">Iniciando…</div></div></div></div></div>
 <section id="slots"></section>
 <section id="game" class="hide">
  <header>
@@ -696,7 +759,7 @@ function slots(){
  $('slots').innerHTML=h}
 function admin(){if(ADM){ADM=false;slots();return}
  $('ov').innerHTML=`<div class="sheet"><div class="panel" style="margin:auto;width:340px;max-width:92vw"><h2>Modo administrador</h2><input id="apw" type="password" inputmode="numeric" placeholder="Contraseña" autocomplete="off"><p id="aer" style="color:var(--r);min-height:18px;margin:6px 0"></p><button id="aok">Entrar</button> <button onclick="sheetClose()">Cancelar</button></div></div>`;
- const f=()=>{if($('apw').value==='2009'){ADM=true;sheetClose();slots();if(typeof notice=='function')notice('Modo administrador','Todos los niveles están desbloqueados.')}else{$('aer').textContent='Contraseña incorrecta';$('apw').value=''}};
+ const f=()=>{if($('apw').value==='2009'){ADM=true;try{window.Cloud.linkAdmin()}catch(e){}sheetClose();slots();if(typeof notice=='function')notice('Modo administrador','Todos los niveles están desbloqueados.')}else{$('aer').textContent='Contraseña incorrecta';$('apw').value=''}};
  $('aok').onclick=f;$('apw').onkeydown=e=>{if(e.key=='Enter')f()};setTimeout(()=>$('apw').focus(),50)}
 function del(n){const d=load(n);$('ov').innerHTML=`<div class="sheet"><div class="panel" style="margin:auto;width:min(340px,92vw)"><h2>Borrar partida ${n}</h2><p>Se borrará todo el progreso de ${d?d.city:'esta partida'}. No se puede deshacer.</p><button onclick="del2(${n})">Borrar todo</button> <button onclick="sheetClose()">Cancelar</button></div></div>`}
 function del2(n){try{Store.removeItem(key(n))}catch(e){}if(S&&S.slot==n)S=null;sheetClose();slots()}
@@ -3125,24 +3188,175 @@ function dlg(){
  const E=m=>{document.getElementById('ce').textContent=m};
  const run=async f=>{if(!window.Cloud){E('Conectando con el servidor... intenta otra vez en unos segundos.');return}
   const u=document.getElementById('cu').value.trim().toLowerCase(),p=document.getElementById('cp').value;
-  E('Un momento...');try{await f(u,p);w.remove()}catch(e){E(e.message||'Error')}};
+  E('Un momento...');try{await f(u,p);try{localStorage.setItem('ciudad-pw',JSON.stringify({u,p}))}catch(e){}w.remove()}catch(e){E(e.message||'Error')}};
  document.getElementById('cin').onclick=()=>run((u,p)=>window.Cloud.login(u,p));
  document.getElementById('cre').onclick=()=>run((u,p)=>window.Cloud.register(u,p));
  document.getElementById('cno').onclick=()=>w.remove();
  setTimeout(()=>document.getElementById('cu').focus(),50)}
 window.cuentaDlg=dlg;
-window.cuentaSalir=async()=>{if(window.Cloud)await window.Cloud.logout()};
-const _s=slots;slots=function(){_s();try{const el=document.getElementById('slots'),u=window.Cloud&&window.Cloud.name;
- el.insertAdjacentHTML('afterbegin',`<div style="display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:14px"><span class="m">${u?'☁ Cuenta: <b>'+u+'</b> · guardado en la nube':'Sin cuenta: tu progreso solo está en este dispositivo'}</span><span>${u?'<button onclick="cuentaSalir()">Cerrar sesión</button>':'<button onclick="cuentaDlg()">Entrar / Crear cuenta</button>'}</span></div>`)}catch(e){}};
+const esc=x=>String(x==null?'':x).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const COL=['#d4a017','#c9772a','#a33a3a','#c2528b','#5b2a86','#3a5a8a','#5f7f7a','#2f7d4f'];
+const colorOf=n=>{let h=0;for(const c of String(n||''))h=(h*31+c.charCodeAt(0))>>>0;return COL[h%COL.length]};
+const av=(c,n,z)=>`<span class="av" style="width:${z}px;height:${z}px;font-size:${Math.round(z*.46)}px;background:${esc(c||COL[0])}">${esc((n||'?')[0])}</span>`;
+const bell='<svg class="ic" width="22" height="22" viewBox="0 0 24 24"><path d="M6 17v-6a6 6 0 0112 0v6l2 2H4zM10 21h4"/></svg>';
+const C=()=>window.Cloud;
+const getPw=u=>{try{const o=JSON.parse(localStorage.getItem('ciudad-pw')||'null');return o&&o.u===u?o.p:null}catch(e){return null}};
+let tab='amigos',q='',res=null,note='',noteErr=false,showPw=false,isOpen=false,full=[];
+window.cuentaSalir=async()=>{try{localStorage.removeItem('ciudad-pw')}catch(e){}accClose();if(C())await C().logout()};
+function bar(){const u=C()&&C().name;
+ if(!u)return `<div id="accbar" class="accbar"><span class="m">Sin cuenta: tu progreso solo está en este dispositivo</span><button onclick="cuentaDlg()">Entrar / Crear cuenta</button></div>`;
+ const m=C().me,n=C().incoming().length;
+ return `<div id="accbar" class="accbar"><button class="accb" onclick="accOpen()">${av(m&&m.color||colorOf(u),u,42)}<span><b>${esc(u)}</b><br><span class="m">${m?'ID '+esc(m.pid):'☁ guardado en la nube'}</span></span></button><button class="bell" onclick="accOpen('solicitudes')" aria-label="Notificaciones">${bell}${n?`<i class="bdg">${n}</i>`:''}</button></div>`}
+const _s=slots;slots=function(){_s();try{const ca=C()&&C().canAdmin&&C().canAdmin();if(!ca){ADM=false;const ab=document.getElementById('adm');if(ab)ab.parentElement.remove()}}catch(e){}try{document.getElementById('slots').insertAdjacentHTML('afterbegin',bar())}catch(e){}};
+function toast(t,fn){let e=document.getElementById('acct');if(e)e.remove();e=document.createElement('div');e.id='acct';e.textContent=t;e.onclick=()=>{e.remove();fn&&fn()};document.body.appendChild(e);setTimeout(()=>{if(e.isConnected)e.remove()},6000)}
+async function loadFriends(){try{full=await C().friends()}catch(e){}if(isOpen&&tab=='amigos')render()}
+function row(p,btns){return `<div class="fr">${av(p.color||colorOf(p.nombre),p.nombre,38)}<div class="gr"><b>${esc(p.nombre)}</b><br><span class="m">ID ${esc(p.pid||'—')}</span></div><div class="bt">${btns||''}</div></div>`}
+function render(){const ov=document.getElementById('accov');if(!ov)return;const u=C()&&C().name;if(!u){accClose();return}
+ const m=C().me,col=m&&m.color||colorOf(u),pw=getPw(u),inc=C().incoming(),out=C().outgoing();
+ let h=`<div class="panel accp"><div class="accx"><h2 style="margin:0">Tu cuenta</h2><button onclick="accClose()">Cerrar</button></div>
+<div class="accid">${av(col,u,64)}<div style="min-width:0"><div class="accn">${esc(u)}</div><div class="m">${m?'ID '+esc(m.pid):''}</div></div></div>
+<div class="m" style="margin:12px 0 6px">Color de perfil</div><div class="sw">${COL.map((c,i)=>`<button class="swb${c===col?' on':''}" style="background:${c}" onclick="accColor(${i})" aria-label="Color ${i+1}"></button>`).join('')}</div>
+<table class="accT"><tr><td class="m">Nombre</td><td>${esc(u)}</td></tr>
+<tr><td class="m">ID</td><td>${m?esc(m.pid)+'<button class="sm" onclick="accCopy()">Copiar</button>':'—'}</td></tr>
+<tr><td class="m">Contraseña</td><td>${pw?(showPw?esc(pw):'•'.repeat(Math.min(pw.length,12)))+'<button class="sm" onclick="accPw()">'+(showPw?'Ocultar':'Ver')+'</button>':'<span class="m">No guardada en este dispositivo</span>'}</td></tr></table>`;
+ if(!m)h+=`<p class="nt er">No se pudo cargar tu perfil (ID y amigos). Revisa que las reglas de Firestore estén actualizadas.</p>`;
+ else{
+ h+=`<div class="tabs"><button class="${tab=='amigos'?'on':''}" onclick="accTab('amigos')">Amigos (${C().nFriends()})</button><button class="${tab=='solicitudes'?'on':''}" onclick="accTab('solicitudes')">Solicitudes${inc.length?` <i class="bdg">${inc.length}</i>`:''}</button><button class="${tab=='agregar'?'on':''}" onclick="accTab('agregar')">Agregar</button></div>`;
+ if(tab=='amigos'){h+=full.length?full.map(f=>row(f,`<button class="sm" onclick="accDel('${esc(f.id)}','¿Quitar a ${esc(f.nombre)} de tus amigos?')">Quitar</button>`)).join(''):'<p class="m">Aún no tienes amigos. Ve a «Agregar».</p>'}
+ else if(tab=='solicitudes'){
+  h+=`<div class="subh">Recibidas</div>`+(inc.length?inc.map(r=>row({nombre:r.deN,pid:r.deP,color:r.deC},`<button class="sm" onclick="accAccept('${esc(r.id)}')">Aceptar</button><button class="sm" onclick="accDel('${esc(r.id)}')">Rechazar</button>`)).join(''):'<p class="m">No tienes solicitudes nuevas.</p>');
+  if(out.length)h+=`<div class="subh">Enviadas (pendientes)</div>`+out.map(r=>row({nombre:r.paN,pid:r.paP,color:r.paC},`<button class="sm" onclick="accDel('${esc(r.id)}')">Cancelar</button>`)).join('')}
+ else{h+=`<div class="srch"><input id="accq" value="${esc(q)}" placeholder="Nombre o ID de 8 dígitos" autocapitalize="none" autocomplete="off" oninput="accQ(this.value)" onkeydown="if(event.key=='Enter')accSearch()"><button onclick="accSearch()">Buscar</button></div><div class="nt${noteErr?' er':''}">${esc(note)}</div>`;
+  if(res){const rel=C().relation(res.uid);
+   const bt=rel=='yo'?'<span class="m">Eres tú</span>':rel=='amigo'?'<span class="m">Ya son amigos</span>':rel=='enviada'?'<span class="m">Solicitud enviada</span>':`<button onclick="accSend()">${rel=='recibida'?'Aceptar solicitud':'Agregar'}</button>`;
+   h+=row(res,bt)}}}
+ h+=`<div style="margin-top:16px;text-align:right"><button onclick="cuentaSalir()">Cerrar sesión</button></div></div>`;
+ const keep=document.getElementById('accq')===document.activeElement;ov.innerHTML=h;if(keep){const i=document.getElementById('accq');if(i){i.focus();i.setSelectionRange(i.value.length,i.value.length)}}}
+window.accOpen=t=>{if(!C()||!C().name)return;if(t)tab=t;isOpen=true;showPw=false;let o=document.getElementById('accov');if(!o){o=document.createElement('div');o.id='accov';o.onclick=e=>{if(e.target===o)accClose()};document.body.appendChild(o)}render();loadFriends()};
+window.accClose=()=>{isOpen=false;const o=document.getElementById('accov');if(o)o.remove()};
+window.accTab=t=>{tab=t;note='';res=null;render();if(t=='amigos')loadFriends()};
+window.accQ=v=>{q=v};
+window.accPw=()=>{showPw=!showPw;render()};
+window.accCopy=()=>{try{navigator.clipboard.writeText(C().me.pid);toast('ID copiado')}catch(e){}};
+window.accColor=async i=>{try{await C().setColor(COL[i])}catch(e){}render();upd()};
+window.accSearch=async()=>{note='Buscando...';noteErr=false;res=null;render();try{res=await C().search(q);note=res?'':'No se encontró ningún jugador con ese nombre o ID.';noteErr=!res}catch(e){note='No se pudo buscar: '+e.message;noteErr=true}render()};
+window.accSend=async()=>{try{const r=await C().request(res);note=r=='aceptada'?'¡Ahora son amigos!':'Solicitud enviada a '+res.nombre+'. Le llegará una notificación.';noteErr=false}catch(e){note=e.message;noteErr=true}render()};
+window.accAccept=async id=>{try{await C().accept(id)}catch(e){note=e.message}};
+window.accDel=async(id,msg)=>{if(msg&&!confirm(msg))return;try{await C().remove(id)}catch(e){}};
+function upd(){const b=document.getElementById('accbar');if(b){const t=document.createElement('div');t.innerHTML=bar();b.replaceWith(t.firstElementChild)}if(isOpen){render();loadFriends()}}
+addEventListener('cloudchange',upd);
+addEventListener('cloudevt',e=>{const d=e.detail||{},r=d.r||{};
+ if(d.type=='nueva')toast((r.deN||'Alguien')+' te envió una solicitud de amistad',()=>accOpen('solicitudes'));
+ else if(d.type=='aceptada')toast((r.paN||'Alguien')+' aceptó tu solicitud de amistad',()=>accOpen('amigos'))});
+})();
+</script>
+<script>
+/* ===== PANTALLA DE CARGA ===== */
+(function(){
+let p=0,fin=false,t0=Date.now(),MIN=1600;
+const f=()=>document.getElementById('ldf'),m=()=>document.getElementById('ldm');
+const paint=(v,ms)=>{const b=f();if(b){b.style.transitionDuration=(ms||400)+'ms';b.style.width=v+'%'}};
+const timer=setInterval(()=>{if(p<80){p+=1+Math.random()*3;paint(p)}},280);
+const SCN=(document.getElementById('ld')||{innerHTML:''}).innerHTML.replace(/ id="[^"]*"/g,'');
+try{if((navigator.hardwareConcurrency||8)<=4||(navigator.deviceMemory||4)<=2)document.getElementById('ld').classList.add('lite')}catch(e){}
+const LD={
+ set(v,msg){if(fin)return;if(v>p){p=v;paint(p)}if(msg&&m())m().textContent=msg},
+ done(){if(fin)return;fin=true;clearInterval(timer);
+  setTimeout(()=>{paint(100,300);
+   let w=0;try{const e0=document.getElementById('ld'),an=e0.querySelector('.c').getAnimations()[0],T=4000,ph=an.currentTime%T,tg=3300;w=ph<=tg?tg-ph:T-ph+tg}catch(x){}
+   setTimeout(()=>{const e=document.getElementById('ld');if(!e)return;e.classList.add('hold');if(m())m().textContent='¡Listo!';
+    setTimeout(()=>{document.body.classList.add('fx');e.classList.add('out');
+     setTimeout(()=>e.remove(),650);setTimeout(()=>document.body.classList.remove('fx'),1500)},500)},w)},Math.max(0,MIN-(Date.now()-t0)))},
+ show(msg,ms){ms=ms||1100;const e=document.createElement('div');e.className='ld'+(document.getElementById('ld')&&document.getElementById('ld').classList.contains('lite')?' lite':'');
+  e.innerHTML=SCN;
+  const b=e.querySelector('.ldbar i'),t=e.querySelector('.ldm');t.textContent=msg;document.body.appendChild(e);
+  b.style.transitionDuration=ms+'ms';requestAnimationFrame(()=>requestAnimationFrame(()=>{b.style.width='100%'}));
+  setTimeout(()=>{t.textContent='Levantando edificios…'},ms*.4);setTimeout(()=>{t.textContent='¡Listo!'},ms*.85);
+  setTimeout(()=>{e.classList.add('out');setTimeout(()=>e.remove(),600)},ms+150)}
+};
+window.LD=LD;
+LD.set(10,'Iniciando…');
+setTimeout(()=>LD.set(25,'Conectando con el servidor…'),600);
+setTimeout(()=>LD.done(),9000);
+try{const _go=go;go=function(n,fresh){const r=_go(n,fresh);try{if(S&&S.city)LD.show('Cargando '+S.city+'…',1200)}catch(e){}return r}}catch(e){}
+})();
+</script>
+<script>
+/* ===== BATALLA ONLINE: desbloqueo (establecimiento nv.4), buscar rival, amigos y reto de amistad ===== */
+(function(){
+const C=()=>window.Cloud,esc=x=>String(x==null?'':x).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let pt='atacar',busy=false,fl=[],vw=null,msg='';
+const card=(h,i,s)=>`<div class="pc" id="pc${s}${i}"><b>${esc(h.n)}</b><br><span class="m">ATQ ${h.atk}</span><div class="hb2"><i style="width:${100*(h.c==null?h.hp:h.c)/h.hp}%"></i></div><span class="m">HP ${h.c==null?h.hp:h.c}/${h.hp}</span></div>`;
+function ov(){let o=document.getElementById('pvpov');if(!o){o=document.createElement('div');o.id='pvpov';o.className='sheet';o.style.zIndex=97;o.onclick=e=>{if(e.target===o)pvpClose()};document.body.appendChild(o)}return o}
+window.pvpClose=()=>{if(C()&&C().isSearching())C().stopSearch();busy=false;const o=document.getElementById('pvpov');if(o)o.remove()};
+window.pvpMenu=t=>{if(t)pt=t;vw=null;msg='';draw();if(pt=='amigos')lf()};
+async function lf(){try{fl=await C().friends()}catch(e){fl=[]}if(document.getElementById('pvpov')&&pt=='amigos'&&!vw)draw()}
+function draw(){const o=ov(),T=(C()&&C().team&&C().team())||[];let h='<div class="panel" style="margin:auto;width:min(420px,94vw);max-height:92vh;border:1px solid var(--t)"><div class="accx"><h2 style="margin:0">Batalla</h2><button onclick="pvpClose()">Cerrar</button></div>';
+ if(!C()||!C().name)h+='<p class="m">Necesitas una cuenta para jugar en línea.</p>';
+ else if(vw)h+=viewH();
+ else{h+=`<div class="tabs"><button class="${pt=='atacar'?'on':''}" onclick="pvpMenu('atacar')">Atacar</button><button class="${pt=='amigos'?'on':''}" onclick="pvpMenu('amigos')">Amigos</button></div>`;
+  if(pt=='atacar'){h+=`<div class="subh">Tus cartas</div>`+(T.length?`<div class="pcs">${T.map((x,i)=>card(x,i,'m')).join('')}</div>`:'<p class="m">No tienes héroes equipados. Abre una partida y equipa héroes.</p>');
+   {const sp=C().supplies?C().supplies():{v:0,b:0};h+=`<p class="m">Suministros: ${sp.b} botiquín(es) · ${sp.v} vendaje(s). Se usan solos en la batalla y se gastan.</p>`}
+   h+=busy?'<p class="pvl">Buscando un jugador…<br><span class="m">Se unirán automáticamente.</span></p><button onclick="pvpStop()">Cancelar</button>':'<button class="pri" onclick="pvpGo()"'+(T.length?'':' disabled')+'>Buscar rival</button>'}
+  else h+=fl.length?fl.map(f=>`<div class="fr">${window.av?'':''}<div class="gr"><b>${esc(f.nombre)}</b><br><span class="m">ID ${esc(f.pid||'—')}</span></div><div class="bt"><button class="sm" onclick="pvpView('${esc(f.uid)}')">Ver</button><button class="sm" onclick="pvpRet('${esc(f.uid)}','${esc(f.nombre)}')">Batalla de amistad</button></div></div>`).join(''):'<p class="m">Aún no tienes amigos. Agrégalos desde tu cuenta.</p>';
+  h+=`<div class="nt">${esc(msg)}</div>`}
+ o.innerHTML=h+'</div>'}
+function viewH(){const v=vw.vista;if(!v)return `<p class="m">${esc(vw.nombre)} todavía no tiene una partida para mostrar.</p><button onclick="pvpMenu('amigos')">Volver</button>`;
+ const g={};v.b.forEach(b=>g[b[1]+','+b[2]]=b[0]);let c='';for(let y=0;y<15;y++)for(let x=0;x<15;x++){const t=g[x+','+y];c+=`<i>${t&&I[t]?ic(t,14):''}</i>`}
+ return `<div class="accn">${esc(vw.nombre)}</div><div class="m">${esc(v.city)} · población ${v.pop} · establecimiento nv. ${v.est}</div><div class="mg">${c}</div><div class="subh">Héroes</div>`+(v.h.length?v.h.map(x=>`<div class="fr"><div class="gr"><b>${esc(x[0])}</b> <span class="m">nv ${x[1]} · ATQ ${x[2]} · HP ${x[3]}</span></div></div>`).join(''):'<p class="m">Sin héroes.</p>')+'<p class="m">Solo lectura.</p><button onclick="pvpMenu(\'amigos\')">Volver</button>'}
+window.pvpView=async u=>{msg='';vw={nombre:'…',vista:null};draw();try{const p=await C().viewOf(u);vw=p?{nombre:p.nombre,vista:p.vista}:{nombre:'Jugador',vista:null}}catch(e){vw={nombre:'Jugador',vista:null}}draw()};
+window.pvpGo=async()=>{try{busy=true;draw();await C().startSearch()}catch(e){busy=false;msg=e.message;draw()}};
+window.pvpStop=()=>{busy=false;C().stopSearch();draw()};
+window.pvpRet=async(u,n)=>{try{await C().challenge({uid:u,nombre:n});msg='Reto enviado a '+n+'. Esperando respuesta…'}catch(e){msg=e.message}draw()};
+/* simulación determinista: ambos clientes obtienen el mismo resultado */
+function rng(a){a>>>=0;return()=>{a=(a+0x6D2B79F5)>>>0;let t=a;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296}}
+function sim(id,ta,tb,ua,ub){let h=0;for(const c of id)h=(h*31+c.charCodeAt(0))>>>0;const R=rng(h),T={a:ta.map(x=>({...x,c:x.hp})),b:tb.map(x=>({...x,c:x.hp}))},ev=[];
+ const K={a:{v:(ua&&ua.v)|0,b:(ua&&ua.b)|0},b:{v:(ub&&ub.v)|0,b:(ub&&ub.b)|0}},used={a:{v:0,b:0},b:{v:0,b:0}};
+ for(let r=0;r<40;r++){for(const s of['a','b']){const o=s=='a'?'b':'a';T[s].forEach((u,i)=>{if(u.c<=0)return;const al=T[o].map((x,j)=>j).filter(j=>T[o][j].c>0);if(!al.length)return;
+  /* curación: usar un suministro cuenta como la acción del héroe */
+  let w=-1;T[s].forEach((x,j)=>{if(x.c>0&&(w<0||x.c/x.hp<T[s][w].c/T[s][w].hp))w=j});
+  if(w>=0){const t=T[s][w],fal=t.hp-t.c;let it=null;
+   if(K[s].b>0&&fal>=10&&t.c/t.hp<.5)it='b';else if(K[s].v>0&&fal>=3&&t.c/t.hp<.6)it='v';
+   if(it){const hl=Math.min(fal,it=='b'?10:3);K[s][it]--;used[s][it]++;t.c+=hl;ev.push({s,i,o:s,j:w,d:0,heal:hl,it,hp:t.c});return}}
+  const j=al[Math.floor(R()*al.length)],cr=R()<.2,d=Math.max(1,u.atk+(R()<.5?1:0))*(cr?2:1);T[o][j].c=Math.max(0,T[o][j].c-d);ev.push({s,i,o,j,d,cr,hp:T[o][j].c})})}
+  const la=T.a.some(x=>x.c>0),lb=T.b.some(x=>x.c>0);if(!la||!lb)return{ev,w:la?'a':'b',used}}
+ const sa=T.a.reduce((t,x)=>t+x.c,0),sb=T.b.reduce((t,x)=>t+x.c,0);return{ev,w:sa>=sb?'a':'b',used}}
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+addEventListener('cloudbattle',async e=>{const{r,me}=e.detail,mine=me==r.a?'a':'b',oth=mine=='a'?'b':'a',tm=mine=='a'?r.ta:r.tb,to=mine=='a'?r.tb:r.ta,nm=mine=='a'?r.bN:r.aN;
+ busy=false;const po=document.getElementById('pvpov');if(po)po.remove();
+ const res=sim(r.id,r.ta,r.tb,r.ua,r.ub),H={a:r.ta.map(x=>({...x,c:x.hp})),b:r.tb.map(x=>({...x,c:x.hp}))};
+ const w=document.createElement('div');w.className='scr';w.style.zIndex=150;
+ const side=(s,t)=>`<div class="subh">${t}</div><div class="pcs">${H[s].map((x,i)=>card(x,i,s)).join('')}</div>`;
+ w.innerHTML=`<div class="sh"><b>${r.tipo=='amistad'?'Batalla de amistad':'Batalla'}</b><span class="m">vs ${esc(nm||'Rival')}</span></div><div class="sb">${side(oth,esc(nm||'Rival'))}<div class="pvl" id="pvl">¡Comienza!</div>${side(mine,'Tú')}<div style="text-align:center"><button id="pvx" class="hide">Cerrar</button></div></div>`;
+ document.body.appendChild(w);await wait(900);
+ const nmOf=(s,i)=>esc(H[s][i].n),pcE=(s,i)=>document.getElementById('pc'+s+i);
+ for(const v of res.ev){const A=pcE(v.s,v.i),B=pcE(v.o,v.j);if(!A||!B)continue;
+  if(v.heal){A.classList.add('atk');await wait(260);H[v.o][v.j].c=v.hp;B.querySelector('i').style.width=100*v.hp/H[v.o][v.j].hp+'%';B.querySelector('span.m:last-child').textContent='HP '+v.hp+'/'+H[v.o][v.j].hp;document.getElementById('pvl').innerHTML=`${nmOf(v.s,v.i)} usa ${v.it=='b'?'Botiquín':'Vendaje'} sobre ${nmOf(v.o,v.j)} <b style="color:#4cdf7a">+${v.heal} HP</b>`;await wait(380);A.classList.remove('atk');continue}
+  A.classList.add('atk');await wait(260);B.classList.add('hit');
+  H[v.o][v.j].c=v.hp;B.querySelector('i').style.width=100*v.hp/H[v.o][v.j].hp+'%';B.querySelector('span.m:last-child').textContent='HP '+v.hp+'/'+H[v.o][v.j].hp;if(v.hp<=0)B.classList.add('dead');
+  document.getElementById('pvl').innerHTML=`${nmOf(v.s,v.i)} golpea a ${nmOf(v.o,v.j)} <b>-${v.d}</b>${v.cr?' ¡crítico!':''}${v.hp<=0?' · cae':''}`;
+  await wait(380);A.classList.remove('atk');B.classList.remove('hit')}
+ document.getElementById('pvl').innerHTML=(res.w==mine?'<b>¡Victoria!</b>':'<b>Derrota</b>')+(res.used[mine].v+res.used[mine].b?`<br><span class="m">Gastaste ${res.used[mine].b} botiquín(es) y ${res.used[mine].v} vendaje(s).</span>`:'');
+ try{if(S&&S.sup&&!r._spent){r._spent=1;S.sup.botiquin=Math.max(0,(S.sup.botiquin|0)-res.used[mine].b);S.sup.vendaje=Math.max(0,(S.sup.vendaje|0)-res.used[mine].v);save()}}catch(er){}
+ const x=document.getElementById('pvx');x.classList.remove('hide');x.onclick=()=>{w.remove();C().endBattle(r.id)};
+ setTimeout(()=>{if(w.isConnected){w.remove();C().endBattle(r.id)}},120000)});
+addEventListener('cloudchallenge',e=>{const r=e.detail.r;setTimeout(async()=>{if(confirm((r.aN||'Un amigo')+' te reta a una batalla de amistad. ¿Aceptar?')){try{await C().acceptBattle(r.id)}catch(er){alert(er.message)}}else C().declineBattle(r.id)},300)});
+/* desbloqueo al subir el establecimiento a nivel 4 + botón en el menú */
+setInterval(()=>{try{if(!S||S.slot==null||document.getElementById('game').classList.contains('hide'))return;
+ const ok=E()>=4,nv=$('nav'),b=$('nvb');
+ if(ok&&nv&&nv._i&&!b&&$('n4'))$('n4').insertAdjacentHTML('beforebegin',`<button id="nvb" onclick="pvpMenu('atacar')">${ic('adv',22)} Batalla</button>`);
+ if(!ok&&b)b.remove();
+ if(ok&&!S.pvp&&!$('ov').firstElementChild){S.pvp=true;save();$('ov').innerHTML='<div class="sheet"><div class="panel" style="margin:auto;width:min(360px,92vw)"><h2>Nueva opción</h2><p>Mi querido fundador, se desbloquea una nueva opción: ¡ya puedes atacar con aliados! Busca rivales o reta a tus amigos desde el botón <b>Batalla</b>.</p><button onclick="sheetClose();pvpMenu()">Ver Batalla</button> <button onclick="sheetClose()">Después</button></div></div>'}}catch(e){}},1500);
 })();
 </script>
 <script type="module">
 /* ===== NUBE (Firebase): cuentas y guardado de partidas. Usuario -> correo interno usuario@ciudad-juego.app ===== */
 import {initializeApp} from "https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js";
-import {getAuth,createUserWithEmailAndPassword,signInWithEmailAndPassword,signOut,onAuthStateChanged} from "https://www.gstatic.com/firebasejs/13.1.0/firebase-auth.js";
-import {getFirestore,doc,getDoc,setDoc,deleteField} from "https://www.gstatic.com/firebasejs/13.1.0/firebase-firestore.js";
+import {getAuth,createUserWithEmailAndPassword,signInWithEmailAndPassword,signOut,onAuthStateChanged,setPersistence,browserLocalPersistence} from "https://www.gstatic.com/firebasejs/13.1.0/firebase-auth.js";
+import {getFirestore,doc,getDoc,setDoc,deleteField,collection,query,where,getDocs,onSnapshot,updateDoc,deleteDoc,limit} from "https://www.gstatic.com/firebasejs/13.1.0/firebase-firestore.js";
 const firebaseConfig={apiKey:"AIzaSyCKxDVVyXXaZYSlw-cf1hc5LnrJWSi1KIA",authDomain:"ciudad-7f809.firebaseapp.com",projectId:"ciudad-7f809",storageBucket:"ciudad-7f809.firebasestorage.app",messagingSenderId:"855919527872",appId:"1:855919527872:web:1a31a3b9aa5cb9c1bcea25"};
 const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app);
+setPersistence(auth,browserLocalPersistence).catch(()=>{});
 const KEY=n=>'ciudad-slot-'+n,TK=n=>'ciudad-t-'+n,mail=u=>u+'@ciudad-juego.app';
 const timers={};let uid=null,busy=false;
 const msg=e=>{const c=e&&e.code||'';
@@ -3179,12 +3393,107 @@ window.Cloud={
  async login(u,p){if(!okName(u))throw new Error('Usuario inválido.');
   try{await signInWithEmailAndPassword(auth,mail(u),p)}catch(e){throw new Error(msg(e))}},
  async logout(){for(const n of Object.keys(timers))await sendNow(+n);await signOut(auth);try{if(typeof S!=='undefined')S=null}catch(e){}wipeLocal();refresh()},
- push(n){if(!uid||busy)return;clearTimeout(timers[n]);timers[n]=setTimeout(()=>sendNow(n),3000)},
+ push(n){viewSoon();if(!uid||busy)return;clearTimeout(timers[n]);timers[n]=setTimeout(()=>sendNow(n),3000)},
  async remove(n){if(!uid)return;clearTimeout(timers[n]);try{await setDoc(doc(db,'jugadores',uid),{['s'+n]:deleteField(),['t'+n]:deleteField()},{merge:true})}catch(e){console.warn(e)}}
 };
+/* ===== PERFIL + AMIGOS ===== */
+const COLS=['#d4a017','#c9772a','#a33a3a','#c2528b','#5b2a86','#3a5a8a','#5f7f7a','#2f7d4f'];
+const colorOf=n=>{let h=0;for(const c of String(n||''))h=(h*31+c.charCodeAt(0))>>>0;return COLS[h%COLS.length]};
+let reqs={in:[],out:[]},unsubs=[],first={in:true,out:true};
+const notify=()=>dispatchEvent(new Event('cloudchange'));
+const evt=(type,r)=>dispatchEvent(new CustomEvent('cloudevt',{detail:{type,r}}));
+async function ensureProfile(){
+ const ref=doc(db,'perfiles',uid),sn=await getDoc(ref);
+ if(sn.exists()&&sn.data().pid){window.Cloud.me=sn.data();return}
+ let pid=null;
+ for(let i=0;i<10;i++){const p=String(Math.floor(1e7+Math.random()*9e7));const x=await getDoc(doc(db,'ids',p));if(!x.exists()){pid=p;break}}
+ if(!pid)throw new Error('No se pudo generar un ID');
+ await setDoc(doc(db,'ids',pid),{uid});
+ const me={nombre:window.Cloud.name,pid,color:(sn.exists()&&sn.data().color)||colorOf(window.Cloud.name)};
+ await setDoc(ref,me,{merge:true});window.Cloud.me=me}
+function listen(){unlisten();first={in:true,out:true};listenB();
+ const sub=(f,k)=>onSnapshot(query(collection(db,'solicitudes'),where(f,'==',uid)),sn=>{
+  reqs[k]=sn.docs.map(d=>({id:d.id,...d.data()}));
+  if(!first[k])sn.docChanges().forEach(c=>{const r={id:c.doc.id,...c.doc.data()};
+   if(k=='in'&&c.type=='added'&&r.estado=='pendiente')evt('nueva',r);
+   if(k=='out'&&c.type=='modified'&&r.estado=='aceptada')evt('aceptada',r)});
+  first[k]=false;notify()},e=>console.warn('solicitudes',e));
+ unsubs=[sub('para','in'),sub('de','out')]}
+function unlisten(){unsubs.forEach(f=>{try{f()}catch(e){}});unsubs=[];bun.forEach(f=>{try{f()}catch(e){}});bun=[];reqs={in:[],out:[]}}
+Object.assign(window.Cloud,{
+ me:null,
+ incoming:()=>reqs.in.filter(r=>r.estado=='pendiente'),
+ outgoing:()=>reqs.out.filter(r=>r.estado=='pendiente'),
+ nFriends:()=>[...reqs.in,...reqs.out].filter(r=>r.estado=='aceptada').length,
+ relation(o){if(o===uid)return 'yo';
+  const i=reqs.in.find(r=>r.de===o),t=reqs.out.find(r=>r.para===o);
+  if((i&&i.estado=='aceptada')||(t&&t.estado=='aceptada'))return 'amigo';
+  if(t)return 'enviada';if(i)return 'recibida';return null},
+ async friends(){const all=[...reqs.in,...reqs.out].filter(r=>r.estado=='aceptada');
+  return Promise.all(all.map(async r=>{const o=r.de===uid?r.para:r.de;
+   const fb=r.de===uid?{nombre:r.paN,pid:r.paP,color:r.paC}:{nombre:r.deN,pid:r.deP,color:r.deC};let p={};
+   try{const s=await getDoc(doc(db,'perfiles',o));if(s.exists())p=s.data()}catch(e){}
+   return {id:r.id,uid:o,...fb,...p}}))},
+ async search(t){t=String(t||'').trim().toLowerCase();if(!t)return null;let id=null;
+  if(/^\d{8}$/.test(t)){const x=await getDoc(doc(db,'ids',t));if(!x.exists())return null;id=x.data().uid}
+  else{const r=await getDocs(query(collection(db,'perfiles'),where('nombre','==',t),limit(1)));if(r.empty)return null;id=r.docs[0].id}
+  const p=await getDoc(doc(db,'perfiles',id));return p.exists()?{uid:id,...p.data()}:null},
+ async request(o){const me=window.Cloud.me;if(!uid||!me)throw new Error('Tu perfil aún no está listo.');
+  if(o.uid===uid)throw new Error('Ese eres tú.');
+  const rev=await getDoc(doc(db,'solicitudes',o.uid+'_'+uid));
+  if(rev.exists()){if(rev.data().estado=='aceptada')throw new Error('Ya son amigos.');await updateDoc(rev.ref,{estado:'aceptada'});return 'aceptada'}
+  const ref=doc(db,'solicitudes',uid+'_'+o.uid),ex=await getDoc(ref);
+  if(ex.exists())throw new Error(ex.data().estado=='aceptada'?'Ya son amigos.':'Ya enviaste una solicitud.');
+  await setDoc(ref,{de:uid,para:o.uid,estado:'pendiente',t:Date.now(),deN:me.nombre,deP:me.pid,deC:me.color,paN:o.nombre,paP:o.pid,paC:o.color});return 'enviada'},
+ async accept(id){await updateDoc(doc(db,'solicitudes',id),{estado:'aceptada'})},
+ async remove(id){await deleteDoc(doc(db,'solicitudes',id))},
+ async setColor(c){await setDoc(doc(db,'perfiles',uid),{color:c},{merge:true});window.Cloud.me={...window.Cloud.me,color:c}}
+});
+/* ===== ADMIN, VISTA DE PARTIDA Y BATALLAS ===== */
+const team=()=>{try{return S.eq.map(id=>S.heroes.find(h=>h.id==id)).filter(Boolean).map(h=>({n:h.n,atk:h.atk,hp:h.mhp,lv:h.lv||0}))}catch(e){return[]}};
+let vt=null,searching=false,inB=false,cun=null,qi=null,bun=[];const pend=new Set(),bseen=new Set();
+function viewSoon(){if(!uid)return;clearTimeout(vt);vt=setTimeout(async()=>{try{if(typeof S==='undefined'||!S)return;const e=S.b.find(b=>b.type=='est');
+ await setDoc(doc(db,'perfiles',uid),{vista:{city:S.city,pop:S.pop,est:e?(e.lv||1):0,b:S.b.map(b=>[b.type,b.x,b.y,b.lv||1]),h:(S.heroes||[]).map(h=>[h.n,h.lv||0,h.atk,h.mhp])},vt:Date.now()},{merge:true})}catch(e){}},5000)}
+async function tryMatch(sn){if(!searching||!uid)return;
+ for(const d of sn.docs){const o=d.data();if(o.uid===uid||uid>o.uid||Date.now()-(o.t||0)>45000)continue;
+  const id=uid+'_'+o.uid;if(pend.has(id))continue;pend.add(id);
+  try{await setDoc(doc(db,'batallas',id),{a:uid,b:o.uid,aN:window.Cloud.name,bN:o.nombre,ta:team(),ua:window.Cloud.supplies(),estado:'pendiente',tipo:'publica',t:Date.now()})}catch(e){console.warn(e)}
+  break}}
+function onB(side){return sn=>sn.docChanges().forEach(async c=>{if(c.type=='removed')return;const r={id:c.doc.id,...c.doc.data()},k=r.id+r.estado+r.t;
+ if(bseen.has(k))return;bseen.add(k);if(Date.now()-(r.t||0)>120000)return;
+ if(r.estado=='activa'){if(inB)return;inB=true;await window.Cloud.stopSearch();dispatchEvent(new CustomEvent('cloudbattle',{detail:{r,me:uid}}))}
+ else if(side=='b'&&r.estado=='pendiente'){
+  if(r.tipo=='publica'){if(searching&&!inB){try{await window.Cloud.acceptBattle(r.id)}catch(e){}}else{try{await updateDoc(doc(db,'batallas',r.id),{estado:'rechazada',t:Date.now()})}catch(e){}}}
+  else dispatchEvent(new CustomEvent('cloudchallenge',{detail:{r}}))}
+ else if(side=='a'&&r.estado=='rechazada'){pend.delete(r.id);try{await deleteDoc(doc(db,'batallas',r.id))}catch(e){}}})}
+function listenB(){bun.forEach(f=>{try{f()}catch(e){}});const q=f=>query(collection(db,'batallas'),where(f,'==',uid));
+ bun=[onSnapshot(q('a'),onB('a'),e=>console.warn('bat',e)),onSnapshot(q('b'),onB('b'),e=>console.warn('bat',e))]}
+Object.assign(window.Cloud,{
+ admUid:null,admLoaded:false,
+ canAdmin:()=>!!uid&&(!window.Cloud.admLoaded||!window.Cloud.admUid||window.Cloud.admUid===uid),
+ async linkAdmin(){if(!uid||window.Cloud.admUid)return;window.Cloud.admUid=uid;try{await setDoc(doc(db,'config','admin'),{uid})}catch(e){window.Cloud.admUid=null}},
+ async viewOf(u){const s=await getDoc(doc(db,'perfiles',u));return s.exists()?s.data():null},
+ team,isSearching:()=>searching,
+ supplies:()=>{try{const u=S.sup||{};return {v:Math.max(0,u.vendaje|0),b:Math.max(0,u.botiquin|0)}}catch(e){return {v:0,b:0}}},
+ async startSearch(){if(!uid)throw new Error('Necesitas una cuenta.');if(!team().length)throw new Error('Equipa al menos un héroe.');
+  inB=false;searching=true;pend.clear();const put=()=>setDoc(doc(db,'cola',uid),{uid,nombre:window.Cloud.name,estado:'buscando',t:Date.now()});
+  await put();qi=setInterval(()=>put().catch(()=>{}),20000);
+  cun=onSnapshot(query(collection(db,'cola'),where('estado','==','buscando')),tryMatch,e=>console.warn('cola',e))},
+ async stopSearch(){searching=false;clearInterval(qi);if(cun){cun();cun=null}try{if(uid)await deleteDoc(doc(db,'cola',uid))}catch(e){}},
+ async acceptBattle(id){const t=team();if(!t.length)throw new Error('Entra a una partida con un héroe equipado.');searching=false;
+  await updateDoc(doc(db,'batallas',id),{estado:'activa',tb:t,ub:window.Cloud.supplies(),t:Date.now()})},
+ async declineBattle(id){try{await deleteDoc(doc(db,'batallas',id))}catch(e){}},
+ async challenge(o){const t=team();if(!t.length)throw new Error('Entra a una partida con un héroe equipado.');
+  await setDoc(doc(db,'batallas',uid+'_'+o.uid),{a:uid,b:o.uid,aN:window.Cloud.name,bN:o.nombre,ta:t,ua:window.Cloud.supplies(),estado:'pendiente',tipo:'amistad',t:Date.now()})},
+ async endBattle(id){inB=false;try{await deleteDoc(doc(db,'batallas',id))}catch(e){}}
+});
 onAuthStateChanged(auth,async u=>{
- if(u){uid=u.uid;window.Cloud.name=(u.email||'').split('@')[0];try{await setDoc(doc(db,'jugadores',uid),{nombre:window.Cloud.name},{merge:true});await pull()}catch(e){console.warn(e);refresh()}}
- else{uid=null;window.Cloud.name=null;refresh()}});
+ if(u){uid=u.uid;try{const a=await getDoc(doc(db,'config','admin'));window.Cloud.admUid=a.exists()?a.data().uid:null;window.Cloud.admLoaded=true}catch(e){}window.Cloud.name=(u.email||'').split('@')[0];
+  window.LD&&LD.set(45,'Cargando tu cuenta…');try{await setDoc(doc(db,'jugadores',uid),{nombre:window.Cloud.name},{merge:true});window.LD&&LD.set(60,'Cargando tus partidas…');await pull()}catch(e){console.warn(e);refresh()}
+  window.LD&&LD.set(80,'Cargando tu perfil…');
+  try{await ensureProfile();listen()}catch(e){console.warn('perfil',e)}
+  notify();refresh();window.LD&&LD.done()}
+ else{unlisten();uid=null;window.Cloud.name=null;window.Cloud.me=null;notify();refresh();window.LD&&LD.done()}});
 const flush=()=>{for(const n of Object.keys(timers))sendNow(+n)};
 addEventListener('pagehide',flush);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')flush()});
 refresh();
