@@ -2199,7 +2199,7 @@ window.mtHas=k=>!!MT.meta[k];
 const sz=b=>(b/1048576).toFixed(1)+' MB';
 const idb=(mode,fn)=>new Promise((res,rej)=>{if(!MT.db)return rej(new Error('Almacenamiento no disponible'));const tx=MT.db.transaction('music',mode),st=tx.objectStore('music');let r;try{r=fn(st)}catch(e){return rej(e)}tx.oncomplete=()=>res(r&&r.result);tx.onerror=tx.onabort=()=>rej(tx.error||new Error('Error de base de datos'))});
 function dbOpen(){return new Promise(res=>{try{const q=indexedDB.open('ciudad-db',1);q.onupgradeneeded=()=>{if(!q.result.objectStoreNames.contains('music'))q.result.createObjectStore('music',{keyPath:'k'})};
- q.onsuccess=()=>{MT.db=q.result;const c=q.result.transaction('music').objectStore('music').openCursor();c.onsuccess=()=>{const x=c.result;if(x){const v=x.value;MT.meta[v.k]={name:v.name,size:v.size,tr:v.tr};x.continue()}else res()};c.onerror=()=>res()};
+ q.onsuccess=()=>{MT.db=q.result;const c=q.result.transaction('music').objectStore('music').openCursor();c.onsuccess=()=>{const x=c.result;if(x){const v=x.value;MT.meta[v.k]={name:v.name,size:v.size,tr:v.tr,v:v.v||0};x.continue()}else res()};c.onerror=()=>res()};
  q.onerror=()=>{MT.err='No se pudo abrir la base de datos.';res()};q.onblocked=()=>res()}catch(e){MT.err='Este navegador no permite IndexedDB.';res()}})}
 const ready=dbOpen().then(()=>{try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}});
 /* reproducción */
@@ -2223,13 +2223,30 @@ setInterval(()=>{try{
  if(MT.hold)return;const w=want();if(w!==MT.cur)switchTo(w);
  else if(MT.cur){const a=MT.el[MT.cur];if(a&&a.paused&&Date.now()-MT.lastTry>1500){MT.lastTry=Date.now();a.volume=MT.MV;a.play().catch(()=>{})}}}catch(e){}},500);
 ['pointerdown','keydown'].forEach(t=>document.addEventListener(t,()=>{if(MT.cur&&!MT.hold){const a=MT.el[MT.cur];if(a&&a.paused)a.play().catch(()=>{})}},true));
+/* sincronización con la nube: lo que publica el administrador lo reciben todas las cuentas */
+const syncing={};
+async function syncMusic(d){if(d.fromCache)return;const list=d.list,keys=new Set(list.map(x=>x.k));
+ try{await ready}catch(e){}
+ for(const x of list){const m=MT.meta[x.k];
+  if(m&&m.v===x.v){if(m.tr!==x.tr){try{const r=await idb('readonly',s=>s.get(x.k));if(r){r.tr=x.tr;await idb('readwrite',s=>s.put(r))}m.tr=x.tr}catch(e){}}continue}
+  if(syncing[x.k]===x.v)continue;syncing[x.k]=x.v;
+  try{const blob=await Cloud.musicBlob(x);await idb('readwrite',s=>s.put({k:x.k,name:x.name,size:x.size,tr:x.tr,v:x.v,blob}));
+   MT.meta[x.k]={name:x.name,size:x.size,tr:x.tr,v:x.v};dropEl(x.k);if(MT.pv===x.k)mtStopPv();if($('musw'))musUI()}
+  catch(e){console.warn('Música: no se pudo descargar',x.k,e)}finally{if(syncing[x.k]===x.v)delete syncing[x.k]}}
+ for(const k of Object.keys(MT.meta)){if(MT.meta[k].v&&!keys.has(k)&&!syncing[k]){try{await idb('readwrite',s=>s.delete(k))}catch(e){}if(MT.pv===k)mtStopPv();delete MT.meta[k];dropEl(k);if($('musw'))musUI()}}}
+addEventListener('cloudmusic',e=>syncMusic(e.detail));
+window.mtPubAll=async()=>{const ks=Object.keys(MT.meta).filter(k=>!MT.meta[k].v);if(!ks.length)return;if(!(window.Cloud&&Cloud.musicPut)){notice('Sin conexión','Inicia sesión para publicar.');return}
+ for(const k of ks){try{const r=await idb('readonly',s=>s.get(k));if(!r)continue;if(r.size>15*1048576){notice('Muy grande',r.name+' pasa de 15 MB');continue}
+  const v=Date.now();syncing[k]=v;notice('Publicando…',r.name);await Cloud.musicPut(k,r.blob,r.tr,v,r.name);r.v=v;await idb('readwrite',s=>s.put(r));MT.meta[k].v=v}
+  catch(e){delete syncing[k];notice('No se pudo publicar',String(e.message||e))}}
+ notice('Listo','Las canciones ya están disponibles para todas las cuentas');musUI()};
 /* interfaz del menú lateral */
 const fab=document.createElement('button');fab.id='mfab';fab.setAttribute('aria-label','Música');fab.textContent='♪';
 fab.style.cssText='position:fixed;left:12px;bottom:12px;z-index:60;display:none;width:46px;height:46px;border-radius:50%;padding:0;align-items:center;justify-content:center;font-size:22px;background:var(--a);color:#1A1836;box-shadow:0 6px 16px rgba(0,0,0,.45)';
 fab.onclick=()=>musUI();document.body.appendChild(fab);
 const lvName=k=>{const n=+k.split(':')[1];return 'Jefe del nivel '+n+(n==60?' · Yloka':'')};
 const row=(k,title,desc,del)=>{const m=MT.meta[k],has=!!m,pv=MT.pv===k;
- return `<div class="ucard"><div class="uct"><b>${title}</b><span class="m">${has?sz(m.size):'Sin música'}</span></div><span class="m">${desc}</span>${has?`<span class="chip">♪ ${esc(m.name)}</span>`:''}
+ return `<div class="ucard"><div class="uct"><b>${title}</b><span class="m">${has?sz(m.size):'Sin música'}</span></div><span class="m">${desc}</span>${has?`<span class="chip">♪ ${esc(m.name)} · ${m.v?'☁ Para todos':'Solo aquí'}</span>`:''}
  <div class="uf"><select ${has?'':'disabled'} onchange="mtTr('${k}',this.value)" aria-label="Transición" style="background:rgba(255,255,255,.06);color:var(--t);border:1px solid var(--l);border-radius:10px;padding:8px;font:inherit;max-width:46%">${TRS.map(t=>`<option value="${t[0]}" ${(m?m.tr:2000)==t[0]?'selected':''}>${t[1]}</option>`).join('')}</select>
  <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end"><button onclick="mtUp('${k}')">${has?'Reemplazar':'Subir MP3'}</button>${has?`<button onclick="mtPv('${k}')">${pv?'■ Parar':'▶ Probar'}</button><button onclick="mtDel('${k}')">Quitar</button>`:''}${del&&!has?`<button onclick="mtDel('${k}')">Quitar fila</button>`:''}</div></div></div>`};
 function musUI(){let w=$('musw');const keep=w&&w.querySelector('.menu')?w.querySelector('.menu').scrollTop:0;
@@ -2238,8 +2255,8 @@ function musUI(){let w=$('musw');const keep=w&&w.querySelector('.menu')?w.queryS
  const h=`<div class="panel side menu" style="width:min(420px,94vw)!important"><div class="mhd"><span class="mem">♪</span><div><h1>Música</h1><span class="m">Modo administrador · ${Object.keys(MT.meta).length} pistas · ${sz(tot)}</span></div><button class="mx" aria-label="Cerrar" onclick="musClose()">✕</button></div>
  ${MT.err?`<div class="note warn" style="margin-top:14px">${MT.err} Las canciones no se podrán guardar.</div>`:''}
  <div class="sx">Volumen</div><input type="range" min="0" max="100" value="${Math.round(MT.MV*100)}" oninput="mtVol(this.value)" aria-label="Volumen" style="padding:0">
- <p class="m hint">Los MP3 se guardan en este navegador (IndexedDB) y no entran en el código de progreso. Cada canción hace su transición al empezar y al irse la anterior.</p>
- <div class="sx">Secciones</div>${MTS.map(s=>row(s[0],s[1],s[2])).join('')}
+ <p class="m hint">Las canciones que subas se publican para TODAS las cuentas (se descargan solas y quedan guardadas en cada dispositivo). Cada canción hace su transición al empezar y al irse la anterior.</p>
+ ${Object.values(MT.meta).some(m=>!m.v)?`<div class="note" style="margin-top:14px">Hay canciones que solo suenan en este dispositivo. <button onclick="mtPubAll()">Publicar para todos</button></div>`:''}<div class="sx">Secciones</div>${MTS.map(s=>row(s[0],s[1],s[2])).join('')}
  <div class="sx">Jefes específicos</div>${sp.map(k=>row(k,lvName(k),'Solo suena en ese jefe; tiene prioridad sobre «Jefes (general)».')).join('')||'<p class="m hint">Aún no hay jefes con música propia.</p>'}
  <div class="ucard"><div class="uct"><b>Añadir jefe específico</b></div><span class="m">Nivel de jefe (múltiplo de 5, 5–140). El nivel 60 es Yloka.</span><div class="uf"><input id="mtl" type="number" min="5" max="140" step="5" value="60" style="width:90px"><button onclick="mtNew()">Elegir MP3</button></div></div>
  <div class="mft"><button onclick="mtStopPv();musClose()">Cerrar</button><button onclick="mtStopPv()">Parar prueba</button></div></div>`;
@@ -2250,13 +2267,17 @@ document.addEventListener('keydown',e=>{if(e.key=='Escape'&&$('musw')&&!(e.targe
 const fi=document.createElement('input');fi.type='file';fi.accept='audio/mpeg,audio/mp3,.mp3,audio/*';fi.style.display='none';document.body.appendChild(fi);
 fi.onchange=async()=>{const f=fi.files[0],k=fi._k;fi.value='';if(!f||!k)return;
  if(!(/audio/.test(f.type)||/\.mp3$/i.test(f.name))){notice('Archivo no válido','Elige un archivo de audio MP3.');return}
- if(f.size>60*1048576){notice('Archivo muy grande','El máximo es 60 MB por canción.');return}
- try{await ready;const old=MT.meta[k];await idb('readwrite',s=>s.put({k,name:f.name,size:f.size,tr:old?old.tr:2000,blob:f}));
-  MT.meta[k]={name:f.name,size:f.size,tr:old?old.tr:2000};dropEl(k);if(MT.pv===k)mtStopPv();notice('Canción guardada',f.name)}catch(e){notice('No se pudo guardar',String(e.message||e))}musUI()};
+ if(f.size>15*1048576){notice('Archivo muy grande','El máximo es 15 MB por canción para poder publicarla a todos.');return}
+ try{await ready;const old=MT.meta[k],tr=old?old.tr:2000;let v=0,msg=f.name;
+  if(window.Cloud&&Cloud.musicPut){v=Date.now();syncing[k]=v;notice('Publicando para todos…',f.name);
+   try{await Cloud.musicPut(k,f,tr,v)}catch(e){v=0;delete syncing[k];msg=f.name+' (solo en este dispositivo: '+String(e.message||e)+')'}}
+  await idb('readwrite',s=>s.put({k,name:f.name,size:f.size,tr,v,blob:f}));
+  MT.meta[k]={name:f.name,size:f.size,tr,v};dropEl(k);if(MT.pv===k)mtStopPv();
+  notice(v?'Publicada para todas las cuentas':'Canción guardada',msg)}catch(e){notice('No se pudo guardar',String(e.message||e))}musUI()};
 window.mtUp=k=>{fi._k=k;fi.click()};
 window.mtNew=()=>{const n=Math.round(+$('mtl').value);if(!(n>=5&&n<=140&&n%5==0)){notice('Nivel no válido','Los jefes están en los niveles múltiplos de 5 (5 a 140).');return}mtUp('jefe:'+n)};
-window.mtTr=async(k,v)=>{const m=MT.meta[k];if(!m)return;try{const r=await idb('readonly',s=>s.get(k));if(r){r.tr=+v;await idb('readwrite',s=>s.put(r));m.tr=+v}}catch(e){notice('No se pudo guardar',String(e.message||e))}};
-window.mtDel=async k=>{if(MT.meta[k]&&!confirm('¿Quitar esta canción?'))return;try{await idb('readwrite',s=>s.delete(k))}catch(e){}if(MT.pv===k)mtStopPv();delete MT.meta[k];dropEl(k);musUI()};
+window.mtTr=async(k,v)=>{const m=MT.meta[k];if(!m)return;try{const r=await idb('readonly',s=>s.get(k));if(r){r.tr=+v;await idb('readwrite',s=>s.put(r));m.tr=+v}if(m.v&&window.Cloud&&Cloud.musicTr)Cloud.musicTr(k,+v).catch(()=>{})}catch(e){notice('No se pudo guardar',String(e.message||e))}};
+window.mtDel=async k=>{if(MT.meta[k]&&!confirm('¿Quitar esta canción?'))return;const was=MT.meta[k]&&MT.meta[k].v;try{await idb('readwrite',s=>s.delete(k))}catch(e){}if(was&&window.Cloud&&Cloud.musicDel){try{await Cloud.musicDel(k)}catch(e){notice('No se pudo quitar de la nube',String(e.message||e))}}if(MT.pv===k)mtStopPv();delete MT.meta[k];dropEl(k);musUI()};
 window.mtVol=v=>{MT.MV=Math.max(0,Math.min(1,v/100));try{localStorage.setItem('ciudad-mvol',MT.MV)}catch(e){}const a=MT.cur&&MT.el[MT.cur];if(a&&!a.paused)fade(a,MT.MV,80);if(MT.pa)MT.pa.volume=MT.MV};
 /* prueba de una pista: pausa la música del juego mientras suena */
 window.mtStopPv=()=>{if(MT.pa){MT.pa.pause();try{URL.revokeObjectURL(MT.pa._u)}catch(e){}MT.pa=null}if(MT.pv){MT.pv=null;MT.hold=false;if($('musw'))musUI()}};
@@ -3353,7 +3374,7 @@ setInterval(()=>{try{if(!S||S.slot==null||document.getElementById('game').classL
 /* ===== NUBE (Firebase): cuentas y guardado de partidas. Usuario -> correo interno usuario@ciudad-juego.app ===== */
 import {initializeApp} from "https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js";
 import {getAuth,createUserWithEmailAndPassword,signInWithEmailAndPassword,signOut,onAuthStateChanged,setPersistence,browserLocalPersistence} from "https://www.gstatic.com/firebasejs/13.1.0/firebase-auth.js";
-import {getFirestore,doc,getDoc,setDoc,deleteField,collection,query,where,getDocs,onSnapshot,updateDoc,deleteDoc,limit} from "https://www.gstatic.com/firebasejs/13.1.0/firebase-firestore.js";
+import {getFirestore,doc,getDoc,setDoc,deleteField,collection,query,where,getDocs,onSnapshot,updateDoc,deleteDoc,limit,Bytes} from "https://www.gstatic.com/firebasejs/13.1.0/firebase-firestore.js";
 const firebaseConfig={apiKey:"AIzaSyCKxDVVyXXaZYSlw-cf1hc5LnrJWSi1KIA",authDomain:"ciudad-7f809.firebaseapp.com",projectId:"ciudad-7f809",storageBucket:"ciudad-7f809.firebasestorage.app",messagingSenderId:"855919527872",appId:"1:855919527872:web:1a31a3b9aa5cb9c1bcea25"};
 const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app);
 setPersistence(auth,browserLocalPersistence).catch(()=>{});
@@ -3488,12 +3509,31 @@ Object.assign(window.Cloud,{
  async endBattle(id){inB=false;try{await deleteDoc(doc(db,'batallas',id))}catch(e){}}
 });
 onAuthStateChanged(auth,async u=>{
- if(u){uid=u.uid;try{const a=await getDoc(doc(db,'config','admin'));window.Cloud.admUid=a.exists()?a.data().uid:null;window.Cloud.admLoaded=true}catch(e){}window.Cloud.name=(u.email||'').split('@')[0];
+ if(u){uid=u.uid;musicListen();try{const a=await getDoc(doc(db,'config','admin'));window.Cloud.admUid=a.exists()?a.data().uid:null;window.Cloud.admLoaded=true}catch(e){}window.Cloud.name=(u.email||'').split('@')[0];
   window.LD&&LD.set(45,'Cargando tu cuenta…');try{await setDoc(doc(db,'jugadores',uid),{nombre:window.Cloud.name},{merge:true});window.LD&&LD.set(60,'Cargando tus partidas…');await pull()}catch(e){console.warn(e);refresh()}
   window.LD&&LD.set(80,'Cargando tu perfil…');
   try{await ensureProfile();listen()}catch(e){console.warn('perfil',e)}
   notify();refresh();window.LD&&LD.done()}
- else{unlisten();uid=null;window.Cloud.name=null;window.Cloud.me=null;notify();refresh();window.LD&&LD.done()}});
+ else{unlisten();musicStop();uid=null;window.Cloud.name=null;window.Cloud.me=null;notify();refresh();window.LD&&LD.done()}});
+/* ===== MÚSICA COMPARTIDA: el administrador publica y todas las cuentas reciben (trozos de ~900 KB en Firestore) ===== */
+const MCH=900000,mid=k=>k.replace(/[^a-zA-Z0-9_-]/g,'_'),pid=(k,v,i)=>mid(k)+'_'+v+'_'+i;
+let mun=null;
+async function delParts(k,v,n){for(let i=0;i<n;i++){try{await deleteDoc(doc(db,'musicaPartes',pid(k,v,i)))}catch(e){}}}
+Object.assign(window.Cloud,{
+ async musicPut(k,file,tr,v,name){if(!uid)throw new Error('Necesitas iniciar sesión.');
+  const buf=new Uint8Array(await file.arrayBuffer()),n=Math.max(1,Math.ceil(buf.length/MCH));
+  let old=null;try{const o=await getDoc(doc(db,'musica',mid(k)));if(o.exists())old=o.data()}catch(e){}
+  try{for(let i=0;i<n;i+=3){await Promise.all([0,1,2].filter(j=>i+j<n).map(j=>setDoc(doc(db,'musicaPartes',pid(k,v,i+j)),{k,v,i:i+j,d:Bytes.fromUint8Array(buf.subarray((i+j)*MCH,(i+j+1)*MCH))})))}
+   await setDoc(doc(db,'musica',mid(k)),{k,name:name||file.name,size:file.size,tr,n,v,t:Date.now()})}
+  catch(e){await delParts(k,v,n);throw new Error(e&&e.code=='permission-denied'?'Sin permiso: faltan las reglas de Firestore para la música (solo el administrador publica).':msg(e))}
+  if(old&&old.v&&old.v!==v)delParts(k,old.v,old.n||0)},
+ async musicBlob(x){const ps=await Promise.all(Array.from({length:x.n},(_,i)=>getDoc(doc(db,'musicaPartes',pid(x.k,x.v,i)))));
+  return new Blob(ps.map(p=>{if(!p.exists())throw new Error('Falta un trozo');return p.data().d.toUint8Array()}),{type:'audio/mpeg'})},
+ async musicTr(k,tr){await setDoc(doc(db,'musica',mid(k)),{tr},{merge:true})},
+ async musicDel(k){const r=doc(db,'musica',mid(k)),o=await getDoc(r);await deleteDoc(r);if(o.exists())await delParts(k,o.data().v,o.data().n||0)}
+});
+function musicListen(){if(mun)return;mun=onSnapshot(collection(db,'musica'),sn=>dispatchEvent(new CustomEvent('cloudmusic',{detail:{fromCache:sn.metadata.fromCache,list:sn.docs.map(d=>d.data())}})),e=>console.warn('musica',e))}
+function musicStop(){if(mun){mun();mun=null}}
 const flush=()=>{for(const n of Object.keys(timers))sendNow(+n)};
 addEventListener('pagehide',flush);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')flush()});
 refresh();
