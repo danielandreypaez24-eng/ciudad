@@ -639,7 +639,7 @@ body.onscr #game *{animation:none!important}
 .mg{display:grid;grid-template-columns:repeat(15,18px);grid-auto-rows:18px;border-left:1px solid var(--l);border-top:1px solid var(--l);width:max-content;margin:8px auto;background:var(--s)}
 .mg i{border-right:1px solid var(--l);border-bottom:1px solid var(--l);display:flex;align-items:center;justify-content:center;color:var(--a)}
 #nav{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr)}#nav button svg.si{width:30px;height:30px;fill:currentColor;stroke:none;display:block}#nav button,#nav #n4{gap:0;padding:0;align-items:center;justify-content:center;min-height:62px}#nav #n4{border:0;background:rgba(255,255,255,.035);color:var(--t);box-shadow:inset 0 0 0 1px var(--l);cursor:pointer}#nav #n4 svg{color:var(--a)}#nav #n4:hover{background:rgba(233,152,86,.12);box-shadow:inset 0 0 0 1px var(--a)}#nav #n2 svg.si{color:#1A1836}@media(min-width:900px){#nav button svg.si{width:36px;height:36px}#nav button,#nav #n4{min-height:76px}}
-#view{touch-action:pan-x pan-y}#grid{transform-origin:0 0}
+#view{touch-action:pan-x pan-y;scrollbar-width:none;-ms-overflow-style:none}#view::-webkit-scrollbar{display:none;width:0;height:0}#zw{width:max-content;margin:0 auto}#zw #grid{margin:0;transform-origin:0 0}
 </style></head><body>
 <div class="ld" id="ld"><div class="ldstage"><svg class="ldring" viewBox="0 0 112 112" aria-hidden="true"><circle class="tr" cx="56" cy="56" r="44"/><circle class="w" cx="56" cy="56" r="44" pathLength="100" transform="rotate(-90 56 56)"/><circle class="p" cx="56" cy="56" r="44" pathLength="100" transform="rotate(-90 56 56)"/><path class="c" pathLength="100" transform="translate(-1.14 3.63)" d="M40 67H72A9 9 0 0 0 73 49A13 13 0 0 0 48 46A10 10 0 0 0 40 67"/></svg><div class="ldtt">CIUDAD</div><div class="ldsub">Forja tu leyenda</div><div class="ldbar"><i id="ldf"></i></div><div class="ldm" id="ldm">Iniciando…</div></div></div></div></div>
 <section id="slots"></section>
@@ -648,7 +648,7 @@ body.onscr #game *{animation:none!important}
   <button id="mb" aria-label="Menu" style="padding:5px 7px"><svg class="ic" width="20" height="20" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
   <div class="city" id="cn"></div><button id="hb" class="hide">Héroes</button><div class="coins" id="cc"></div>
  </header>
- <div id="view"><div id="grid"></div></div>
+ <div id="view"><div id="zw"><div id="grid"></div></div></div>
   <div id="bar"><p id="tt"></p><button id="ta" class="hide"></button></div>
  <div id="nav" class="hide"></div>
 </section>
@@ -1085,16 +1085,16 @@ function zoom(d){const r=$('view').getBoundingClientRect();zPreview((zPend?zTarg
    Nunca se recalculan las casillas, ni durante el gesto ni al soltar los dedos. */
 const zClamp=v=>Math.min(2.2,Math.max(1,v));
 let zPend=null,zTarget=1,zRaf=0,zT=0,pd=0,pz=1,zBase=0;
-function zFrame(){zRaf=0;if(!zPend)return;const g=$('grid'),v=$('view'),p=zPend,s=zTarget,f=s/p.z0,cs=getComputedStyle(v),pl=parseFloat(cs.paddingLeft)||0,pr=parseFloat(cs.paddingRight)||0,
- avail=v.clientWidth-pl-pr,W=g.offsetWidth,L=Math.max(0,(avail-W*s)/2);
- /* el tablero escalado se mantiene centrado mientras quepa; al crecer, el margen se reduce y el scroll cubre todo el ancho */
- g.style.transform=s==1?'':'scale('+s+')';g.style.margin=s==1?'':'0 0 0 '+L+'px';
- const gl=s==1?pl+Math.max(0,(avail-W)/2):pl+L;
- v.scrollLeft=(p.cx-p.gl)*f+gl-p.ox;v.scrollTop=(p.cy-p.gt)*f+p.gt-p.oy}
+function zFrame(){zRaf=0;if(!zPend)return;const g=$('grid'),v=$('view'),w=$('zw'),p=zPend,s=zTarget;
+ /* el contenedor #zw ocupa el tamano ya escalado: el area de scroll es simetrica (izq/der/arriba/abajo) y el tablero sigue centrado mientras quepa */
+ g.style.transform=s==1?'':'scale('+s+')';
+ w.style.width=s==1?'':g.offsetWidth*s+'px';w.style.height=s==1?'':g.offsetHeight*s+'px';
+ const vr=v.getBoundingClientRect(),wr=w.getBoundingClientRect();
+ v.scrollLeft=wr.left-vr.left+v.scrollLeft+p.ux*s-p.ox;v.scrollTop=wr.top-vr.top+v.scrollTop+p.uy*s-p.oy}
 function zPreview(target,mx,my){
- if(zPend===null){const g=$('grid'),v=$('view'),vr=v.getBoundingClientRect(),gr=g.getBoundingClientRect(),
-  b=BASE();if(b!=zBase){zBase=b;g.style.setProperty('--cs',b+'px')}
-  zPend={z0:Z,ox:mx-vr.left,oy:my-vr.top,cx:v.scrollLeft+mx-vr.left,cy:v.scrollTop+my-vr.top,gl:gr.left-vr.left+v.scrollLeft,gt:gr.top-vr.top+v.scrollTop}}
+ if(zPend===null){const g=$('grid'),v=$('view'),w=$('zw'),b=BASE();if(b!=zBase){zBase=b;g.style.setProperty('--cs',b+'px');if(Z>1){w.style.width=g.offsetWidth*Z+'px';w.style.height=g.offsetHeight*Z+'px'}}
+  const vr=v.getBoundingClientRect(),wr=w.getBoundingClientRect(),ox=mx-vr.left,oy=my-vr.top;
+  zPend={z0:Z,ox,oy,ux:(ox-(wr.left-vr.left))/Z,uy:(oy-(wr.top-vr.top))/Z}}
  zTarget=zClamp(target);if(!zRaf)zRaf=requestAnimationFrame(zFrame)}
 function zCommit(){if(zPend===null)return;if(zRaf){cancelAnimationFrame(zRaf);zFrame()}Z=zTarget;zPend=null}
 const t2=e=>Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY),
@@ -1103,7 +1103,7 @@ $('view').addEventListener('touchstart',e=>{if(e.touches.length==2){zCommit();pd
 $('view').addEventListener('touchmove',e=>{if(e.touches.length==2&&pd){e.preventDefault();const m=m2(e);zPreview(pz*t2(e)/pd,m[0],m[1])}},{passive:false});
 const zEnd=e=>{if(e.touches.length<2){pd=0;zCommit()}};
 $('view').addEventListener('touchend',zEnd,{passive:true});$('view').addEventListener('touchcancel',zEnd,{passive:true});
-$('view').addEventListener('wheel',e=>{if(e.ctrlKey||e.metaKey){e.preventDefault();zPreview((zPend?zTarget:Z)*Math.exp(-e.deltaY*.01),e.clientX,e.clientY);clearTimeout(zT);zT=setTimeout(zCommit,140)}},{passive:false});
+$('view').addEventListener('wheel',e=>{if(e.ctrlKey||e.metaKey){e.preventDefault();{const r=$('view').getBoundingClientRect();zPreview((zPend?zTarget:Z)*Math.exp(-Math.max(-60,Math.min(60,e.deltaY))*.01),r.left+r.width/2,r.top+r.height/2)};clearTimeout(zT);zT=setTimeout(zCommit,140)}},{passive:false});
 /* combate */
 const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
 function sparks(x,y,n,c){if(RM)return;for(let i=0;i<n;i++){const d=document.createElement('i');d.className='sp';d.style.cssText=`left:${x}px;top:${y}px;color:${c}`;document.body.appendChild(d);const a=Math.random()*6.28,r=60+Math.random()*90;d.animate([{opacity:1,transform:'translate(0,0) rotate(45deg)'},{opacity:0,transform:`translate(${Math.cos(a)*r}px,${Math.sin(a)*r}px) rotate(45deg) scale(.3)`}],{duration:900+Math.random()*500,easing:'ease-out'}).finished.then(()=>d.remove())}}
