@@ -1085,9 +1085,12 @@ function zoom(d){const r=$('view').getBoundingClientRect();zPreview((zPend?zTarg
    Nunca se recalculan las casillas, ni durante el gesto ni al soltar los dedos. */
 const zClamp=v=>Math.min(2.2,Math.max(1,v));
 let zPend=null,zTarget=1,zRaf=0,zT=0,pd=0,pz=1,zBase=0;
-function zFrame(){zRaf=0;if(!zPend)return;const g=$('grid'),v=$('view'),p=zPend,s=zTarget,f=s/p.z0;
- g.style.transform=s==1?'':'scale('+s+')';
- v.scrollLeft=(p.cx-p.gl)*f+p.gl-p.ox;v.scrollTop=(p.cy-p.gt)*f+p.gt-p.oy}
+function zFrame(){zRaf=0;if(!zPend)return;const g=$('grid'),v=$('view'),p=zPend,s=zTarget,f=s/p.z0,cs=getComputedStyle(v),pl=parseFloat(cs.paddingLeft)||0,pr=parseFloat(cs.paddingRight)||0,
+ avail=v.clientWidth-pl-pr,W=g.offsetWidth,L=Math.max(0,(avail-W*s)/2);
+ /* el tablero escalado se mantiene centrado mientras quepa; al crecer, el margen se reduce y el scroll cubre todo el ancho */
+ g.style.transform=s==1?'':'scale('+s+')';g.style.margin=s==1?'':'0 0 0 '+L+'px';
+ const gl=s==1?pl+Math.max(0,(avail-W)/2):pl+L;
+ v.scrollLeft=(p.cx-p.gl)*f+gl-p.ox;v.scrollTop=(p.cy-p.gt)*f+p.gt-p.oy}
 function zPreview(target,mx,my){
  if(zPend===null){const g=$('grid'),v=$('view'),vr=v.getBoundingClientRect(),gr=g.getBoundingClientRect(),
   b=BASE();if(b!=zBase){zBase=b;g.style.setProperty('--cs',b+'px')}
