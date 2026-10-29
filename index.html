@@ -636,8 +636,8 @@ body.onscr #game *{animation:none!important}
 .pc.hit{background:color-mix(in srgb,var(--r) 35%,var(--s));transform:scale(.95)}.pc.atk{transform:translateY(-6px)}.pc.dead{opacity:.25}
 .pc .hb2{height:5px;background:var(--l);margin-top:4px}.pc .hb2 i{display:block;height:100%;background:var(--r);transition:width .3s}
 .pcs{display:flex;gap:6px;margin:6px 0}.pvl{min-height:38px;text-align:center;margin:10px 0;font-size:12px}
-.mg{display:grid;grid-template-columns:repeat(15,18px);grid-auto-rows:18px;border-left:1px solid var(--l);border-top:1px solid var(--l);width:max-content;margin:8px auto;background:var(--s)}
-.mg i{border-right:1px solid var(--l);border-bottom:1px solid var(--l);display:flex;align-items:center;justify-content:center;color:var(--a)}
+.mgm{display:grid;grid-template-columns:repeat(15,18px);grid-auto-rows:18px;border-left:1px solid var(--l);border-top:1px solid var(--l);width:max-content;margin:8px auto;background:var(--s)}
+.mgm i{border-right:1px solid var(--l);border-bottom:1px solid var(--l);display:flex;align-items:center;justify-content:center;color:var(--a)}
 #nav{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr)}#nav button svg.si{width:30px;height:30px;fill:currentColor;stroke:none;display:block}#nav button,#nav #n4{gap:0;padding:0;align-items:center;justify-content:center;min-height:62px}#nav #n4{border:0;background:rgba(255,255,255,.035);color:var(--t);box-shadow:inset 0 0 0 1px var(--l);cursor:pointer}#nav #n4 svg{color:var(--a)}#nav #n4:hover{background:rgba(233,152,86,.12);box-shadow:inset 0 0 0 1px var(--a)}#nav #n2 svg.si{color:#1A1836}@media(min-width:900px){#nav button svg.si{width:36px;height:36px}#nav button,#nav #n4{min-height:76px}}
 #view{touch-action:pan-x pan-y;scrollbar-width:none;-ms-overflow-style:none}#view::-webkit-scrollbar{display:none;width:0;height:0}#zw{width:max-content;margin:0 auto}#zw #grid{margin:0;transform-origin:0 0}
 </style></head><body>
@@ -645,7 +645,7 @@ body.onscr #game *{animation:none!important}
 <section id="slots"></section>
 <section id="game" class="hide">
  <header>
-  <button id="mb" aria-label="Menu" style="padding:5px 7px"><svg class="ic" width="20" height="20" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+  <button id="mb" aria-label="Menu" style="padding:5px 7px"><svg class="si" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true"><path d="M5 5h14a1.4 1.4 0 0 1 0 2.8H5A1.4 1.4 0 0 1 5 5zM5 10.6h9a1.4 1.4 0 0 1 0 2.8H5a1.4 1.4 0 0 1 0-2.8zM5 16.2h14a1.4 1.4 0 0 1 0 2.8H5a1.4 1.4 0 0 1 0-2.8z"/></svg></button>
   <div class="city" id="cn"></div><button id="hb" class="hide">Héroes</button><div class="coins" id="cc"></div>
  </header>
  <div id="view"><div id="zw"><div id="grid"></div></div></div>
@@ -701,7 +701,8 @@ min:'<path d="M7 21V8l5-5 5 5v13M10 21v-5h4v5M10 11h4"/>',
 mur:'<path d="M3 6h18v12H3zM3 12h18M9 6v6M15 12v6M6 12v6"/>',
 cs:'<circle cx="12" cy="12" r="8"/><path d="M12 8v8M8 12h8"/>',cf:'<circle cx="12" cy="12" r="8"/><path d="M9 8v8M9 8h6M9 12h4"/>',
 cr:'<path d="M4 8l8-4 8 4v8l-8 4-8-4z"/>',cd:'<path d="M12 3l8 7-8 11-8-11z"/>'};
-const ic=(k,s=18)=>window.STN&&STN[k]?STN[k](s):`<svg class="ic" width="${s}" height="${s}" viewBox="0 0 24 24">${I[k]}</svg>`;
+const CIC={"cs":"M12 2a10 10 0 1 0 0 20a10 10 0 1 0 0-20zM12 8.9a3.1 3.1 0 1 0 0 6.2a3.1 3.1 0 1 0 0-6.2zM17.3 12.85 L19.7 12.85 L19.7 11.15 L17.3 11.15zM15.15 16.35 L16.84 18.05 L18.05 16.84 L16.35 15.15zM11.15 17.3 L11.15 19.7 L12.85 19.7 L12.85 17.3zM7.65 15.15 L5.95 16.84 L7.16 18.05 L8.85 16.35zM6.7 11.15 L4.3 11.15 L4.3 12.85 L6.7 12.85zM8.85 7.65 L7.16 5.95 L5.95 7.16 L7.65 8.85zM12.85 6.7 L12.85 4.3 L11.15 4.3 L11.15 6.7zM16.35 8.85 L18.05 7.16 L16.84 5.95 L15.15 7.65z","cf":"M12 2a10 10 0 1 0 0 20a10 10 0 1 0 0-20zM16.4 6.2A6.1 6.1 0 1 0 16.4 17.8 7.2 7.2 0 0 1 16.4 6.2z","cr":"M12 2.2L20.6 7.1V16.9L12 21.8L3.4 16.9V7.1zM11.1 10.76 L4.95 7.21 L4.15 8.59 L10.3 12.14zM13.7 12.14 L19.85 8.59 L19.05 7.21 L12.9 10.76zM11.2 13.7 L11.2 20.4 L12.8 20.4 L12.8 13.7z","cd":"M7.2 3H16.8L22 9.2L12 21.2L2 9.2zM3.8 9.85 L20.2 9.85 L20.2 8.55 L3.8 8.55zM8.92 3.96 L7.92 8.16 L9.08 8.44 L10.08 4.24zM13.92 4.24 L14.92 8.44 L16.08 8.16 L15.08 3.96zM7.75 10.53 L10.75 17.63 L11.85 17.17 L8.85 10.07zM15.15 10.07 L12.15 17.17 L13.25 17.63 L16.25 10.53z","pie":"M6.2 5.2C8.1 3 15.8 3 18 5.4c2.5 2.7 3.4 7.4 1.3 11.2-1.8 3.3-5.3 4.9-7.9 4.9-4.3 0-7.7-2.4-8.5-6.3-.6-3 .2-7.5 3.3-10zM12 7.1L13.5 10.5L16.9 12L13.5 13.5L12 16.9L10.5 13.5L7.1 12L10.5 10.5z","cri":"M12 1.6L16.8 6.9V17.3L12 22.4L7.2 17.3V6.9zM11.35 5.6 L11.35 18.4 L12.65 18.4 L12.65 5.6zM2.2 14.2L4.5 11.6L6.8 14.2V18.6L4.5 20.6L2.2 18.6zM21.8 14.2L19.5 11.6L17.2 14.2V18.6L19.5 20.6L21.8 18.6z","pol":"M10.8 4 L14.04 9.36 L19.4 12.6 L14.04 15.84 L10.8 21.2 L7.56 15.84 L2.2 12.6 L7.56 9.36zM19 1.8 L20.35 4.05 L22.6 5.4 L20.35 6.75 L19 9 L17.65 6.75 L15.4 5.4 L17.65 4.05zM18.6 15.8 L19.73 17.67 L21.6 18.8 L19.73 19.93 L18.6 21.8 L17.47 19.93 L15.6 18.8 L17.47 17.67z","nuc":"M12 2a10 10 0 1 0 0 20a10 10 0 1 0 0-20zM12 4.5a7.5 7.5 0 1 0 0 15a7.5 7.5 0 1 0 0-15zM12 7.4a4.6 4.6 0 1 0 0 9.2a4.6 4.6 0 1 0 0-9.2zM12 10.3a1.7 1.7 0 1 0 0 3.4a1.7 1.7 0 1 0 0-3.4z","fel":"M12 21.2c-.4 0-.8-.1-1.1-.4C6.2 17 2.6 13.8 2.6 9.6 2.6 6.6 4.9 4.4 7.7 4.4c1.7 0 3.3.9 4.3 2.3 1-1.4 2.6-2.3 4.3-2.3 2.8 0 5.1 2.2 5.1 5.2 0 4.2-3.6 7.4-8.3 11.2-.3.3-.7.4-1.1.4z","men":"M5 5h14a1.4 1.4 0 0 1 0 2.8H5A1.4 1.4 0 0 1 5 5zM5 10.6h9a1.4 1.4 0 0 1 0 2.8H5a1.4 1.4 0 0 1 0-2.8zM5 16.2h14a1.4 1.4 0 0 1 0 2.8H5a1.4 1.4 0 0 1 0-2.8z"};
+const ic=(k,s=18)=>CIC[k]?`<svg class="ci" width="${s}" height="${s}" viewBox="0 0 24 24" fill="currentColor" fill-rule="evenodd" stroke="none" aria-hidden="true"><path d="${CIC[k]}"/></svg>`:window.STN&&STN[k]?STN[k](s):`<svg class="ic" width="${s}" height="${s}" viewBox="0 0 24 24">${I[k]}</svg>`;
 const SI={"tnd":"<path fill-rule=\"evenodd\" d=\"M12 3.4l10 15.2v2.9H2V18.6zM12 12.2L8.7 21.5h6.6z\"/><path d=\"M12.7.8l4 1.5-4 1.5z\"/><path d=\"M11.4.8h1.3v3.6h-1.3z\"/>","her": "<path fill-rule=\"evenodd\" d=\"M12 3.2c-3.2 0-5.4 2.3-5.4 5.4v5.4c0 2.5 1.3 4.4 3.3 5.8l2.1 1.5 2.1-1.5c2-1.4 3.3-3.3 3.3-5.8V8.6c0-3.1-2.2-5.4-5.4-5.4zM8.2 9.4h7.6v1.8H8.2zM11.1 12.6h1.8v5.2h-1.8z\"/><path d=\"M5.2 6.6L1.6 5.6c.1 2.3 1 3.9 2.7 4.9-1.1.1-2 .6-2.7 1.5 1.2.4 2.3.4 3.3 0-.5.7-.7 1.5-.6 2.4 1.1-.4 2-1.1 2.5-2z\"/><path d=\"M18.8 6.6l3.6-1c-.1 2.3-1 3.9-2.7 4.9 1.1.1 2 .6 2.7 1.5-1.2.4-2.3.4-3.3 0 .5.7.7 1.5.6 2.4-1.1-.4-2-1.1-2.5-2z\"/>", "tie": "<path d=\"M8.6 2.6c1 .9 2.2.9 3.4 0 1.2.9 2.4.9 3.4 0l-1 3.6H9.6z\"/><path fill-rule=\"evenodd\" d=\"M9 7.6h6c2.9 2.4 4.6 4.9 4.6 7.7 0 3.5-2.6 5.7-7.6 5.7s-7.6-2.2-7.6-5.7c0-2.8 1.7-5.3 4.6-7.7zM12 12.6a2.7 2.7 0 100 5.4 2.7 2.7 0 000-5.4z\"/><circle cx=\"12\" cy=\"15.3\" r=\"1\"/>", "esp": "<g transform=\"translate(0 .6) rotate(45 12 11.4)\"><path fill-rule=\"evenodd\" d=\"M12 .8l1.6 2.4V13h-3.2V3.2zM11.7 4.6h.6v6.2h-.6z\"/><path d=\"M7.4 13.8h9.2v1.8H7.4zM11 15.6h2v3.4h-2z\"/><circle cx=\"12\" cy=\"20.6\" r=\"1.4\"/></g><g transform=\"translate(0 .6) rotate(-45 12 11.4)\"><path fill-rule=\"evenodd\" d=\"M12 .8l1.6 2.4V13h-3.2V3.2zM11.7 4.6h.6v6.2h-.6z\"/><path d=\"M7.4 13.8h9.2v1.8H7.4zM11 15.6h2v3.4h-2z\"/><circle cx=\"12\" cy=\"20.6\" r=\"1.4\"/></g>", "bib": "<path fill-rule=\"evenodd\" d=\"M2.4 6.4C2.4 5.6 3 5 3.8 5h2.7c.8 0 1.4.6 1.4 1.4V20H2.4zM3.7 8.2h2.9v1.3H3.7zM3.7 15.8h2.9v1.1H3.7z\"/><path fill-rule=\"evenodd\" d=\"M8.9 8.4C8.9 7.6 9.5 7 10.3 7h1.6c.8 0 1.4.6 1.4 1.4V20H8.9zM10.1 10.2h2v1.3h-2z\"/><g transform=\"translate(1 2.6) scale(.92)\"><path d=\"M16.6 2.6h4.4v1.5h-4.4z\"/><path fill-rule=\"evenodd\" d=\"M17.4 5.2h2.8v4.5l2.7 5.5c.9 1.9-.2 4.3-2.4 4.3h-3.4c-2.2 0-3.3-2.4-2.4-4.3l2.7-5.5zM16.9 14.8h3.7v1.2h-3.7z\"/></g><path d=\"M2 20.9h20v1.4H2z\"/>"},ics=(k,s=30)=>`<svg class="si" width="${s}" height="${s}" viewBox="0 0 24 24" aria-hidden="true">${SI[k]}</svg>`;
 I.tie='<path d="M4 8h16l-1 12H5zM8 8a4 4 0 018 0"/>';I.adv='<path d="M5 19L19 5M14 5h5v5M4 20l2-2"/>';
 {const D=(p,x='')=>`<path d="${p}" fill="currentColor" fill-opacity=".22"/><path d="${p}"/>${x}`;
@@ -723,6 +724,8 @@ cr:D('M4 8l8-4 8 4v8l-8 4-8-4z','<path d="M4 8l8 4 8-4M12 12v8"/>'),cd:D('M12 3l
 tie:D('M4 8h16l-1 12H5z','<path d="M8 8a4 4 0 018 0"/>'),adv:D('M5 21V4h12l-2 4 2 4H5','<path d="M5 21V3"/>')})}
 const $=id=>document.getElementById(id),sl=ms=>new Promise(r=>setTimeout(r,ms));
 const CN={solar:['cs','Solar'],filar:['cf','Filar'],recursos:['cr','Recursos'],diamantino:['cd','Diamantino']};
+/* valor de 1 diamantino al pagar lo que falte */
+const DQ={solar:5,filar:5,recursos:5,piedra:1,cristal:1};
 const SH={
  sol:{n:'Torre solar',d:'Genera monedas solares.',cost:{filar:100},t:5000,e:'1 solar cada 5 s'},
  fil:{n:'Torre filar',d:'Genera monedas filares.',cost:{solar:100},t:5000,e:'1 filar cada 10 s'},
@@ -812,7 +815,7 @@ function go(n,fresh){if(!fresh)S=load(n);if(S.step==8)S.step=9;place=null;prev={
  $('cc').innerHTML=Object.entries(CN).map(([k,v])=>`<div class="cv" id="cv-${k}" style="color:var(--k-${k})"><span class="ico">${ic(v[0],20)}</span><span class="pill"><i></i><b></b><em></em></span></div>`).join('');
  if(!G){let h='';for(let i=0;i<225;i++)h+=`<div class="c" data-x="${i%15}" data-y="${(i/15)|0}"></div>`;$('grid').innerHTML=h;G=[...$('grid').children]}
  G.forEach(c=>{c._s=null;c.className='c';c.innerHTML=''});zoom(0);draw();tut()}
-function can(c){return Object.entries(c).every(([k,v])=>have(k)>=v)}
+function can(c){let d=0;for(const k in c){const h=have(k),v=c[k];if(h>=v)continue;if(!DQ[k])return false;d+=Math.ceil((v-h)/DQ[k])}return d<=(S.coins.diamantino||0)}
 function cell(x,y){return S.b.find(b=>b.x==x&&b.y==y)}
 const costTxt=c=>Object.entries(c).map(([k,v])=>v+' '+CN[k][1].toLowerCase()).join(', ');
 function fl(t,el,c){const g=el.classList.contains('c');if(g&&$('ov').firstChild)return;if(!el.isConnected)return;const r=el.getBoundingClientRect(),d=document.createElement('div');d.className='fl'+(g?' g':'');d.textContent=t;
@@ -820,7 +823,7 @@ function fl(t,el,c){const g=el.classList.contains('c');if(g&&$('ov').firstChild)
  d.animate([{opacity:.7,transform:'translate(-50%,-50%)'},{opacity:0,transform:'translate(-50%,-36px)'}],{duration:1100,easing:'ease-out'}).finished.then(()=>d.remove())}
 const fm=n=>{n=Math.floor(n);return n>=10000?(n/1000).toFixed(1).replace('.0','')+'k':n};
 function coins(){for(const k in CN){const el=$('cv-'+k),v=S.coins[k],c=cap(k);
- el.querySelector('b').textContent=fm(v);el.querySelector('em').textContent='/'+fm(c);el.title=CN[k][1]+': '+Math.floor(v)+' de '+c;el.querySelector('i').style.width=100*v/c+'%';
+ el.querySelector('b').textContent=fm(v);el.querySelector('em').textContent='/'+fm(c);el.title=k=='diamantino'?'Diamantino: '+Math.floor(v)+' (vale 5 monedas, o 1 piedra/cristal mágico)':CN[k][1]+': '+Math.floor(v)+' de '+c;el.querySelector('i').style.width=100*v/c+'%';
  if(prev[k]!==undefined&&v>prev[k])el.animate([{background:'color-mix(in srgb,currentColor 28%,transparent)'},{background:'transparent'}],{duration:800});prev[k]=v}}
 
 /* ===== Muros: autotiling visual (solo representación; no toca S.b, costes, colisiones ni reglas) =====
@@ -887,7 +890,7 @@ $('grid').onclick=e=>{const c=e.target.closest('.c');if(!c)return;
  if(place){if(b)return;const t=place=='est'?5000:SH[place].t;
   S.b.push({id:S.id++,type:place,x,y,end:Date.now()+t,d:t,last:Date.now()+t,lv:1,pn:PCFG.cycle});
   const w=place;place=null;S.pend=null;if(w=='est'&&S.step==0)S.step=1;if(w=='sol'&&S.step<=3)S.step=4;if(w=='fil'&&S.step<=5)S.step=6;if((w=='als'||w=='alf')&&S.step==9)S.step=10;
-  if(w=='mur'&&can(SH.mur.cost)&&count('mur')<lim('mur')){for(const c in SH.mur.cost)S.coins[c]-=SH.mur.cost[c];place='mur';S.pend='mur'}
+  if(w=='mur'&&can(SH.mur.cost)&&count('mur')<lim('mur')){spend(SH.mur.cost);place='mur';S.pend='mur'}
   save();draw();tut();return}
  if(!b||Date.now()<b.end)return;
  if(b.type=='est'){est(b);tut()}else if(b.type=='cam')camp(b.id);else if(b.type=='min')mineral(b.id);else if(b.type=='chr')centro();else if(b.type=='bib')bib();else if(b.type=='tal')taller();else if(b.type=='hrr')hrr(b);else if(b.type=='cmp')cmpH(b);else if(b.type=='grm')grem(b);else if(b.type=='mur')wall(b);else tower(b)};
@@ -923,15 +926,15 @@ function shop(){if(place)return;
   return `<div class="card sc${full?' full':''}"><div class="sct"><div class="ib">${ic(k,26)}</div><div class="scn"><b>${s.n}</b><span class="m">${s.d}</span></div></div>
   <div class="scs"><div><span class="m">Efecto</span><b>${s.e}</b></div><div><span class="m">Construcción</span><b>${ft(s.t)}</b></div></div>
   <div class="sco"><span class="m">Tienes</span><span class="pips">${pips}<em>${n}/${Lm}</em></span></div>
-  <div class="cost">${Object.entries(s.cost).map(([c,v])=>`<span class="cc${S.coins[c]>=v?'':' no'}" style="color:var(--k-${c})">${ic(CN[c][0],14)}<b>${v}</b><em>${CN[c][1]}</em></span>`).join('')}</div>
+  <div class="cost">${Object.entries(s.cost).map(([c,v])=>`<span class="cc${S.coins[c]>=v||ok?'':' no'}" style="color:var(--k-${c})">${ic(CN[c][0],14)}<b>${v}</b><em>${CN[c][1]}</em></span>`).join('')}</div>
   <button ${ok&&!full?'':'disabled'} onclick="buy('${k}')">${full?'Límite alcanzado':ok?'Comprar':'Faltan monedas'}</button></div>`}).join('');
  sheet(`<div class="shh"><div><h2>Tienda</h2><span class="m">Elige una estructura y colócala en el mapa</span></div><button class="mx" aria-label="Cerrar" onclick="sheetClose()">✕</button></div>
- <div class="chips"><span class="chip"><i class="gm sq"></i>${S.inv.piedra} piedras mágicas</span><span class="chip"><i class="gm di"></i>${S.inv.cristal} cristales mágicos</span></div>
+ <div class="chips"><span class="chip"><span class="gmi" style="color:var(--m)">${ic('pie',14)}</span>${S.inv.piedra} piedras mágicas</span><span class="chip"><span class="gmi" style="color:var(--b)">${ic('cri',14)}</span>${S.inv.cristal} cristales mágicos</span></div>
  <div class="row shr">${cards}</div>`)}
-function buy(k){const s=SH[k];if(!can(s.cost)||count(k)>=lim(k))return;for(const c in s.cost)S.coins[c]-=s.cost[c];sheetClose();place=k;S.pend=k;save();draw();tut()}
+function buy(k){const s=SH[k];if(!can(s.cost)||count(k)>=lim(k))return;spend(s.cost);sheetClose();place=k;S.pend=k;save();draw();tut()}
 const modal=h=>{const k=h.indexOf('<!--E-->'),a=k<0?'':h.slice(0,k),b=k<0?h:h.slice(k+8);$('ov').innerHTML=`<div class="sheet" onclick="if(event.target==this)sheetClose()"><div class="panel pm" style="margin:auto;max-height:90%">${a}<div class="pmb">${b}</div><div class="pmf"><button onclick="sheetClose()">Cerrar</button></div></div></div>`};
 const pipsN=(t,n)=>Array.from({length:t},(_,i)=>`<i class="${i<n?'on':''}"></i>`).join('');
-const chipsCost=c=>Object.entries(c).map(([k,v])=>CN[k]?`<span class="cc${S.coins[k]>=v?'':' no'}" style="color:var(--k-${k})">${ic(CN[k][0],14)}<b>${v}</b><em>${CN[k][1]}</em></span>`:`<span class="cc${have(k)>=v?'':' no'}" style="color:${INV[k][1]}"><i class="gm di"></i><b>${v}</b><em>${INV[k][0]}</em></span>`).join('');
+const chipsCost=c=>{const all=can(c);return Object.entries(c).map(([k,v])=>{const sh=have(k)<v,dd=sh&&all&&DQ[k]?Math.ceil((v-have(k))/DQ[k]):0,x=dd?`<span class="cdx" title="Cubierto con diamantino">${ic('cd',11)}${dd}</span>`:'',I2=INV[k]||['Piedras','var(--m)'];return CN[k]?`<span class="cc${!sh||all?'':' no'}" style="color:var(--k-${k})">${ic(CN[k][0],14)}<b>${v}</b><em>${CN[k][1]}</em>${x}</span>`:`<span class="cc${!sh||all?'':' no'}" style="color:${I2[1]}">${ic(({cristal:'cri',polvo:'pol',nucleo:'nuc',piedra:'pie'})[k]||'cri',14)}<b>${v}</b><em>${I2[0]}</em>${x}</span>`}).join('')};
 const reqRow=(t,ok,v='')=>`<div class="req${ok?' ok':''}"><i>${ok?'✓':'✕'}</i><span>${t}</span><em>${v}</em></div>`;
 function capBar(c){const p=capParts(c),t=p.base+p.st+p.pr,w=v=>100*v/t+'%',sw=(col,l,v)=>`<tr><td><span style="display:inline-block;width:10px;height:10px;background:${col};margin-right:6px"></span>${l}</td><td>+${v}</td></tr>`;
  return `<div class="bar" style="display:flex;height:10px"><i style="width:${w(p.base)};background:var(--m)"></i><i style="width:${w(p.st)};background:var(--k-${c})"></i><i style="width:${w(p.pr)};background:var(--a)"></i></div>
@@ -976,8 +979,8 @@ function wk(id,d){const b=S.b.find(x=>x.id==id),w=b.w||0;if(d>0&&(w>=LV.min[L(b)
 function wall(b){modal(head(b,'Vida '+LV.mur[0].hp+'/'+LV.mur[0].hp)+upBlock(b))}
 function centro(){const n=S.cards,fr=S.pop-used(),nx=n<CARDS.max?CARDS.cost[n-1]:null;let h='';
  for(let i=0;i<n;i++){const hr=S.heroes[i];h+=hr?`<div class="hw">${hcard(hr)}<div class="hwa"><button onclick="mej(${hr.id})">Mejorar</button><button onclick="cal(${hr.id})">Caldero</button><button onclick="skm(${hr.id})">Habilidades</button></div></div>`:`<div class="hw"><div class="cd hc0"><span class="plus">+</span><span class="m">Carta vacía</span></div><div class="hwa one"><button ${fr>=1?'':'disabled'} onclick="recruit()">Reclutar</button></div></div>`}
- modal(`<div class="uh"><div class="ib big">${ic('chr',30)}</div><div class="uhi"><h2>Centro de Héroes</h2><span class="lvp"><span class="pips">${pipsN(CARDS.max,n)}</span><b>${n}/${CARDS.max} cartas</b></span><span class="m">Habitantes libres: ${fr}</span></div></div><!--E--><div class="chips"><span class="chip"><i class="gm di"></i>${S.inv.cristal} cristales mágicos</span></div><div class="sx">Tus héroes</div><div class="hgrid c2">${h}</div><p class="m hint">Mejora vida y ataque con cristales, o asciende el golpe en el Caldero. Un habitante reclutado se convierte en héroe nivel 1.</p>`+(nx?`<div class="sx">Siguiente carta</div><div class="uc"><div><span class="m">Costo</span><div class="cost">${chipsCost(nx)}</div></div></div><button class="pri" ${can(nx)?'':'disabled'} onclick="newCard()">Crear carta</button>`:'<div class="note ok">Máximo de cartas</div>'))}
-function newCard(){const n=S.cards,nx=CARDS.cost[n-1];if(n>=CARDS.max||!nx||!can(nx))return;for(const c in nx)S.coins[c]-=nx[c];S.cards++;save();draw();centro()}
+ modal(`<div class="uh"><div class="ib big">${ic('chr',30)}</div><div class="uhi"><h2>Centro de Héroes</h2><span class="lvp"><span class="pips">${pipsN(CARDS.max,n)}</span><b>${n}/${CARDS.max} cartas</b></span><span class="m">Habitantes libres: ${fr}</span></div></div><!--E--><div class="chips"><span class="chip"><span class="gmi" style="color:var(--b)">${ic('cri',14)}</span>${S.inv.cristal} cristales mágicos</span></div><div class="sx">Tus héroes</div><div class="hgrid c2">${h}</div><p class="m hint">Mejora vida y ataque con cristales, o asciende el golpe en el Caldero. Un habitante reclutado se convierte en héroe nivel 1.</p>`+(nx?`<div class="sx">Siguiente carta</div><div class="uc"><div><span class="m">Costo</span><div class="cost">${chipsCost(nx)}</div></div></div><button class="pri" ${can(nx)?'':'disabled'} onclick="newCard()">Crear carta</button>`:'<div class="note ok">Máximo de cartas</div>'))}
+function newCard(){const n=S.cards,nx=CARDS.cost[n-1];if(n>=CARDS.max||!nx||!can(nx))return;spend(nx);S.cards++;save();draw();centro()}
 function recruit(){const ok=()=>S.heroes.length<S.cards&&S.pop-used()>=1;if(!ok())return;
  $('ov').innerHTML=`<div class="sheet"><div class="panel" style="margin:auto;width:340px;max-width:92vw"><h2>Nombre del héroe</h2><input id="hn" maxlength="20" placeholder="Nombre"><p></p><button id="hk">Reclutar</button> <button onclick="centro()">Cancelar</button></div></div>`;
  $('hk').onclick=()=>{const nm=$('hn').value.trim();if(!nm||!ok())return;S.pop--;const h={id:S.id++,n:nm,lv:1,atk:1,hp:6,mhp:6,mp:3,mmp:3};S.heroes.push(h);const i=S.eq.indexOf(null);if(i>=0)S.eq[i]=h.id;save();centro()}}
@@ -987,15 +990,15 @@ function upg(id){const b=S.b.find(x=>x.id==id),l=L(b),nx=LV[b.type][l];if(!nx)re
  b.nl=l+1;b.end=Date.now()+nx.bt;b.d=nx.bt;b.last=b.end;sheetClose();save();draw();tut()}
 $('mb').onclick=()=>{if(S.step==4)S.step=5;const cnt=t=>S.b.filter(b=>b.type==t&&Date.now()>=b.end).length;
  const tiles=['est','sol','fil','als','alf','cam','min','mur','chr'].map(t=>`<div class="mt${cnt(t)?'':' z'}"><span class="mi">${ic(t,22)}</span><b>${cnt(t)}</b><span class="m">${NM[t]}</span></div>`).join('');
- const money=Object.entries(CN).map(([k,v])=>{const c=cap(k),pc=c?Math.min(100,100*S.coins[k]/c):0;return `<div class="mr" style="color:var(--k-${k})"><span class="mi">${ic(v[0],18)}</span><div class="mm"><div class="mh"><span>${v[1]}</span><b>${S.coins[k]}<em> / ${c}</em></b></div><div class="mbar"><i style="width:${pc}%"></i></div></div></div>`}).join('');
+ const money=Object.entries(CN).map(([k,v])=>{const c=cap(k),pc=c?Math.min(100,100*S.coins[k]/c):0;return `<div class="mr" style="color:var(--k-${k})"><span class="mi">${ic(v[0],18)}</span><div class="mm"><div class="mh"><span>${v[1]}</span><b>${Math.floor(S.coins[k])}${k=='diamantino'?'':`<em> / ${c}</em>`}</b></div>${k=='diamantino'?'':`<div class="mbar"><i style="width:${pc}%"></i></div>`}</div></div>`}).join('');
  const dn=(typeof LVS!=='undefined')?LVS.filter(l=>S.done['L'+l.id]).length:0,tl=(typeof LVS!=='undefined')?LVS.length:0;
  $('ov').innerHTML=`<div class="sheet" onclick="if(event.target==this)sheetClose()"><div class="panel side menu">
  <div class="mhd"><span class="mem">${ic('est',28)}</span><div><h1>${S.city}</h1><span class="m">Establecimiento nivel ${E()}</span></div><button class="mx" aria-label="Cerrar" onclick="sheetClose()">✕</button></div>
  <div class="mst"><div onclick="poblacion()" style="cursor:pointer"><span class="mi">${ic('pop',18)}</span><b>${S.pop}</b><span class="m">Habitantes</span></div><div><span class="mi">${ic('her',18)}</span><b>${S.heroes.length}</b><span class="m">Héroes</span></div>${E()>=2&&tl?`<div><span class="mi">${MONI('melee',false,18)}</span><b>${dn}/${tl}</b><span class="m">Niveles</span></div>`:''}</div>
- <div class="sx">Dinero</div>${money}
+ <div class="sx">Dinero</div>${money}<p class="m dnote">1 diamantino = 5 solares, filares o recursos · o 1 piedra / cristal mágico</p><div class="sx">Felicidad</div>${felHTML()}
  <div class="sx">Inventario mágico</div>
- <div class="mg"><div><span class="gm sq"></span><b>${S.inv.piedra}</b><span class="m">Piedras mágicas</span></div><div><span class="gm di"></span><b>${S.inv.cristal}</b><span class="m">Cristales mágicos</span></div><div><b>${S.inv.polvo||0}</b><span class="m">Polvo arcano</span></div><div><b>${S.inv.nucleo||0}</b><span class="m">Núcleos de jefe</span></div></div>
- <div class="sx">Estructuras</div><div class="mgrid">${tiles}</div>
+  <div class="inv"><div style="color:var(--m)"><span class="iv">${ic('pie',22)}</span><span class="it"><b>${S.inv.piedra||0}</b><span class="m">Piedras mágicas</span></span></div><div style="color:var(--b)"><span class="iv">${ic('cri',22)}</span><span class="it"><b>${S.inv.cristal||0}</b><span class="m">Cristales mágicos</span></span></div><div style="color:var(--a)"><span class="iv">${ic('pol',22)}</span><span class="it"><b>${S.inv.polvo||0}</b><span class="m">Polvo arcano</span></span></div><div style="color:var(--r)"><span class="iv">${ic('nuc',22)}</span><span class="it"><b>${S.inv.nucleo||0}</b><span class="m">Núcleos de jefe</span></span></div></div>
+  <div class="sx">Estructuras</div><div class="mgrid">${tiles}</div>
  <div class="mft"><button onclick="save();sheetClose();slots()">Partidas</button><button onclick="sheetClose()">Cerrar</button></div>
  </div></div>`;tut()};
 $('hb').onclick=heroes;
@@ -1063,15 +1066,15 @@ function aventuras(){SCR='adv';const H=lead(),eq=eqH(),dn=LVS.filter(l=>S.done['
  screen('Aventuras',`<div class="adtop"><div>${hero}</div>${prog}</div><div class="sx">Zonas</div>${zoneMap()}<div class="leg"><span>${monSvg(false,16)} Normal</span><span class="b">${monSvg(true,16)} Jefe</span><span><i class="lck sm">✓</i> Completado</span></div><div class="sx">Aventuras clásicas</div><div class="lvl cls">${cl}</div>`)}
 /* ===== Mejoras permanentes con cristales (separadas del nivel y del entrenamiento) ===== */
 const UPMAX={hp:10,atk:5},upc=(h,k)=>k=='hp'?2+2*((h.up||{}).hp||0):5+4*((h.up||{}).atk||0);
-function mejH(){return `<div class="sx">Mejoras con cristales</div><div class="chips"><span class="chip"><i class="gm di"></i>${S.inv.cristal} cristales mágicos</span></div>`+S.heroes.map(h=>`<div class="mh2"><div class="hav sm">${ic('her',18)}</div><div class="mhi"><b>${h.n}</b><div class="chips"><span class="chip">Nv ${h.lv}</span><span class="chip r">HP ${h.mhp}</span><span class="chip a">Atq ${h.atk}</span></div></div><div class="mhb"><button onclick="mej(${h.id})">Mejorar</button><button onclick="cal(${h.id})">Caldero</button></div></div>`).join('')}
+function mejH(){return `<div class="sx">Mejoras con cristales</div><div class="chips"><span class="chip"><span class="gmi" style="color:var(--b)">${ic('cri',14)}</span>${S.inv.cristal} cristales mágicos</span></div>`+S.heroes.map(h=>`<div class="mh2"><div class="hav sm">${ic('her',18)}</div><div class="mhi"><b>${h.n}</b><div class="chips"><span class="chip">Nv ${h.lv}</span><span class="chip r">HP ${h.mhp}</span><span class="chip a">Atq ${h.atk}</span></div></div><div class="mhb"><button onclick="mej(${h.id})">Mejorar</button><button onclick="cal(${h.id})">Caldero</button></div></div>`).join('')}
 function mej(id){SCR=null;const h=S.heroes.find(x=>x.id==id);if(!h){centro();return}const u=h.up||{};
  const rs=['hp','atk'].map(t=>{const c=upc(h,t),n=u[t]||0,mx=n>=UPMAX[t],now=t=='hp'?h.mhp:h.atk;
-  return `<div class="ucard"><div class="uct"><b>${t=='hp'?'Vida máxima':'Ataque'}</b><span class="pips">${pipsN(UPMAX[t],n)}<em>${n}/${UPMAX[t]}</em></span></div><div class="uch"><span class="big">${now}</span>${mx?'':`<span class="ar">→</span><span class="big n">${now+1}</span>`}</div><div class="uf">${mx?'<span class="m">Mejora al máximo</span>':`<span class="cc${S.inv.cristal>=c?'':' no'}" style="color:var(--b)"><i class="gm di"></i><b>${c}</b><em>cristales</em></span>`}<button ${mx||S.inv.cristal<c?'disabled':''} onclick="mejC(${id},'${t}')">${mx?'Máx.':'Mejorar'}</button></div></div>`}).join('');
- modal(`<div class="uh"><div class="hav">${ic('her',26)}</div><div class="uhi"><h2>${h.n}</h2><span class="m">Nivel ${h.lv} · Mejoras permanentes</span></div></div><!--E--><div class="chips"><span class="chip"><i class="gm di"></i>${S.inv.cristal} cristales mágicos</span></div>${rs}<button onclick="centro()">Volver al Centro</button>`)}
+  return `<div class="ucard"><div class="uct"><b>${t=='hp'?'Vida máxima':'Ataque'}</b><span class="pips">${pipsN(UPMAX[t],n)}<em>${n}/${UPMAX[t]}</em></span></div><div class="uch"><span class="big">${now}</span>${mx?'':`<span class="ar">→</span><span class="big n">${now+1}</span>`}</div><div class="uf">${mx?'<span class="m">Mejora al máximo</span>':`<span class="cc${can({cristal:c})?'':' no'}" style="color:var(--b)"><span class="gmi" style="color:var(--b)">${ic('cri',14)}</span><b>${c}</b><em>cristales</em></span>`}<button ${mx||!can({cristal:c})?'disabled':''} onclick="mejC(${id},'${t}')">${mx?'Máx.':'Mejorar'}</button></div></div>`}).join('');
+ modal(`<div class="uh"><div class="hav">${ic('her',26)}</div><div class="uhi"><h2>${h.n}</h2><span class="m">Nivel ${h.lv} · Mejoras permanentes</span></div></div><!--E--><div class="chips"><span class="chip"><span class="gmi" style="color:var(--b)">${ic('cri',14)}</span>${S.inv.cristal} cristales mágicos</span></div>${rs}<button onclick="centro()">Volver al Centro</button>`)}
 function mejC(id,t){const h=S.heroes.find(x=>x.id==id);if(!h)return;const a=t=='hp'?h.mhp:h.atk;
- modal(`<div class="uh"><div class="hav">${ic('her',26)}</div><div class="uhi"><h2>Confirmar mejora</h2><span class="m">${h.n}</span></div></div><!--E--><div class="ucard"><div class="uct"><b>${t=='hp'?'Vida máxima':'Ataque'}</b></div><div class="uch"><span class="big">${a}</span><span class="ar">→</span><span class="big n">${a+1}</span></div><div class="uf"><span class="cc" style="color:var(--b)"><i class="gm di"></i><b>${upc(h,t)}</b><em>de ${S.inv.cristal}</em></span></div></div><button id="mc" class="pri">Confirmar</button><button onclick="mej(${id})">Atrás</button>`);$('mc').onclick=()=>mejDo(id,t)}
-function mejDo(id,t){const h=S.heroes.find(x=>x.id==id);if(!h)return;h.up=h.up||{hp:0,atk:0};const c=upc(h,t);if((h.up[t]||0)>=UPMAX[t]||S.inv.cristal<c)return;
- S.inv.cristal-=c;h.up[t]=(h.up[t]||0)+1;if(t=='hp'){h.mhp++;h.hp++}else h.atk++;save();sparks(innerWidth/2,innerHeight/2,18,'var(--b)');mej(id)}
+ modal(`<div class="uh"><div class="hav">${ic('her',26)}</div><div class="uhi"><h2>Confirmar mejora</h2><span class="m">${h.n}</span></div></div><!--E--><div class="ucard"><div class="uct"><b>${t=='hp'?'Vida máxima':'Ataque'}</b></div><div class="uch"><span class="big">${a}</span><span class="ar">→</span><span class="big n">${a+1}</span></div><div class="uf"><span class="cc" style="color:var(--b)"><span class="gmi" style="color:var(--b)">${ic('cri',14)}</span><b>${upc(h,t)}</b><em>de ${S.inv.cristal}</em></span></div></div><button id="mc" class="pri">Confirmar</button><button onclick="mej(${id})">Atrás</button>`);$('mc').onclick=()=>mejDo(id,t)}
+function mejDo(id,t){const h=S.heroes.find(x=>x.id==id);if(!h)return;h.up=h.up||{hp:0,atk:0};const c=upc(h,t);if((h.up[t]||0)>=UPMAX[t]||!can({cristal:c}))return;
+ spend({cristal:c});h.up[t]=(h.up[t]||0)+1;if(t=='hp'){h.mhp++;h.hp++}else h.atk++;save();sparks(innerWidth/2,innerHeight/2,18,'var(--b)');mej(id)}
 const ADV=[
  {n:'Claro del bosque',d:'Un par de monstruos débiles.',m:[['Babosa',1,2],['Rata',1,2]]},
  {n:'Cueva baja',d:'Tres monstruos pequeños.',m:[['Murciélago',1,2],['Babosa',1,2],['Rata',1,3]]},
@@ -1136,12 +1139,12 @@ function cal(id){SCR=null;const h=S.heroes.find(x=>x.id==id);if(!h){centro();ret
  const sk=g=>`<div class="sk"><b>${g.n}</b><div class="chips"><span class="chip">${g.mp} maná</span><span class="chip a">${g.d} daño</span>${g.ig?`<span class="chip r">ignora ${g.ig} armadura</span>`:''}</div></div>`;
  let b='';
  if(!mx){const [c,rc,so]=CALD.c[r-1],lv=CALD.lv[r-1];
-  const rq=[['Nivel del héroe',h.lv>=lv,`${h.lv}/${lv}`],['Cristales mágicos',S.inv.cristal>=c,`${S.inv.cristal}/${c}`],['Recursos',S.coins.recursos>=rc,`${S.coins.recursos}/${rc}`],['Solares',S.coins.solar>=so,`${S.coins.solar}/${so}`]],ok=rq.every(x=>x[1]);
+  const rq=[['Nivel del héroe',h.lv>=lv,`${h.lv}/${lv}`],['Cristales mágicos',S.inv.cristal>=c||can({cristal:c,recursos:rc,solar:so}),`${S.inv.cristal}/${c}`],['Recursos',S.coins.recursos>=rc||can({cristal:c,recursos:rc,solar:so}),`${S.coins.recursos}/${rc}`],['Solares',S.coins.solar>=so||can({cristal:c,recursos:rc,solar:so}),`${S.coins.solar}/${so}`]],ok=rq.every(x=>x[1]);
   b=`<div class="sx">Siguiente rango</div>${sk(GOLPE[r])}<div class="sx">Requisitos</div><div class="reqs">${rq.map(x=>reqRow(x[0],x[1],x[2])).join('')}</div><button class="pri" ${ok?'':'disabled'} onclick="calDo(${id})">Ascender a rango ${r+1}</button>`}
  modal(`<div class="uh"><div class="ib big">${ic('chr',30)}</div><div class="uhi"><h2>Caldero de Ascensión</h2><span class="lvp"><span class="pips">${pipsN(5,r)}</span><b>Rango ${r}/5</b></span><span class="m">${h.n}</span></div></div><!--E--><div class="sx">Golpe actual</div>${sk(GOLPE[r-1])}${mx?'<div class="note ok">Rango máximo alcanzado</div>':b}<button onclick="centro()">Volver al Centro</button>`)}
 function calDo(id){const h=S.heroes.find(x=>x.id==id);if(!h)return;const r=gr(h);if(r>=5)return;const [c,rc,so]=CALD.c[r-1];
- if(h.lv<CALD.lv[r-1]||S.inv.cristal<c||S.coins.recursos<rc||S.coins.solar<so)return;
- S.inv.cristal-=c;S.coins.recursos-=rc;S.coins.solar-=so;h.sk={...(h.sk||{}),golpe:r+1};save();sparks(innerWidth/2,innerHeight/2,22,'var(--a)');cal(id)}
+ if(h.lv<CALD.lv[r-1]||!can({cristal:c,recursos:rc,solar:so}))return;
+ spend({cristal:c,recursos:rc,solar:so});h.sk={...(h.sk||{}),golpe:r+1};save();sparks(innerWidth/2,innerHeight/2,22,'var(--a)');cal(id)}
 let go1=0;
 async function startBattle(adv){if(go1||!lead())return;go1=1;sheetClose();
  $('ov').innerHTML=`<div class="fx"><div class="fxt">AVENTURÁNDOSE…</div><div class="fxs">${adv?adv.n:'Ataque a la aldea'}</div></div>`;sparks(innerWidth/2,innerHeight/2,14,'var(--a)');
@@ -1249,7 +1252,7 @@ const SKL={corte:{n:'Corte preciso',mp:1,k:'dmg',v:3,d:'Ataque físico fiable: 3
 const TOMO={filo:{n:'Tomo del Filo',s:'corte',r:'c',c:{solar:60},q:0,buy:1},bastion:{n:'Tomo del Bastión',s:'guardia',r:'c',c:{solar:60},q:0,buy:1},savia:{n:'Tomo de la Savia',s:'regen',r:'c',c:{solar:80},q:0,buy:1},brasas:{n:'Tomo de las Brasas',s:'bola',r:'u',c:{solar:150,filar:20},q:3,buy:1},escarcha:{n:'Tomo de la Escarcha',s:'helada',r:'u',c:{solar:150,filar:20},q:3,buy:1},veneno:{n:'Tomo del Veneno',s:'psn',r:'u',c:{solar:140,filar:20},q:3,buy:1},vendaval:{n:'Tomo del Vendaval',s:'eva',r:'r',c:{solar:300,filar:60},q:8,buy:1},luz:{n:'Tomo de la Luz Solar',s:'heal',r:'r',c:{solar:300,filar:60},q:8,buy:1},cadenas:{n:'Tomo de las Cadenas',s:'bind',r:'r',buy:0},eco:{n:'Tomo del Eco Arcano',s:'echo',r:'e',buy:0},tiempo:{n:'Tomo del Tiempo',s:'haste',r:'l',buy:0},fenix:{n:'Tomo del Fénix',s:'phx',r:'l',buy:0}};
 const BT={5:'eco',10:'cadenas',15:'tiempo',20:'fenix'},BOOK='<svg class="ic" width="26" height="26" viewBox="0 0 24 24"><path d="M5 4h11a3 3 0 013 3v13H8a3 3 0 01-3-3zM8 4v13M8 20h11"/></svg>';
 const TS=()=>{S.tomos=S.tomos||{};S.frag=S.frag||0;return S.tomos},dnL=()=>LVS.filter(l=>S.done['L'+l.id]).length;
-const pay=c=>{if(!can(c))return false;for(const k in c)S.coins[k]-=c[k];return true};
+const pay=c=>{if(!can(c))return false;spend(c);return true};
 function bossTome(){const a=B.adv;if(!a||!a.lv||a.lv%5||S.done['T'+a.lv])return;S.done['T'+a.lv]=1;const id=BT[a.lv];if(id){TS()[id]=(TS()[id]||0)+1;B.log.push('¡El jefe suelta el '+TOMO[id].n+'!')}else{TS();S.frag+=3;B.log.push('El jefe suelta 3 fragmentos arcanos.')}save()}
 function bib(tab){tab=tab||'shelf';const T=TS(),dn=dnL(),own=Object.keys(T).filter(k=>T[k]>0);
  const card=(id,x)=>{const t=TOMO[id],r=RAR[t.r],k=SKL[t.s];return `<div class="tm" style="--rc:${r[1]}"><div class="tms">${BOOK}</div><div class="tmb"><span class="tmr">${r[0]}</span><b>${t.n}</b><span class="m">${k.n} · ${k.mp} maná${k.cd?' · recarga '+k.cd:''}</span><span class="m">${k.d}</span>${x}</div></div>`};
@@ -1363,7 +1366,7 @@ const MULC=[1,1.8,3.2,5.5],MULT=[1,1.7,2.8,4.5];
 const scl=(c,m)=>Object.fromEntries(Object.entries(c).map(([k,v])=>[k,Math.round(v*m)]));
 const have=k=>S.coins[k]!==undefined?S.coins[k]:((S.inv&&S.inv[k])||0);
 const INV={cristal:['Cristales','var(--b)'],polvo:['Polvo arcano','var(--a)'],nucleo:['Núcleos','var(--r)']};
-function spend(c){for(const k in c){if(S.coins[k]!==undefined)S.coins[k]-=c[k];else S.inv[k]=(S.inv[k]||0)-c[k]}}
+function spend(c){for(const k in c){const v=c[k],isC=S.coins[k]!==undefined,h=have(k),set=x=>{if(isC)S.coins[k]=x;else S.inv[k]=x};if(h>=v||!DQ[k]){set(h-v);continue}const d=Math.ceil((v-h)/DQ[k]);S.coins.diamantino=(S.coins.diamantino||0)-d;set(d*DQ[k]-(v-h))}}
 /* generador: niveles 2..5 de un edificio a partir de un coste/tiempo base (multiplicadores del documento) */
 function gen(t,base,bt,ex,ef,from=0){for(let k=from;k<4;k++)LV[t][k+1]={cost:{...scl(base,MULC[k]),...(ex[k]||{})},bt:Math.round(bt*MULT[k]),...(ef[k]||{})}}
 gen('sol',{filar:15},15000,[0,0,{recursos:10},{recursos:25,solar:120}],[0,0,{a:4,t:4000,cap:8},{a:5,t:3500,cap:10}],2);
@@ -1473,6 +1476,13 @@ function moodTick(){if(!S||$('game').classList.contains('hide'))return;const t=m
  const nm=moodName(S.mv);if(S.mn&&S.mn!=nm){const top=t.c.slice().sort((a,b)=>Math.abs(b[1])-Math.abs(a[1]))[0];S.mlog=S.mlog||[];S.mlog.unshift(`Ánimo: ${S.mn} → ${nm}${top?' ('+top[0]+')':''}`);S.mlog.length=Math.min(S.mlog.length,8)}
  S.mn=nm}
 setInterval(moodTick,5000);
+/* ===== Felicidad de los aldeanos: barra de 100; al llenarse da +2 diamantino y se reinicia ===== */
+const FEL={max:100,reward:2,k:0.0111,capDt:1800000}; /* k: ritmo (aldeanos x ánimo). capDt: máx. tiempo sin conexión que cuenta */
+function felTick(){if(!S||$('game').classList.contains('hide'))return;const n=Date.now(),dt=Math.max(0,Math.min(n-(S.felT||n),FEL.capDt))/1000;S.felT=n;
+ const mv=S.mv==null?50:S.mv;S.fel=(S.fel||0)+dt*(S.pop||0)*(mv/100)*FEL.k;let g=0;while(S.fel>=FEL.max){S.fel-=FEL.max;g+=FEL.reward}
+ if(g){S.coins.diamantino=(S.coins.diamantino||0)+g;save();coins();try{fl('+'+g+' diamantino',$('cv-diamantino'),'var(--k-diamantino)')}catch(e){}notice('¡Felicidad al máximo!','Los aldeanos están felices: recibes +'+g+' diamantino.')}}
+setInterval(felTick,5000);
+const felHTML=()=>{const v=Math.max(0,Math.min(100,S.fel||0));return `<div class="fel"><div class="fh"><span class="iv">${ic('fel',20)}</span><div class="mm"><div class="mh"><span>Felicidad de los aldeanos</span><b>${Math.floor(v)}<em> / 100</em></b></div><div class="mbar"><i style="width:${v}%"></i></div></div></div><span class="m fn">Al llegar a 100 se reinicia y recibes +${FEL.reward} <span class="fd">${ic('cd',12)}diamantino</span>.</span></div>`};
 function festival(){const n=Date.now();if((S.evt&&S.evt.until>n)||(S.evtcd&&S.evtcd>n)||!pay({solar:120}))return;
  S.evt={n:'Festival local',d:10,until:n+300000};S.evtcd=n+900000;save();draw();notice('Festival local','Los habitantes celebran: +10 de ánimo durante 5 minutos.');poblacion()}
 function poblacion(){const mv=S.mv==null?50:S.mv,t=moodCalc(),tot=S.pop+S.heroes.length,cp=popCap(),n=Date.now(),
@@ -1481,10 +1491,10 @@ function poblacion(){const mv=S.mv==null?50:S.mv,t=moodCalc(),tot=S.pop+S.heroes
  evOn=S.evt&&S.evt.until>n,cd=S.evtcd&&S.evtcd>n;
  modal(`<div class="uh"><div class="ib big">${ic('pop',30)}</div><div class="uhi"><h2>Población</h2><span class="m">${S.pop} habitantes · ${S.heroes.length} héroes · alojamiento ${tot}/${cp}</span></div></div><!--E-->
  <div class="mst"><div><b>${S.pop-used()}</b><span class="m">Libres</span></div><div><b>${work()}</b><span class="m">Trabajando</span></div><div><b>${rest()}</b><span class="m">Descansando</span></div></div>
- <div class="sx">Ánimo de la ciudad</div><div class="ucard"><div class="uct"><b>${moodName(mv)}</b><span class="m">${Math.round(mv)} / 100</span></div><div class="pb"><i style="width:${mv}%"></i></div><span class="m">${eft}</span></div>
+ <div class="sx">Ánimo de la ciudad</div><div class="ucard"><div class="uct"><b>${moodName(mv)}</b><span class="m">${Math.round(mv)} / 100</span></div><div class="pb"><i style="width:${mv}%"></i></div><span class="m">${eft}</span></div><div class="sx">Felicidad</div>${felHTML()}
  <div class="sx">Distribución</div><div class="reqs">${MOODS.map((m,i)=>`<div class="req ok"><i style="background:var(--m)">${dist[i]}</i><span>${m[1]}</span><em>${S.pop?Math.round(100*dist[i]/S.pop):0}%</em></div>`).join('')}</div>
  <div class="sx">Causas actuales</div><div class="reqs">${t.c.length?t.c.map(x=>`<div class="req ${x[1]>0?'ok':''}"><i>${x[1]>0?'▲':'▼'}</i><span>${x[0]}</span><em>${x[1]>0?'+':''}${x[1]}</em></div>`).join(''):'<div class="note">Sin factores destacados: ánimo base 50.</div>'}</div>
- <div class="sx">Eventos</div>${evOn?`<div class="note ok">${S.evt.n} activo (${mmss(S.evt.until-n)})</div>`:`<button class="pri" ${cd||S.coins.solar<120?'disabled':''} onclick="festival()">Organizar festival (120 solares)</button><p class="m hint">${cd?'Disponible de nuevo en '+mmss(S.evtcd-n):'+10 de ánimo durante 5 minutos. Enfría 15 minutos.'}</p>`}
+ <div class="sx">Eventos</div>${evOn?`<div class="note ok">${S.evt.n} activo (${mmss(S.evt.until-n)})</div>`:`<button class="pri" ${cd||!can({solar:120})?'disabled':''} onclick="festival()">Organizar festival (120 solares)</button><p class="m hint">${cd?'Disponible de nuevo en '+mmss(S.evtcd-n):'+10 de ánimo durante 5 minutos. Enfría 15 minutos.'}</p>`}
  ${(S.mlog&&S.mlog.length)?`<div class="sx">Historial</div><div class="reqs">${S.mlog.map(x=>`<div class="req ok"><span>${x}</span></div>`).join('')}</div>`:''}`)}
 {const _b=banner;banner=function(t){if(S){if(t=='DERROTA')S.lastDefeat=Date.now();else if(t=='VICTORIA')S.lastWin=Date.now()}_b(t)}}
 
@@ -1548,7 +1558,7 @@ function ivUI(){const iv=S.iv;if(!iv)return;const d=ivDef(iv),a=ivAtk(iv),left=i
  <div class="sx">Defensa actual: ${d.t} / ${a}</div><div class="pb"><i style="width:${Math.min(100,100*d.t/a)}%"></i></div>
  <div class="reqs">${reqRow('Muros ('+S.b.filter(b=>b.type=='mur'&&Date.now()>=b.end).length+' × '+IVC.wall+')',d.w>0,'+'+d.w)}${reqRow('Milicia (habitantes libres, máx. 6)',d.m>0,'+'+d.m)}${reqRow('Héroes del equipo',iv.hero&&d.hs>0,iv.hero?'+'+d.hs:'no asignados')}${reqRow('Campo Heroico (defensores entrenados)',(d.c||0)>0,'+'+(d.c||0))}${reqRow('Refuerzos ('+(iv.boost||0)+'/'+IVC.boostMax+')',(iv.boost||0)>0,'+'+d.bo)}</div>
  <p class="m hint">${d.t>=a?'Con esta defensa la ciudad resistiría.':'Con esta defensa la ciudad perdería parte de sus reservas (sin destruir nada).'}</p>
- <div class="pmf two"><button class="pri" ${bm||left<=0||S.coins.solar<IVC.boostCost?'disabled':''} onclick="ivBoost()">Reforzar (${IVC.boostCost} solares, +${IVC.boostVal})</button><button ${left<=0?'disabled':''} onclick="ivHeroTog()">${iv.hero?'Retirar héroes':'Asignar héroes'}</button></div>`);
+ <div class="pmf two"><button class="pri" ${bm||left<=0||!can({solar:IVC.boostCost})?'disabled':''} onclick="ivBoost()">Reforzar (${IVC.boostCost} solares, +${IVC.boostVal})</button><button ${left<=0?'disabled':''} onclick="ivHeroTog()">${iv.hero?'Retirar héroes':'Asignar héroes'}</button></div>`);
  clearInterval(window.__ivi);window.__ivi=setInterval(()=>{const e=$('ivt');if(!e||!S||!S.iv){clearInterval(window.__ivi);return}e.textContent=mmss(S.iv.at-Date.now())},500)}
 function ivTick(){if(!S||$('game').classList.contains('hide'))return;
  if(S.iv&&Date.now()>=S.iv.at)ivResolve();else ivPlan();
@@ -2009,10 +2019,10 @@ const lvAtk=h=>Math.floor(Math.max(0,h.lv-10)/2),lvPow=h=>Math.floor(Math.max(0,
  if(o&&u){let e=skRank(u.h,a)>1?skEff(o,skRank(u.h,a)):o;if(['dmg','mag','slow','psn'].includes(o.k)&&lvPow(u.h)>0)e={...e,v:(e.v||0)+lvPow(u.h)};if(e!==o)SKL[a]=e}
  try{r=_sa(a)}finally{SKL[a]=o}return r}}
 function skUp(hid,id){const h=S.heroes.find(x=>x.id==hid);if(!h||!SKL[id]||!knows(h,id))return;const r=skRank(h,id);if(r>=5)return;
- const [c,rc,so]=CALD.c[r-1],lv=3*r;if(h.lv<lv||S.inv.cristal<c||S.coins.recursos<rc||S.coins.solar<so){notice('Requisitos no cumplidos',`Necesitas héroe nivel ${lv}, ${c} cristales, ${rc} recursos y ${so} solares.`);return}
+ const [c,rc,so]=CALD.c[r-1],lv=3*r;if(h.lv<lv||!can({cristal:c,recursos:rc,solar:so})){notice('Requisitos no cumplidos',`Necesitas héroe nivel ${lv}, ${c} cristales, ${rc} recursos y ${so} solares.`);return}
  spend({cristal:c,recursos:rc,solar:so});h.sk.rk=h.sk.rk||{};h.sk.rk[id]=r+1;save();draw();sparks(innerWidth/2,innerHeight/2,22,'var(--a)');cal(hid)}
 {const _c=cal;cal=function(id){_c(id);try{const h=S.heroes.find(x=>x.id==id);if(!h)return;eqNorm(h);const l=h.sk.k.filter(x=>SKL[x]);if(!l.length)return;
- const rows=l.map(sid=>{const r=skRank(h,sid),mx=r>=5,[c,rc,so]=mx?[0,0,0]:CALD.c[r-1],lv=3*r,ok=!mx&&h.lv>=lv&&S.inv.cristal>=c&&S.coins.recursos>=rc&&S.coins.solar>=so;
+ const rows=l.map(sid=>{const r=skRank(h,sid),mx=r>=5,[c,rc,so]=mx?[0,0,0]:CALD.c[r-1],lv=3*r,ok=!mx&&h.lv>=lv&&can({cristal:c,recursos:rc,solar:so});
   return `<div class="sk"><b>${SKL[sid].n}</b> <span class="m">rango ${r}/5</span><div class="chips"><span class="chip a">${skEffTx(sid,r)}</span>${mx?'':`<span class="chip">sig.: ${skEffTx(sid,r+1)}</span>`}</div>${mx?'<div class="note ok">Rango máximo</div>':`<span class="m">Requiere héroe nv ${lv} · ${c} cristales · ${rc} recursos · ${so} solares</span><button ${ok?'':'disabled'} onclick="skUp(${id},'${sid}')">Ascender a rango ${r+1}</button>`}</div>`}).join('');
  const bt=[...$('ov').querySelectorAll('button')].find(b=>/centro\(\)/.test(b.getAttribute('onclick')||''));const html=`<div class="sx">Habilidades aprendidas</div>${rows}`;
  if(bt)bt.insertAdjacentHTML('beforebegin',html)}catch(e){console.error(e)}}}
@@ -3378,7 +3388,7 @@ function draw(){const o=ov(),T=(C()&&C().team&&C().team())||[];let h='<div class
  o.innerHTML=h+'</div>'}
 function viewH(){const v=vw.vista;if(!v)return `<p class="m">${esc(vw.nombre)} todavía no tiene una partida para mostrar.</p><button onclick="pvpMenu('amigos')">Volver</button>`;
  const g={};v.b.forEach(b=>g[b[1]+','+b[2]]=b[0]);let c='';for(let y=0;y<15;y++)for(let x=0;x<15;x++){const t=g[x+','+y];c+=`<i>${t&&I[t]?ic(t,14):''}</i>`}
- return `<div class="accn">${esc(vw.nombre)}</div><div class="m">${esc(v.city)} · población ${v.pop} · establecimiento nv. ${v.est}</div><div class="mg">${c}</div><div class="subh">Héroes</div>`+(v.h.length?v.h.map(x=>`<div class="fr"><div class="gr"><b>${esc(x[0])}</b> <span class="m">nv ${x[1]} · ATQ ${x[2]} · HP ${x[3]}</span></div></div>`).join(''):'<p class="m">Sin héroes.</p>')+'<p class="m">Solo lectura.</p><button onclick="pvpMenu(\'amigos\')">Volver</button>'}
+ return `<div class="accn">${esc(vw.nombre)}</div><div class="m">${esc(v.city)} · población ${v.pop} · establecimiento nv. ${v.est}</div><div class="mgm">${c}</div><div class="subh">Héroes</div>`+(v.h.length?v.h.map(x=>`<div class="fr"><div class="gr"><b>${esc(x[0])}</b> <span class="m">nv ${x[1]} · ATQ ${x[2]} · HP ${x[3]}</span></div></div>`).join(''):'<p class="m">Sin héroes.</p>')+'<p class="m">Solo lectura.</p><button onclick="pvpMenu(\'amigos\')">Volver</button>'}
 window.pvpView=async u=>{msg='';vw={nombre:'…',vista:null};draw();try{const p=await C().viewOf(u);vw=p?{nombre:p.nombre,vista:p.vista}:{nombre:'Jugador',vista:null}}catch(e){vw={nombre:'Jugador',vista:null}}draw()};
 window.pvpGo=async()=>{try{busy=true;draw();await C().startSearch()}catch(e){busy=false;msg=e.message;draw()}};
 window.pvpStop=()=>{busy=false;C().stopSearch();draw()};
@@ -3603,4 +3613,21 @@ const flush=()=>{for(const n of Object.keys(timers))sendNow(+n)};
 addEventListener('pagehide',flush);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')flush()});
 refresh();
 </script>
+
+<style id="ui-iconos-v2">
+svg.ci{display:block;flex:none}.gmi{display:inline-flex;align-items:center;flex:none}
+#mb{width:40px;height:40px;padding:0!important;display:flex;align-items:center;justify-content:center;border:0;border-radius:12px;background:color-mix(in srgb,var(--t) 4%,transparent);box-shadow:inset 0 0 0 1px var(--l);color:var(--a)}
+#mb:hover:not(:disabled){background:color-mix(in srgb,var(--a) 16%,transparent);color:var(--a);box-shadow:inset 0 0 0 1px var(--a)}
+#mb svg{width:24px!important;height:24px!important;display:block}
+.iv{flex:none;width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:10px;border:1px solid currentColor;background:color-mix(in srgb,currentColor 12%,transparent)}
+.inv{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.inv>div{display:flex;align-items:center;gap:10px;min-width:0;padding:10px 12px;border:1px solid var(--l);border-radius:12px;background:color-mix(in srgb,var(--t) 3%,transparent)}
+.inv .it{min-width:0;display:flex;flex-direction:column;gap:1px}.inv b{font-size:17px;line-height:1.1;color:var(--t)}.inv .m{font-size:10px;line-height:1.2;letter-spacing:.03em}
+.fel{display:flex;flex-direction:column;gap:8px;padding:12px;border:1px solid var(--l);border-radius:12px;background:color-mix(in srgb,var(--t) 3%,transparent);color:var(--r)}
+.fel .fh{display:flex;align-items:center;gap:10px}.fel .mm{flex:1;min-width:0}.fel .fn{font-size:11px;line-height:1.35;color:var(--m)}
+.fel .fd{display:inline-flex;align-items:center;gap:3px;vertical-align:-2px;color:var(--k-diamantino);font-weight:600}
+.dnote{font-size:11px;margin:2px 0 0;line-height:1.35}
+.cv .ico{width:20px!important}.cv .ico svg{width:17px!important;height:17px!important}
+.cdx{display:inline-flex;align-items:center;gap:2px;margin-left:4px;font-size:10px;color:var(--k-diamantino)}
+</style>
 </body></html>
