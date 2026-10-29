@@ -638,6 +638,8 @@ body.onscr #game *{animation:none!important}
 .pcs{display:flex;gap:6px;margin:6px 0}.pvl{min-height:38px;text-align:center;margin:10px 0;font-size:12px}
 .mg{display:grid;grid-template-columns:repeat(15,18px);grid-auto-rows:18px;border-left:1px solid var(--l);border-top:1px solid var(--l);width:max-content;margin:8px auto;background:var(--s)}
 .mg i{border-right:1px solid var(--l);border-bottom:1px solid var(--l);display:flex;align-items:center;justify-content:center;color:var(--a)}
+#nav{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr)}#nav button svg.si{width:30px;height:30px;fill:currentColor;stroke:none;display:block}#nav button,#nav #n4{gap:0;padding:0;align-items:center;justify-content:center;min-height:62px}#nav #n4{border:0;background:rgba(255,255,255,.035);color:var(--t);box-shadow:inset 0 0 0 1px var(--l);cursor:pointer}#nav #n4 svg{color:var(--a)}#nav #n4:hover{background:rgba(233,152,86,.12);box-shadow:inset 0 0 0 1px var(--a)}#nav #n2 svg.si{color:#1A1836}@media(min-width:900px){#nav button svg.si{width:36px;height:36px}#nav button,#nav #n4{min-height:76px}}
+#view{touch-action:pan-x pan-y}#grid{transform-origin:0 0}
 </style></head><body>
 <div class="ld" id="ld"><div class="ldstage"><svg class="ldring" viewBox="0 0 112 112" aria-hidden="true"><circle class="tr" cx="56" cy="56" r="44"/><circle class="w" cx="56" cy="56" r="44" pathLength="100" transform="rotate(-90 56 56)"/><circle class="p" cx="56" cy="56" r="44" pathLength="100" transform="rotate(-90 56 56)"/><path class="c" pathLength="100" transform="translate(-1.14 3.63)" d="M40 67H72A9 9 0 0 0 73 49A13 13 0 0 0 48 46A10 10 0 0 0 40 67"/></svg><div class="ldtt">CIUDAD</div><div class="ldsub">Forja tu leyenda</div><div class="ldbar"><i id="ldf"></i></div><div class="ldm" id="ldm">Iniciando…</div></div></div></div></div>
 <section id="slots"></section>
@@ -647,11 +649,42 @@ body.onscr #game *{animation:none!important}
   <div class="city" id="cn"></div><button id="hb" class="hide">Héroes</button><div class="coins" id="cc"></div>
  </header>
  <div id="view"><div id="grid"></div></div>
- <div class="zm"><button onclick="zoom(.25)" aria-label="Acercar">+</button><button onclick="zoom(-.25)" aria-label="Alejar">&minus;</button></div>
- <div id="bar"><p id="tt"></p><button id="ta" class="hide"></button></div>
+  <div id="bar"><p id="tt"></p><button id="ta" class="hide"></button></div>
  <div id="nav" class="hide"></div>
 </section>
 <div id="ov"></div>
+<script>
+/* ===== ICONOS DE MONSTRUOS v2: estilo plano moderno (insignia hexagonal + glifo sólido) ===== */
+(function(){
+const COL={melee:'#e8894a',tank:'#6fa0e0',ranged:'#e0bb4c',assassin:'#b673e0',flyer:'#4cc6d6',poison:'#6fc864',healer:'#ec6f9f',summoner:'#8f82f0',controller:'#41bfa5'};
+const BOSS='#f0605a',GOLD='#f2c14e',CUT='style="fill:var(--s,#201f1e)"',CUTS='style="stroke:var(--s,#201f1e);fill:none"';
+const claw=dx=>`<path d="M${15+dx} 15C${22+dx} 23 ${26+dx} 34 ${25+dx} 49C${18+dx} 41 ${14+dx} 30 ${15+dx} 15Z"/>`;
+const G={
+ melee:()=>claw(0)+claw(10)+claw(20),
+ tank:()=>`<path d="M32 10 49 17V32C49 42 41 49 32 54 23 49 15 42 15 32V17Z"/><path d="M32 19V45M23 28H41" ${CUTS} stroke-width="3.4" stroke-linecap="round"/>`,
+ ranged:()=>`<path d="M25 13C11 25 11 39 25 51" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round"/><path d="M25 13V51M17 32H46" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path d="M53 32 42 25V39Z"/><path d="M17 32 13 27M17 32 13 37" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>`,
+ assassin:()=>`<path d="M27 21H37L32 54Z"/><path d="M22 17H42V22H22Z"/><path d="M29.5 8H34.5V17H29.5Z"/><circle cx="32" cy="7" r="3.2"/><path d="M32 27V42" ${CUTS} stroke-width="2" stroke-linecap="round"/>`,
+ flyer:()=>{const w='<path d="M31 40C29 28 21 21 9 21 13 26 13 31 15 37 18 35 22 36 24 41 27 38 29 40 31 40Z"/>';return w+`<g transform="translate(64 0) scale(-1 1)">${w}</g><ellipse cx="32" cy="36" rx="4" ry="9"/><path d="M28.5 28 27 20 32 25 37 20 35.5 28Z"/>`},
+ poison:()=>`<path d="M32 11C40 23 47 30 47 39A15 15 0 0 1 17 39C17 30 24 23 32 11Z"/><circle cx="26" cy="41" r="3.4" ${CUT}/><circle cx="36" cy="36" r="2.2" ${CUT}/><circle cx="35" cy="45" r="1.6" ${CUT}/>`,
+ healer:()=>`<path d="M26 13H38V26H51V38H38V51H26V38H13V26H26Z"/><path d="M32 22V42M22 32H42" ${CUTS} stroke-width="2.4" stroke-linecap="round"/>`,
+ summoner:()=>`<circle cx="32" cy="32" r="19" fill="none" stroke="currentColor" stroke-width="3" stroke-dasharray="5 4"/><path d="M32 16 36 28 48 32 36 36 32 48 28 36 16 32 28 28Z"/><circle cx="32" cy="10" r="2.6"/><circle cx="32" cy="54" r="2.6"/>`,
+ controller:()=>`<path d="M7 32C16 18 48 18 57 32 48 46 16 46 7 32Z"/><circle cx="32" cy="32" r="9" ${CUT}/><ellipse cx="32" cy="32" rx="3" ry="7"/>`
+};
+const HEX='M32 4 57 18V46L32 60 7 46V18Z';
+window.MONI=function(cat,boss,z,elite){
+ cat=G[cat]?cat:'melee';z=z||24;const c=boss?BOSS:COL[cat];
+ let o=`<svg class="mons mi" viewBox="0 0 64 64" width="${z}" height="${z}" aria-hidden="true" style="color:${c};overflow:visible"><path d="${HEX}" fill="${c}" fill-opacity="${boss?.26:.16}" stroke="${c}" stroke-width="${boss?3.2:2.4}" stroke-linejoin="round"/>`;
+ if(boss)o+=`<path d="M32 9 52 20.5V43.5L32 55 12 43.5V20.5Z" fill="none" stroke="${c}" stroke-opacity=".55" stroke-width="1.2" stroke-linejoin="round"/><path d="M14 17 6 3 24 11ZM50 17 58 3 40 11Z" fill="${c}"/><path d="M22 7 25 0 29 5 32-2 35 5 39 0 42 7Z" fill="${GOLD}" stroke="${GOLD}" stroke-width="1" stroke-linejoin="round"/>`;
+ o+=`<g fill="${c}" transform="translate(32 33) scale(.84) translate(-32 -32)">${G[cat]()}</g>`;
+ if(elite)o+=`<path d="M52 44 57 50 52 56 47 50Z" fill="${GOLD}" stroke="var(--s,#201f1e)" stroke-width="1.4"/>`;
+ return o+'</svg>'};
+/* categoría del monstruo de un nivel (para fichas y mapa) */
+window.lvCat=function(l){try{const n=(MN[l.m[l.m.length-1]]||[])[0]||'';return MCAT[n]||MCAT[n.replace(/^(Élite|Jefe) · /,'')]||'melee'}catch(e){return'melee'}};
+/* icono dentro del combate: Yloka usa su diseño propio; jefes y élites se distinguen */
+window.monIc=function(m,i,z){try{if(m.n=='Yloka')return window.YSVG.replace('width="72" height="72"','width="'+z+'" height="'+z+'"');
+ const boss=!!(SQ&&SQ.adv&&SQ.adv.boss&&i==SQ.m.length-1);return MONI(sqCat(m),boss||/^Jefe · /.test(m.n),z,/^Élite · /.test(m.n))}catch(e){return MONI('melee',false,z)}};
+})();
+</script>
 <script>
 const I={
 est:'<path d="M3 21V10l9-6 9 6v11M9 21v-6h6v6M3 10h18"/>',
@@ -669,6 +702,7 @@ mur:'<path d="M3 6h18v12H3zM3 12h18M9 6v6M15 12v6M6 12v6"/>',
 cs:'<circle cx="12" cy="12" r="8"/><path d="M12 8v8M8 12h8"/>',cf:'<circle cx="12" cy="12" r="8"/><path d="M9 8v8M9 8h6M9 12h4"/>',
 cr:'<path d="M4 8l8-4 8 4v8l-8 4-8-4z"/>',cd:'<path d="M12 3l8 7-8 11-8-11z"/>'};
 const ic=(k,s=18)=>window.STN&&STN[k]?STN[k](s):`<svg class="ic" width="${s}" height="${s}" viewBox="0 0 24 24">${I[k]}</svg>`;
+const SI={"tnd":"<path fill-rule=\"evenodd\" d=\"M12 3.4l10 15.2v2.9H2V18.6zM12 12.2L8.7 21.5h6.6z\"/><path d=\"M12.7.8l4 1.5-4 1.5z\"/><path d=\"M11.4.8h1.3v3.6h-1.3z\"/>","her": "<path fill-rule=\"evenodd\" d=\"M12 3.2c-3.2 0-5.4 2.3-5.4 5.4v5.4c0 2.5 1.3 4.4 3.3 5.8l2.1 1.5 2.1-1.5c2-1.4 3.3-3.3 3.3-5.8V8.6c0-3.1-2.2-5.4-5.4-5.4zM8.2 9.4h7.6v1.8H8.2zM11.1 12.6h1.8v5.2h-1.8z\"/><path d=\"M5.2 6.6L1.6 5.6c.1 2.3 1 3.9 2.7 4.9-1.1.1-2 .6-2.7 1.5 1.2.4 2.3.4 3.3 0-.5.7-.7 1.5-.6 2.4 1.1-.4 2-1.1 2.5-2z\"/><path d=\"M18.8 6.6l3.6-1c-.1 2.3-1 3.9-2.7 4.9 1.1.1 2 .6 2.7 1.5-1.2.4-2.3.4-3.3 0 .5.7.7 1.5.6 2.4-1.1-.4-2-1.1-2.5-2z\"/>", "tie": "<path d=\"M8.6 2.6c1 .9 2.2.9 3.4 0 1.2.9 2.4.9 3.4 0l-1 3.6H9.6z\"/><path fill-rule=\"evenodd\" d=\"M9 7.6h6c2.9 2.4 4.6 4.9 4.6 7.7 0 3.5-2.6 5.7-7.6 5.7s-7.6-2.2-7.6-5.7c0-2.8 1.7-5.3 4.6-7.7zM12 12.6a2.7 2.7 0 100 5.4 2.7 2.7 0 000-5.4z\"/><circle cx=\"12\" cy=\"15.3\" r=\"1\"/>", "esp": "<g transform=\"translate(0 .6) rotate(45 12 11.4)\"><path fill-rule=\"evenodd\" d=\"M12 .8l1.6 2.4V13h-3.2V3.2zM11.7 4.6h.6v6.2h-.6z\"/><path d=\"M7.4 13.8h9.2v1.8H7.4zM11 15.6h2v3.4h-2z\"/><circle cx=\"12\" cy=\"20.6\" r=\"1.4\"/></g><g transform=\"translate(0 .6) rotate(-45 12 11.4)\"><path fill-rule=\"evenodd\" d=\"M12 .8l1.6 2.4V13h-3.2V3.2zM11.7 4.6h.6v6.2h-.6z\"/><path d=\"M7.4 13.8h9.2v1.8H7.4zM11 15.6h2v3.4h-2z\"/><circle cx=\"12\" cy=\"20.6\" r=\"1.4\"/></g>", "bib": "<path fill-rule=\"evenodd\" d=\"M2.4 6.4C2.4 5.6 3 5 3.8 5h2.7c.8 0 1.4.6 1.4 1.4V20H2.4zM3.7 8.2h2.9v1.3H3.7zM3.7 15.8h2.9v1.1H3.7z\"/><path fill-rule=\"evenodd\" d=\"M8.9 8.4C8.9 7.6 9.5 7 10.3 7h1.6c.8 0 1.4.6 1.4 1.4V20H8.9zM10.1 10.2h2v1.3h-2z\"/><g transform=\"translate(1 2.6) scale(.92)\"><path d=\"M16.6 2.6h4.4v1.5h-4.4z\"/><path fill-rule=\"evenodd\" d=\"M17.4 5.2h2.8v4.5l2.7 5.5c.9 1.9-.2 4.3-2.4 4.3h-3.4c-2.2 0-3.3-2.4-2.4-4.3l2.7-5.5zM16.9 14.8h3.7v1.2h-3.7z\"/></g><path d=\"M2 20.9h20v1.4H2z\"/>"},ics=(k,s=30)=>`<svg class="si" width="${s}" height="${s}" viewBox="0 0 24 24" aria-hidden="true">${SI[k]}</svg>`;
 I.tie='<path d="M4 8h16l-1 12H5zM8 8a4 4 0 018 0"/>';I.adv='<path d="M5 19L19 5M14 5h5v5M4 20l2-2"/>';
 {const D=(p,x='')=>`<path d="${p}" fill="currentColor" fill-opacity=".22"/><path d="${p}"/>${x}`;
 Object.assign(I,{
@@ -873,8 +907,8 @@ function tut(){
  else if(S.step>=10){bar=false}
  else{const t=T[S.step]||T[9];k=t[0];x=t[1];if(t[2])f=[t[2],t[3]]}
  $('bar').classList.toggle('hide',!bar);$('game').classList.toggle('nb',!bar);
- {const nv=$('nav');if(!nv._i){nv._i=1;nv.innerHTML=`<button id="n1" onclick="heroes()">${ic('her',22)} Héroes</button><button id="n3" onclick="shop()">${ic('tie',22)} Tienda</button><button id="n2" onclick="aventuras()">${ic('adv',22)} Aventuras</button><div id="n4" aria-hidden="true"></div>`}
-  $('n1').classList.toggle('hide',!S.hu&&!ADM);$('n2').classList.toggle('hide',E()<2&&!ADM);$('n3').classList.toggle('hide',S.step<3);nv.classList.toggle('hide',!(S.hu||E()>=2||S.step>=3||ADM))}
+ {const nv=$('nav');if(!nv._i){nv._i=1;nv.innerHTML=`<button id="n1" onclick="heroes()" aria-label="Héroes" title="Héroes">${ics('her')}</button><button id="n3" onclick="shop()" aria-label="Tienda" title="Tienda">${ics('tie')}</button><button id="n2" onclick="aventuras()" aria-label="Aventuras" title="Aventuras">${ics('tnd')}</button><button id="n4" onclick="bib()" aria-label="Biblioteca" title="Biblioteca">${ics('bib')}</button>`}
+  $('n1').classList.toggle('hide',!S.hu&&!ADM);$('n2').classList.toggle('hide',E()<2&&!ADM);$('n3').classList.toggle('hide',S.step<3);$('n4').classList.toggle('hide',!ADM&&!S.b.some(y=>y.type=='bib'&&Date.now()>=y.end));nv.classList.toggle('hide',!(S.hu||E()>=2||S.step>=3||ADM))}
  {const h=bar?`<span class="k">${k}</span><br>${x}`:'';if($('tt')._h!==h){$('tt')._h=h;$('tt').innerHTML=h}}
  const a=$('ta');if(f){if(a.textContent!==f[0])a.textContent=f[0];a.classList.remove('hide');a.onclick=f[1]}else a.classList.add('hide')}
 function sheetClose(){SCR=null;const o=$('ov'),el=o.firstElementChild;o._h=null;
@@ -957,7 +991,7 @@ $('mb').onclick=()=>{if(S.step==4)S.step=5;const cnt=t=>S.b.filter(b=>b.type==t&
  const dn=(typeof LVS!=='undefined')?LVS.filter(l=>S.done['L'+l.id]).length:0,tl=(typeof LVS!=='undefined')?LVS.length:0;
  $('ov').innerHTML=`<div class="sheet" onclick="if(event.target==this)sheetClose()"><div class="panel side menu">
  <div class="mhd"><span class="mem">${ic('est',28)}</span><div><h1>${S.city}</h1><span class="m">Establecimiento nivel ${E()}</span></div><button class="mx" aria-label="Cerrar" onclick="sheetClose()">✕</button></div>
- <div class="mst"><div onclick="poblacion()" style="cursor:pointer"><span class="mi">${ic('pop',18)}</span><b>${S.pop}</b><span class="m">Habitantes</span></div><div><span class="mi">${ic('her',18)}</span><b>${S.heroes.length}</b><span class="m">Héroes</span></div>${E()>=2&&tl?`<div><span class="mi">${ic('mon',18)}</span><b>${dn}/${tl}</b><span class="m">Niveles</span></div>`:''}</div>
+ <div class="mst"><div onclick="poblacion()" style="cursor:pointer"><span class="mi">${ic('pop',18)}</span><b>${S.pop}</b><span class="m">Habitantes</span></div><div><span class="mi">${ic('her',18)}</span><b>${S.heroes.length}</b><span class="m">Héroes</span></div>${E()>=2&&tl?`<div><span class="mi">${MONI('melee',false,18)}</span><b>${dn}/${tl}</b><span class="m">Niveles</span></div>`:''}</div>
  <div class="sx">Dinero</div>${money}
  <div class="sx">Inventario mágico</div>
  <div class="mg"><div><span class="gm sq"></span><b>${S.inv.piedra}</b><span class="m">Piedras mágicas</span></div><div><span class="gm di"></span><b>${S.inv.cristal}</b><span class="m">Cristales mágicos</span></div><div><b>${S.inv.polvo||0}</b><span class="m">Polvo arcano</span></div><div><b>${S.inv.nucleo||0}</b><span class="m">Núcleos de jefe</span></div></div>
@@ -1000,7 +1034,7 @@ const dif=l=>'★'.repeat(Math.min(5,1+((l.id-1)/6|0)));
 function lvl(id){const l=LVS[id-1];if(!l||stt(id)=='lock')return;startBattle({n:'Nivel '+id+(l.b?' · Jefe':''),lv:id,m:l.m.map(i=>[...MN[i],1+((id-1)/10|0)])})}
 const LOCKI='<svg class="ic" width="16" height="16" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/></svg>',CROWN='<svg class="ic crown" width="22" height="22" viewBox="0 0 24 24"><path d="M3 18l2-10 5 5 2-8 2 8 5-5 2 10z"/></svg>';
 const esc=t=>String(t).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
-const monSvg=(boss,z=24)=>`<svg class="mons" viewBox="0 0 48 48" width="${z}" height="${z}" aria-hidden="true">${boss?'<path d="M11 19 5 5l13 7zM37 19l6-14-13 7z" fill="currentColor"/>':''}<path d="M9 28c0-10 6-17 15-17s15 7 15 17c0 8-6 13-15 13S9 36 9 28z" fill="currentColor" fill-opacity=".18" stroke="currentColor" stroke-width="2.2"/><circle cx="18" cy="26" r="3" fill="currentColor"/><circle cx="30" cy="26" r="3" fill="currentColor"/><path d="M17 34q7 4 14 0" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M20 35.5l1.8 4 1.8-3.2M28 35.5l-1.8 4-1.8-3.2" fill="currentColor"/></svg>`;
+const monSvg=(boss,z=24,cat)=>window.MONI?MONI(cat||'melee',boss,z):`<svg class="mons" viewBox="0 0 48 48" width="${z}" height="${z}" aria-hidden="true">${boss?'<path d="M11 19 5 5l13 7zM37 19l6-14-13 7z" fill="currentColor"/>':''}<path d="M9 28c0-10 6-17 15-17s15 7 15 17c0 8-6 13-15 13S9 36 9 28z" fill="currentColor" fill-opacity=".18" stroke="currentColor" stroke-width="2.2"/><circle cx="18" cy="26" r="3" fill="currentColor"/><circle cx="30" cy="26" r="3" fill="currentColor"/><path d="M17 34q7 4 14 0" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M20 35.5l1.8 4 1.8-3.2M28 35.5l-1.8 4-1.8-3.2" fill="currentColor"/></svg>`;
 function skLong(n){const k=typeof n=='object'?n:MSK[n];if(!k)return '';const p=[];
  if(k.shell)p.push(`Caparazón: el primer golpe que recibe hace ${k.shell} menos de daño.`);
  if(k.arm)p.push(`Coraza: cada golpe que recibe hace ${k.arm} menos de daño (la penetración del héroe la reduce).`);
@@ -1015,17 +1049,17 @@ function skLong(n){const k=typeof n=='object'?n:MSK[n];if(!k)return '';const p=[
  return p.join(' ')}
 function lvInfo(id){const l=LVS[id-1];if(!l)return;const st=stt(id),H=lead(),lm=1+((id-1)/10|0);
  const cards=l.m.map((mi,k)=>{const n=MN[mi][0],boss=l.b&&k==l.m.length-1,sk=MN[mi][3]||MSK[n];
-  return `<div class="mcard${boss?' boss':''}"><span class="mlv">Nv ${lm}</span>${boss?'<span class="mtag">JEFE</span>':''}<div class="msy">${monSvg(boss,64)}</div><b>${n}</b><div class="mab"><span class="m">Habilidad</span>${sk?`<span class="ab" tabindex="0" data-tip="${esc(skLong(sk))}">${sk.d}</span>`:'<span class="ab none">Sin habilidad</span>'}</div></div>`}).join('');
+  return `<div class="mcard${boss?' boss':''}"><span class="mlv">Nv ${lm}</span>${boss?'<span class="mtag">JEFE</span>':''}<div class="msy">${monSvg(boss,64,MCAT[n]||MCAT[String(n).replace(/^(Élite|Jefe) · /,'')]||'melee')}</div><b>${n}</b><div class="mab"><span class="m">Habilidad</span>${sk?`<span class="ab" tabindex="0" data-tip="${esc(skLong(sk))}">${sk.d}</span>`:'<span class="ab none">Sin habilidad</span>'}</div></div>`}).join('');
  const lock=st=='lock',foot=lock?'Bloqueado':!H?'Sin héroe disponible':st=='done'?'Repetir':'Aventurarse';
- const html=`<div class="sheet lvm" onclick="if(event.target==this)lvClose()"><div class="panel pm lvp2" style="margin:auto;max-height:90%"><div class="uh"><div class="ib big mi2${l.b?' boss':''}">${monSvg(l.b,34)}</div><div class="uhi"><h2>Nivel ${id}${l.b?' · Jefe':''}</h2><span class="lvp"><b>${dif(l)}</b><span class="m">${l.m.length} monstruo${l.m.length>1?'s':''}</span></span><span class="m">${st=='done'?'Completado':lock?'Completa el nivel '+(id-1)+' para desbloquearlo':'Listo para la aventura'}</span></div></div><div class="pmb"><div class="mcards">${cards}</div><p class="m hint ctr">Pasa el mouse o toca la habilidad para ver qué hace.</p></div><div class="pmf two"><button class="pri" ${lock||!H?'disabled':''} onclick="lvl(${id})">${foot}</button><button onclick="lvClose()">Volver</button></div></div></div>`;
+ const html=`<div class="sheet lvm" onclick="if(event.target==this)lvClose()"><div class="panel pm lvp2" style="margin:auto;max-height:90%"><div class="uh"><div class="ib big mi2${l.b?' boss':''}">${monSvg(l.b,34,lvCat(l))}</div><div class="uhi"><h2>Nivel ${id}${l.b?' · Jefe':''}</h2><span class="lvp"><b>${dif(l)}</b><span class="m">${l.m.length} monstruo${l.m.length>1?'s':''}</span></span><span class="m">${st=='done'?'Completado':lock?'Completa el nivel '+(id-1)+' para desbloquearlo':'Listo para la aventura'}</span></div></div><div class="pmb"><div class="mcards">${cards}</div><p class="m hint ctr">Pasa el mouse o toca la habilidad para ver qué hace.</p></div><div class="pmf two"><button class="pri" ${lock||!H?'disabled':''} onclick="lvl(${id})">${foot}</button><button onclick="lvClose()">Volver</button></div></div></div>`;
  const o=$('ov');o.querySelectorAll('.lvm').forEach(x=>x.remove());o.insertAdjacentHTML('beforeend',html)}
 function lvClose(){const m=$('ov').querySelector('.lvm');if(!m)return;hideTip();if(RM){m.remove();return}m.classList.add('out');setTimeout(()=>m.remove(),230)}
 function aventuras(){SCR='adv';const H=lead(),eq=eqH(),dn=LVS.filter(l=>S.done['L'+l.id]).length,tl=LVS.length;
  const sel=eq.length>=3?`<div class="chips">${eq.map(h=>`<button class="pk${H&&H.id==h.id?' on':''}" onclick="S.sel=${h.id};save();aventuras()">${h.n}</button>`).join('')}</div>`:'';
  const hero=H?`<div class="adh"><div class="hav">${ic('her',24)}</div><div class="hri"><div class="hrn"><b>${H.n}</b><span class="chip">Nv ${H.lv}</span></div><div class="hbs"><div class="hb r"><i style="width:${100*H.hp/H.mhp}%"></i><span>HP ${H.hp}/${H.mhp}</span></div><div class="hb b"><i style="width:${100*H.mp/H.mmp}%"></i><span>Maná ${H.mp}/${H.mmp}</span></div></div></div></div>${sel}`:`<div class="note">Sin héroe disponible. Equipa uno en Héroes o espera su recuperación.</div>`;
  const prog=`<div class="adp"><div class="uct"><b>Progreso</b><span class="m">${dn}/${tl} niveles</span></div><div class="pb"><i style="width:${100*dn/tl}%"></i></div></div>`;
- const tiles=LVS.map(l=>{const st=stt(l.id);return `<button class="lt ${st}${l.b?' boss':''}" aria-label="Nivel ${l.id}${l.b?' jefe':''}" onclick="lvInfo(${l.id})"><span class="lsy">${monSvg(l.b,32)}</span><b>${l.id}</b>${st=='done'?'<i class="lck">✓</i>':st=='lock'?`<i class="lck lk">${LOCKI}</i>`:''}</button>`}).join('');
- const cl=ADV.map((a,i)=>`<div class="lv open"><div class="lvh"><span class="ln">${ic('mon',18)}</span><div class="lm"><b>${a.n}${S.done['c'+i]?' ✓':''}</b><span class="m">${a.d}</span></div></div><div class="chips">${a.m.map(x=>`<span class="chip">${x[0]}</span>`).join('')}</div><button class="pri" ${H?'':'disabled'} onclick="startBattle(ADV[${i}])">${S.done['c'+i]?'Repetir':'Aventurarse'}</button></div>`).join('');
+ const tiles=LVS.map(l=>{const st=stt(l.id);return `<button class="lt ${st}${l.b?' boss':''}" aria-label="Nivel ${l.id}${l.b?' jefe':''}" onclick="lvInfo(${l.id})"><span class="lsy">${monSvg(l.b,32,lvCat(l))}</span><b>${l.id}</b>${st=='done'?'<i class="lck">✓</i>':st=='lock'?`<i class="lck lk">${LOCKI}</i>`:''}</button>`}).join('');
+ const cl=ADV.map((a,i)=>`<div class="lv open"><div class="lvh"><span class="ln">${MONI('melee',false,18)}</span><div class="lm"><b>${a.n}${S.done['c'+i]?' ✓':''}</b><span class="m">${a.d}</span></div></div><div class="chips">${a.m.map(x=>`<span class="chip">${x[0]}</span>`).join('')}</div><button class="pri" ${H?'':'disabled'} onclick="startBattle(ADV[${i}])">${S.done['c'+i]?'Repetir':'Aventurarse'}</button></div>`).join('');
  screen('Aventuras',`<div class="adtop"><div>${hero}</div>${prog}</div><div class="sx">Zonas</div>${zoneMap()}<div class="leg"><span>${monSvg(false,16)} Normal</span><span class="b">${monSvg(true,16)} Jefe</span><span><i class="lck sm">✓</i> Completado</span></div><div class="sx">Aventuras clásicas</div><div class="lvl cls">${cl}</div>`)}
 /* ===== Mejoras permanentes con cristales (separadas del nivel y del entrenamiento) ===== */
 const UPMAX={hp:10,atk:5},upc=(h,k)=>k=='hp'?2+2*((h.up||{}).hp||0):5+4*((h.up||{}).atk||0);
@@ -1046,11 +1080,27 @@ function aventurasOld(){SCR='adv';const H=lead(),h0=S.eq.map(id=>S.heroes.find(x
  const st=H?`Héroe: <b>${H.n}</b> (nivel ${H.lv})`:h0?`<span style="color:var(--r)">${h0.n} inhabilitado ${Math.max(0,Math.ceil((h0.dead-Date.now())/1000))} s</span>`:'Sin héroe equipado. Equipa uno en Héroes.';
  screen('Aventuras',`<p>${st}</p>`+ADV.map((a,i)=>`<div class="card" style="flex:none;width:100%;margin-bottom:10px"><b>${a.n}</b><span class="m">${a.d}</span><span class="m">Monstruos: ${a.m.length} - Botín: monedas solares y filares</span><button ${H?'':'disabled'} onclick="startBattle(ADV[${i}])">Salir de expedición</button></div>`).join(''))}
 /* zoom: minimo = tamano actual, solo acercar */
-function zoom(d){Z=Math.min(2.2,Math.max(1,Z+d));$('grid').style.setProperty('--cs',BASE()*Z+'px')}
-let pd=0,pz=1;
-$('view').addEventListener('touchstart',e=>{if(e.touches.length==2){pd=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);pz=Z}},{passive:true});
-$('view').addEventListener('touchmove',e=>{if(e.touches.length==2&&pd){e.preventDefault();const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);Z=Math.min(2.2,Math.max(1,pz*d/pd));$('grid').style.setProperty('--cs',BASE()*Z+'px')}},{passive:false});
-$('view').addEventListener('wheel',e=>{if(e.ctrlKey||e.metaKey){e.preventDefault();zoom(e.deltaY<0?.15:-.15)}},{passive:false});
+function zoom(d){const r=$('view').getBoundingClientRect();zPreview((zPend?zTarget:Z)+d,r.left+r.width/2,r.top+r.height/2);zCommit()}
+/* zoom solo con transform: el tablero conserva su tamano de diseno (--cs fijo) y se escala en la GPU.
+   Nunca se recalculan las casillas, ni durante el gesto ni al soltar los dedos. */
+const zClamp=v=>Math.min(2.2,Math.max(1,v));
+let zPend=null,zTarget=1,zRaf=0,zT=0,pd=0,pz=1,zBase=0;
+function zFrame(){zRaf=0;if(!zPend)return;const g=$('grid'),v=$('view'),p=zPend,s=zTarget,f=s/p.z0;
+ g.style.transform=s==1?'':'scale('+s+')';
+ v.scrollLeft=(p.cx-p.gl)*f+p.gl-p.ox;v.scrollTop=(p.cy-p.gt)*f+p.gt-p.oy}
+function zPreview(target,mx,my){
+ if(zPend===null){const g=$('grid'),v=$('view'),vr=v.getBoundingClientRect(),gr=g.getBoundingClientRect(),
+  b=BASE();if(b!=zBase){zBase=b;g.style.setProperty('--cs',b+'px')}
+  zPend={z0:Z,ox:mx-vr.left,oy:my-vr.top,cx:v.scrollLeft+mx-vr.left,cy:v.scrollTop+my-vr.top,gl:gr.left-vr.left+v.scrollLeft,gt:gr.top-vr.top+v.scrollTop}}
+ zTarget=zClamp(target);if(!zRaf)zRaf=requestAnimationFrame(zFrame)}
+function zCommit(){if(zPend===null)return;if(zRaf){cancelAnimationFrame(zRaf);zFrame()}Z=zTarget;zPend=null}
+const t2=e=>Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY),
+ m2=e=>[(e.touches[0].clientX+e.touches[1].clientX)/2,(e.touches[0].clientY+e.touches[1].clientY)/2];
+$('view').addEventListener('touchstart',e=>{if(e.touches.length==2){zCommit();pd=t2(e);pz=Z}},{passive:true});
+$('view').addEventListener('touchmove',e=>{if(e.touches.length==2&&pd){e.preventDefault();const m=m2(e);zPreview(pz*t2(e)/pd,m[0],m[1])}},{passive:false});
+const zEnd=e=>{if(e.touches.length<2){pd=0;zCommit()}};
+$('view').addEventListener('touchend',zEnd,{passive:true});$('view').addEventListener('touchcancel',zEnd,{passive:true});
+$('view').addEventListener('wheel',e=>{if(e.ctrlKey||e.metaKey){e.preventDefault();zPreview((zPend?zTarget:Z)*Math.exp(-e.deltaY*.01),e.clientX,e.clientY);clearTimeout(zT);zT=setTimeout(zCommit,140)}},{passive:false});
 /* combate */
 const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
 function sparks(x,y,n,c){if(RM)return;for(let i=0;i<n;i++){const d=document.createElement('i');d.className='sp';d.style.cssText=`left:${x}px;top:${y}px;color:${c}`;document.body.appendChild(d);const a=Math.random()*6.28,r=60+Math.random()*90;d.animate([{opacity:1,transform:'translate(0,0) rotate(45deg)'},{opacity:0,transform:`translate(${Math.cos(a)*r}px,${Math.sin(a)*r}px) rotate(45deg) scale(.3)`}],{duration:900+Math.random()*500,easing:'ease-out'}).finished.then(()=>d.remove())}}
@@ -1098,7 +1148,7 @@ function _sb(adv){sheetClose();const H=lead();if(!H)return;H.hp=H.mhp;H.mp=H.mmp
  const ms=adv?adv.m.map(([n,atk,hp,lv=1,sk])=>({n,atk,hp,mhp:hp,lv,sk})):[{n:'Monstruo A',atk:1,hp:2,mhp:2,lv:1},{n:'Monstruo B',atk:1,hp:3,mhp:3,lv:1}];
  B={tut:!adv,adv,h:H,m:ms,t:0,i:0,over:false,log:[adv?'Comienza la aventura: '+adv.n+'.':'La aldea está siendo atacada. Defiéndela.']};busy=false;
  $('ov').innerHTML=`<div class="scr"><div class="sh"><b>${adv?adv.n:'Ataque a la aldea'}</b></div><div class="sb" style="display:flex;flex-direction:column;align-items:center;gap:10px">
- <div id="mrow" style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center">${ms.map((m,i)=>`<div class="cd mc" id="m${i}" onclick="pick(${i})"><div class="fg">${ic('mon',24)}</div><b>${m.n}</b><span class="m">Nivel ${m.lv}</span><span class="m">Ataque ${m.atk}</span>${MSK[m.n]?`<span class="m" style="font-size:9px">${MSK[m.n].d}</span>`:''}<div class="bar"><i id="mb${i}" style="background:var(--r)"></i></div><span id="mt${i}" class="m"></span></div>`).join('')}</div>
+ <div id="mrow" style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center">${ms.map((m,i)=>`<div class="cd mc" id="m${i}" onclick="pick(${i})"><div class="fg">${MONI('melee',false,24)}</div><b>${m.n}</b><span class="m">Nivel ${m.lv}</span><span class="m">Ataque ${m.atk}</span>${MSK[m.n]?`<span class="m" style="font-size:9px">${MSK[m.n].d}</span>`:''}<div class="bar"><i id="mb${i}" style="background:var(--r)"></i></div><span id="mt${i}" class="m"></span></div>`).join('')}</div>
  <div id="log" style="flex:1;min-height:40px;width:100%;height:auto;overflow:auto"></div>
  <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center"><button id="b1" onclick="hit(1)">Atacar</button><button id="b2" onclick="hit(2)">Ataque fuerte (daño ${GP(H).d})</button><button id="b3" onclick="hdef()">Defender</button>${((H.sk&&H.sk.l)||[]).map(id=>`<button class="skb" id="s_${id}" onclick="useSk('${id}')">${SKL[id].n} (${SKL[id].mp})</button>`).join('')}<button id="bf" class="hide" onclick="fin()">Continuar</button></div>
  <div class="cd eq" id="hc" style="cursor:default;z-index:1"><div class="fg">${ic('her',24)}</div><b>${H.n}</b><span class="m">Nivel ${H.lv}</span><span class="m">Ataque ${H.atk}</span><div class="bar"><i id="hhp" style="background:var(--r)"></i></div><div class="bar"><i id="hmp" style="background:var(--b)"></i></div><span id="ht" class="m"></span></div></div></div>`;
@@ -1289,7 +1339,7 @@ for(let id=31;id<=60;id++){const ws=xWaves(XC[id],id),idx=[];
 {const _l=lvl;lvl=function(id){const l=LVS[id-1];if(!l||!l.waves)return _l(id);if(stt(id)=='lock')return;
  startBattle({n:'Nivel '+id+(l.b?' · Jefe':''),lv:id,m:l.waves[0],waves:l.waves,boss:l.b})}}
 const mkM=([n,atk,hp,lv=1,sk])=>({n,atk,hp,mhp:hp,lv,sk});
-const mCard=(m,i)=>`<div class="cd mc" id="m${i}" onclick="pick(${i})"><div class="fg">${ic('mon',24)}</div><b>${m.n}</b><span class="m">Nivel ${m.lv}</span><span class="m">Ataque ${m.atk}</span>${(m.sk||MSK[m.n])?`<span class="m" style="font-size:9px">${(m.sk||MSK[m.n]).d}</span>`:''}<div class="bar"><i id="mb${i}" style="background:var(--r)"></i></div><span id="mt${i}" class="m"></span></div>`;
+const mCard=(m,i)=>`<div class="cd mc" id="m${i}" onclick="pick(${i})"><div class="fg">${MONI('melee',false,24)}</div><b>${m.n}</b><span class="m">Nivel ${m.lv}</span><span class="m">Ataque ${m.atk}</span>${(m.sk||MSK[m.n])?`<span class="m" style="font-size:9px">${(m.sk||MSK[m.n]).d}</span>`:''}<div class="bar"><i id="mb${i}" style="background:var(--r)"></i></div><span id="mt${i}" class="m"></span></div>`;
 function wTitle(){const e=document.querySelector('.scr .sh b');if(e&&B.waves)e.textContent=B.adv.n+' · Oleada '+(B.wi+1)+'/'+B.waves.length}
 function bossLine(i){const k=Object.keys(XM).find(k=>XM[k][0]==B.m[B.m.length-1].n);const d=XD[k];if(d&&B.adv&&B.adv.boss)B.log.push('«'+d[i]+'»')}
 async function waveNext(){busy=true;bupd();B.log.push(`Oleada ${B.wi+1} superada.`);const H=B.h;
@@ -1373,7 +1423,7 @@ const ZONES=[
  {n:'Vacío eterno',d:'Más allá de la grieta, donde acaba todo mundo.',a:56,b:60,c:'#b8a0f2'}];
 function zoneMap(){return '<div class="zgrid">'+ZONES.map((z,zi)=>{const ls=LVS.filter(l=>l.id>=z.a&&l.id<=z.b),dn=ls.filter(l=>S.done['L'+l.id]).length,lock=stt(z.a)=='lock',
  last=LVS[z.b-1],bn=last&&MN[last.m[last.m.length-1]]?MN[last.m[last.m.length-1]][0]:'',rec=Math.max(1,Math.round(z.a/3)),
- tiles=ls.map((l,k)=>{const st=stt(l.id);return `<button class="lt ${st}${l.b?' boss':''}" aria-label="Nivel ${l.id}${l.b?' jefe':''}" onclick="lvInfo(${l.id})" style="--i:${k}"><span class="lsy">${monSvg(l.b,32)}</span><b>${l.id}</b>${st=='done'?'<i class="lck">✓</i>':st=='lock'?`<i class="lck lk">${LOCKI}</i>`:''}</button>`}).join('');
+ tiles=ls.map((l,k)=>{const st=stt(l.id);return `<button class="lt ${st}${l.b?' boss':''}" aria-label="Nivel ${l.id}${l.b?' jefe':''}" onclick="lvInfo(${l.id})" style="--i:${k}"><span class="lsy">${monSvg(l.b,32,lvCat(l))}</span><b>${l.id}</b>${st=='done'?'<i class="lck">✓</i>':st=='lock'?`<i class="lck lk">${LOCKI}</i>`:''}</button>`}).join('');
  return `<section class="zc${lock?' lock':''}" style="--zc:${z.c};--z:${zi}"><div class="zh"><div class="zt"><b>${z.n}</b><span class="zn">${lock?LOCKI+' Bloqueada':dn+'/'+ls.length}</span></div><span class="m">${z.d}</span><div class="zp"><i style="width:${ls.length?100*dn/ls.length:0}%"></i></div><div class="chips"><span class="chip">Niveles ${z.a}–${z.b}</span><span class="chip">Héroe recomendado nv ${rec}</span><span class="chip r">Jefe: ${bn}</span></div></div><div class="lmap">${tiles}</div></section>`}).join('')+'</div>'}
 
 const CLS={
@@ -1534,7 +1584,7 @@ function sqStart(adv){const hs=ivHeroes().slice(0,3).map(sqMk);hs.forEach((u,i)=
  sqBuild();SQ.busy=false;sqUpd();bossLineSq()}
 function bossLineSq(){if(B.adv&&B.adv.boss&&(!B.waves||B.wi==B.waves.length-1)){try{bossLine(0)}catch(e){}}}
 function sqBuild(){const bar=(id,c)=>`<div class="bar"><i id="${id}" style="background:${c}"></i></div>`;
- $('sqM').innerHTML=SQ.m.map((m,i)=>`<div class="cd mc" id="sqm${i}" onclick="sqPick(${i})"><div class="fg">${ic('mon',24)}</div><b>${m.n}</b><span class="m">Nivel ${m.lv} · Atq ${m.atk}</span>${SQP.back.test(m.n)?'<span class="chip">Distancia/vuelo</span>':''}${bar('sqmb'+i,'var(--r)')}<span class="m" id="sqmt${i}"></span></div>`).join('');
+ $('sqM').innerHTML=SQ.m.map((m,i)=>`<div class="cd mc" id="sqm${i}" onclick="sqPick(${i})"><div class="fg">${MONI('melee',false,24)}</div><b>${m.n}</b><span class="m">Nivel ${m.lv} · Atq ${m.atk}</span>${SQP.back.test(m.n)?'<span class="chip">Distancia/vuelo</span>':''}${bar('sqmb'+i,'var(--r)')}<span class="m" id="sqmt${i}"></span></div>`).join('');
  $('sqH').innerHTML=SQ.hs.map((u,i)=>`<div class="cd eq" id="sqh${i}" onclick="sqAlly(${i})"><div class="fg">${ic('her',24)}</div><b>${u.n}</b><span class="m">${clsN(u.h)} Nv ${u.h.lv} · ${u.f?'Delante':'Detrás'}</span>${bar('sqhb'+i,'var(--r)')}${bar('sqhm'+i,'var(--b)')}<span class="m" id="sqht${i}"></span></div>`).join('');
  $('sqt').textContent=SQ.adv.n+(SQ.adv.waves?` · Oleada ${SQ.wi+1}/${SQ.adv.waves.length}`:'')}
 function sqPick(i){if(SQ.m[i].hp>0){SQ.t=i;sqUpd()}}
@@ -1712,7 +1762,7 @@ const sqBack=m=>BACKC.includes(sqCat(m));
 function sqPhase(){const m=SQ.m[SQ.m.length-1];if(!m||!SQ.adv.boss||m.ph||m.hp<=0||m.hp>m.mhp/2||SQ.m.indexOf(m)!=SQ.m.length-1)return;
  if(SQ.adv.waves&&SQ.wi<SQ.adv.waves.length-1)return;m.ph=1;m.atk+=Math.max(1,Math.ceil(m.atk*.25));B.log.push(`¡${m.n} entra en una nueva fase! Su ataque aumenta.`);try{bossLine(1)}catch(e){}shake(6);const e=$('sqm'+SQ.m.indexOf(m));if(e)fl('¡Nueva fase!',e,'var(--r)')}
 function sqBuild(){const bar=(id,c)=>`<div class="bar"><i id="${id}" style="background:${c}"></i></div>`;
- $('sqM').innerHTML=SQ.m.map((m,i)=>`<div class="cd mc" id="sqm${i}" onclick="sqPick(${i})"><div class="fg">${ic('mon',24)}</div><b>${m.n}</b><span class="m">Nivel ${m.lv} · Atq ${m.atk}</span><span class="chip">${CATN[sqCat(m)]}</span>${bar('sqmb'+i,'var(--r)')}<span class="m" id="sqmt${i}"></span></div>`).join('');
+ $('sqM').innerHTML=SQ.m.map((m,i)=>`<div class="cd mc" id="sqm${i}" onclick="sqPick(${i})"><div class="fg">${MONI('melee',false,24)}</div><b>${m.n}</b><span class="m">Nivel ${m.lv} · Atq ${m.atk}</span><span class="chip">${CATN[sqCat(m)]}</span>${bar('sqmb'+i,'var(--r)')}<span class="m" id="sqmt${i}"></span></div>`).join('');
  $('sqH').innerHTML=SQ.hs.map((u,i)=>`<div class="cd eq" id="sqh${i}" onclick="sqAlly(${i})"><div class="fg">${ic('her',24)}</div><b>${u.n}</b><span class="m">${clsN(u.h)} Nv ${u.h.lv} · ${u.f?'Delante':'Detrás'} · Vel ${SPD[u.cls]}</span>${bar('sqhb'+i,'var(--r)')}${bar('sqhm'+i,'var(--b)')}${bar('sqhs'+i,'var(--a)')}<span class="m" id="sqht${i}"></span></div>`).join('');
  $('sqt').textContent=SQ.adv.n+(SQ.adv.waves?` · Oleada ${SQ.wi+1}/${SQ.adv.waves.length}`:'')}
 function sqUpd(){if(!SQ||!$('sqm0'))return;
@@ -2092,9 +2142,9 @@ window.copiarCodigo=copiarCodigo;window.pegarCodigo=pegarCodigo;window.encP=encP
 }
 {
 /* ===== Yloka: icono morado animado, fondo propio y efectos ===== */
-const YS='<svg viewBox="0 0 64 64" width="72" height="72" class="yl-svg"><defs><radialGradient id="ylg"><stop offset="0" stop-color="#e9c8ff"/><stop offset=".5" stop-color="#8a3fe0"/><stop offset="1" stop-color="#2a0a55"/></radialGradient></defs><circle cx="32" cy="34" r="26" fill="#9b4dff" opacity=".25"><animate attributeName="r" values="24;30;24" dur="2.4s" repeatCount="indefinite"/><animate attributeName="opacity" values=".15;.4;.15" dur="2.4s" repeatCount="indefinite"/></circle><g><animateTransform attributeName="transform" type="rotate" from="0 32 34" to="360 32 34" dur="6s" repeatCount="indefinite"/><circle cx="32" cy="6" r="2.5" fill="#ff9cf0"/><circle cx="58" cy="34" r="2" fill="#c080ff"/><circle cx="8" cy="40" r="2" fill="#c080ff"/></g><path d="M16 22 8 6l14 8zM48 22 56 6 42 14z" fill="#5a1fa8" stroke="#d9b0ff" stroke-width="1"/><path d="M32 12c12 0 19 8 19 19 0 11-7 21-19 21S13 42 13 31c0-11 7-19 19-19z" fill="url(#ylg)" stroke="#e0c0ff" stroke-width="1.5"/><ellipse cx="24" cy="30" rx="4" ry="2.6" fill="#ff7ae0"><animate attributeName="opacity" values="1;.35;1" dur="1.8s" repeatCount="indefinite"/></ellipse><ellipse cx="40" cy="30" rx="4" ry="2.6" fill="#ff7ae0"><animate attributeName="opacity" values="1;.35;1" dur="1.8s" repeatCount="indefinite"/></ellipse><path d="M22 41q10 7 20 0" fill="none" stroke="#1a0535" stroke-width="2" stroke-linecap="round"/></svg>';
+const YS='<svg viewBox="0 0 64 64" width="72" height="72" class="yl-svg" aria-hidden="true" style="overflow:visible"><g transform="translate(-8.2 -7.56) scale(.108)"><g class="ys1"><path d="M328 95 352 205 330 250 303 212Z" fill="#a66bff"/></g><g class="ys2"><path d="M340 462 368 500 349 645 318 505Z" fill="#a66bff"/></g><path d="M140 425C190 380 280 305 350 262 400 232 480 202 605 187 520 215 470 245 440 275 420 292 400 300 380 305 320 335 230 395 140 425Z" fill="#a66bff"/><path d="M430 290 548 250 510 300 546 296 503 340 520 366 440 380Z" fill="#a66bff"/><path d="M178 472C240 410 340 378 430 372L520 366C480 410 410 432 340 440 280 446 225 452 178 472Z" fill="#a66bff"/><g class="ye"><ellipse cx="335" cy="388" rx="68" ry="24" transform="rotate(-12 335 388)" fill="#ff7ae0"/></g><path d="M335 352 349 388 335 424 321 388Z" transform="rotate(-12 335 388)" fill="#14062b"/></g></svg>';
 window.YSVG=YS;
-{const st=document.createElement('style');st.textContent='.yl-bg{background:radial-gradient(ellipse at 50% 15%,#5b1fa8 0,#1d0842 50%,#07020f 100%)!important;background-size:140% 140%;animation:ylBg 9s ease-in-out infinite}.yl-bg::before{content:"";position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(2px 2px at 15% 20%,#e0c0ff,transparent),radial-gradient(2px 2px at 70% 35%,#c080ff,transparent),radial-gradient(1.5px 1.5px at 40% 75%,#ff9cf0,transparent),radial-gradient(2px 2px at 85% 80%,#e0c0ff,transparent);background-size:240px 240px;animation:ylDr 14s linear infinite;opacity:.8}.yl-bg2{background:radial-gradient(ellipse at 50% 15%,#a0187a 0,#3a0a55 50%,#0a0010 100%)!important}@keyframes ylBg{50%{background-position:30% 40%}}@keyframes ylDr{to{background-position:240px 480px}}.yl-card{position:relative;scale:1.1;background:linear-gradient(160deg,#4a1590,#16052e)!important;color:#f3e6ff!important;border-color:#b070f0!important;animation:ylA 1.6s infinite,ylF 3s ease-in-out infinite}@keyframes ylF{50%{translate:0 -4px}}.yl-card .m{color:#d9b8ff!important}.yl-svg{margin:auto;filter:drop-shadow(0 0 8px #b070f0)}.fx9-ylk{background:radial-gradient(circle at 50% 40%,#4a1590,#0a0014 70%)!important;animation:ylIn .8s}@keyframes ylIn{from{opacity:0}}@keyframes ylNm{from{letter-spacing:.9em;opacity:0}}.fx9-ylk>div:nth-child(2){font-size:40px!important;text-shadow:0 0 18px #b070f0,0 0 40px #7a3fd0;animation:ylNm 1.6s ease-out}';document.head.appendChild(st)}
+{const st=document.createElement('style');st.textContent='.yl-bg{background:radial-gradient(ellipse at 50% 15%,#5b1fa8 0,#1d0842 50%,#07020f 100%)!important;background-size:140% 140%;animation:ylBg 9s ease-in-out infinite}.yl-bg::before{content:"";position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(2px 2px at 15% 20%,#e0c0ff,transparent),radial-gradient(2px 2px at 70% 35%,#c080ff,transparent),radial-gradient(1.5px 1.5px at 40% 75%,#ff9cf0,transparent),radial-gradient(2px 2px at 85% 80%,#e0c0ff,transparent);background-size:240px 240px;animation:ylDr 14s linear infinite;opacity:.8}.yl-bg2{background:radial-gradient(ellipse at 50% 15%,#a0187a 0,#3a0a55 50%,#0a0010 100%)!important}@keyframes ylBg{50%{background-position:30% 40%}}@keyframes ylDr{to{background-position:240px 480px}}.yl-card{position:relative;scale:1.1;background:linear-gradient(160deg,#4a1590,#16052e)!important;color:#f3e6ff!important;border-color:#b070f0!important;animation:ylA 1.6s infinite,ylF 3s ease-in-out infinite}@keyframes ylF{50%{translate:0 -4px}}.yl-card .m{color:#d9b8ff!important}.yl-svg{margin:auto}.yl-svg .ys1{animation:ylS1 5s ease-in-out infinite}.yl-svg .ys2{animation:ylS2 5s ease-in-out infinite}.yl-svg .ye{animation:ylEye 5s ease-in-out infinite}@keyframes ylS1{50%{transform:translateY(-14px)}}@keyframes ylS2{50%{transform:translateY(14px)}}@keyframes ylEye{0%,100%{opacity:1}50%{opacity:.55}}@media(prefers-reduced-motion:reduce){.yl-svg *{animation:none!important}}.fx9-ylk{background:radial-gradient(circle at 50% 40%,#4a1590,#0a0014 70%)!important;animation:ylIn .8s}@keyframes ylIn{from{opacity:0}}@keyframes ylNm{from{letter-spacing:.9em;opacity:0}}.fx9-ylk>div:nth-child(2){font-size:40px!important;text-shadow:0 0 18px #b070f0,0 0 40px #7a3fd0;animation:ylNm 1.6s ease-out}';document.head.appendChild(st)}
 function yDeco(){const sq=SQ;if(!sq||!sq.m)return;const i=sq.m.findIndex(m=>m.n=='Yloka'),Y=sq.m[i];if(!Y)return;
  const s=document.querySelector('.scr');if(s){s.classList.add('yl-bg');s.classList.toggle('yl-bg2',!!Y.ph)}
  const e=$('sqm'+i);if(e&&!e.dataset.yl){e.dataset.yl=1;e.classList.add('yl-card');const f=e.querySelector('.fg');if(f)f.innerHTML=YS}
@@ -2433,7 +2483,7 @@ function lay(){const scr=document.querySelector('#ov .scr');if(!scr||!SQ||!$('sq
  const lg=$('sqlog');lg.classList.add('qlgd');scr.appendChild(lg);scr.appendChild($('sqa'));const oq=$('qtip');if(oq)oq.remove();scr.insertAdjacentHTML('beforeend','<div id="qtip" class="qtip"></div>');
  SQ.m.forEach((m,i)=>{const e=$('sqm'+i);if(!e)return;const sk=m.sk||MSK[m.n],isB=a.boss&&i==SQ.m.length-1;if(isB)e.classList.add('qbs');
   const sl=[0,1,2,3,4].map(k=>k==0&&sk?`<span class="qsl on" tabindex="0" role="button" aria-label="Ver habilidad" onmouseenter="qTip(this,${i})" onmouseleave="qTipH()" onfocus="qTip(this,${i})" onblur="qTipH()" onclick="event.stopPropagation();qTip(this,${i})"><i></i></span>`:`<span class="qsl"></span>`).join('');
-  e.innerHTML=`<b class="qnm">${esc(m.n)}</b><div class="fg qpt">${ic('mon',44)}</div><span class="qlv">Nivel ${m.lv} · Atq ${m.atk}</span><div class="qchs"><span class="chip">${CATN[sqCat(m)]}</span><span class="chip">${sk?'1 habilidad':'Sin habilidades'}</span></div><div class="qsls">${sl}</div>${bq('sqmb'+i,'sqmv'+i,'var(--r)')}<span class="qstt" id="sqmt${i}"></span>`});
+  e.innerHTML=`<b class="qnm">${esc(m.n)}</b><div class="fg qpt">${monIc(m,i,44)}</div><span class="qlv">Nivel ${m.lv} · Atq ${m.atk}</span><div class="qchs"><span class="chip">${CATN[sqCat(m)]}</span><span class="chip">${sk?'1 habilidad':'Sin habilidades'}</span></div><div class="qsls">${sl}</div>${bq('sqmb'+i,'sqmv'+i,'var(--r)')}<span class="qstt" id="sqmt${i}"></span>`});
  SQ.hs.forEach((u,i)=>{const e=$('sqh'+i);if(!e)return;const h=u.h,need=xpNeed(h.lv),xp=h.xp||0;
   e.innerHTML=`<b class="qnm">${esc(u.n)}</b><div class="fg qpt">${ic('her',40)}</div><span class="qlv">Nivel ${h.lv} · Atq ${u.atk}</span><div class="qchs"><span class="chip">${esc(clsN(h))}</span><span class="chip">${u.f?'Delante':'Detrás'}</span></div><div class="qbq"><i style="background:var(--a);width:${h.lv>=HMAX?100:Math.min(100,100*xp/need)}%"></i><span>${h.lv>=HMAX?'Nivel máximo':'Exp '+xp+'/'+need}</span></div>${bq('sqhb'+i,'sqhv'+i,'var(--r)')}${bq('sqhm'+i,'sqhmv'+i,'var(--b)')}${bq('sqhs'+i,'sqhsv'+i,'var(--a)')}<span class="qstt" id="sqht${i}"></span>`})}
 function post(){if(!SQ||!$('sqm0')||!$('sqr'))return;const a=SQ.adv;
@@ -3366,7 +3416,7 @@ addEventListener('cloudchallenge',e=>{const r=e.detail.r;setTimeout(async()=>{if
 /* desbloqueo al subir el establecimiento a nivel 4 + botón en el menú */
 setInterval(()=>{try{if(!S||S.slot==null||document.getElementById('game').classList.contains('hide'))return;
  const ok=E()>=4,nv=$('nav'),b=$('nvb');
- if(ok&&nv&&nv._i&&!b&&$('n4'))$('n4').insertAdjacentHTML('beforebegin',`<button id="nvb" onclick="pvpMenu('atacar')">${ic('adv',22)} Batalla</button>`);
+ if(ok&&nv&&nv._i&&!b&&$('n4'))$('n4').insertAdjacentHTML('beforebegin',`<button id="nvb" onclick="pvpMenu('atacar')" aria-label="Batalla" title="Batalla">${ics('esp')}</button>`);
  if(!ok&&b)b.remove();
  if(ok&&!S.pvp&&!$('ov').firstElementChild){S.pvp=true;save();$('ov').innerHTML='<div class="sheet"><div class="panel" style="margin:auto;width:min(360px,92vw)"><h2>Nueva opción</h2><p>Mi querido fundador, se desbloquea una nueva opción: ¡ya puedes atacar con aliados! Busca rivales o reta a tus amigos desde el botón <b>Batalla</b>.</p><button onclick="sheetClose();pvpMenu()">Ver Batalla</button> <button onclick="sheetClose()">Después</button></div></div>'}}catch(e){}},1500);
 })();
