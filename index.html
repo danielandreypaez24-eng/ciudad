@@ -1896,7 +1896,7 @@ async function sqMonsters(){SQ.busy=true;
   if(c=='summoner'&&m.t%3==0&&SQ.m.filter(x=>x.hp>0).length<5&&(SQ.sum||0)<2){SQ.sum=(SQ.sum||0)+1;SQ.m.push({n:'Esbirro invocado',atk:Math.max(1,Math.round(m.atk/2)),hp:3,mhp:3,lv:m.lv});B.m=SQ.m;B.log.push(`${m.n} invoca un esbirro.`);sqBuild();sqUpd();await sl(RM?100:700);continue}
   let tg=sqTarget(m),d=m.atk,x='';
   if(c=='controller'&&m.t%3==0){const fr=sqAlive().filter(u=>!(u.fz>0)&&!(u.fzi>0));if(fr.length){const v=fr[Math.random()*fr.length|0];tg=v;v.fz=1;const te0=$('sqh'+SQ.hs.indexOf(v));B.log.push(`${m.n} congela a ${v.n}: perderá su próximo turno.`);fl('Congelado',te0,'var(--b)');sqUpd();await sl(RM?100:700);continue}}
-  if(hv&&m.t%s.every==0){d=s.heavy||m.atk+s.bonus;x=` con ${s.nm||'un golpe fuerte'}`}if(s.extra&&Math.random()<s.extra){d++;x=' dos veces'}
+  if(hv&&m.t%s.every==0){d=s.heavy||m.atk+s.bonus;x=` con ${s.nm||'un golpe fuerte'}`;try{if(window.skCard)await window.skCard({n:m.n,sub:'Monstruo · Nivel '+(m.lv||1),sk:s.nm||'Golpe fuerte',d:skLong(s)||s.d||'',chips:['Cada '+s.every+' turnos'],enemy:true,mon:1,cat:c})}catch(e){}}if(s.extra&&Math.random()<s.extra){d++;x=' dos veces';try{if(window.skCard)await window.skCard({n:m.n,sub:'Monstruo · Nivel '+(m.lv||1),sk:'Ataque extra',d:skLong(s)||s.d||'',chips:[Math.round(s.extra*100)+'% de probabilidad'],enemy:true,mon:1,cat:c})}catch(e){}}
   if(m.slw>0){d=Math.max(1,d-1);m.slw--}
   const ic=SQ.hs.find(u=>u.hp>0&&u.f&&u.ic>0&&u!==tg);if(!tg.f&&ic&&!IGNT.includes(c)){ic.ic--;tg=ic;d=Math.max(1,d-1);B.log.push(`${ic.n} intercepta el golpe.`)}
   const te=$('sqh'+SQ.hs.indexOf(tg));await sl(RM?100:450);const an=lunge(me,te,RM?200:1100);await sl(RM?100:500);
@@ -4042,6 +4042,48 @@ const OK=['dmg','mag','slow','psn','guard','heal','gheal','taunt','mark','eva','
 const HEAL={b:10,v:3}; /* botiquín / vendaje */
 let R=null; /* duelo activo */
 const clone=o=>JSON.parse(JSON.stringify(o));
+
+/* ---------- EFECTOS NUEVOS: cuadro de habilidad (tipo carta de monstruo) y anuncio de ataque ---------- */
+if(!$$('pvfx-css')){const s=document.createElement('style');s.id='pvfx-css';s.textContent=`
+.pvsk-bd{position:fixed;inset:0;z-index:165;pointer-events:none;background:radial-gradient(70% 55% at 50% 50%,rgba(10,6,24,.6),rgba(10,6,24,.28))}
+.pvsk{position:fixed;left:50%;top:50%;z-index:166;width:min(240px,74vw);transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 12px 12px;border-radius:18px;text-align:center;color:var(--t);pointer-events:none;
+ background:linear-gradient(165deg,color-mix(in srgb,var(--k) 24%,#2c1a4c),#1d1236 72%);box-shadow:0 0 0 2px var(--k),0 18px 40px rgba(0,0,0,.55),0 0 36px color-mix(in srgb,var(--k) 40%,transparent)}
+.pvsk-who{font-size:11px;color:var(--m)}
+.pvsk-av{width:62px;height:62px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--k);background:color-mix(in srgb,var(--k) 16%,transparent);box-shadow:inset 0 0 0 1.5px var(--k)}
+.pvsk-av svg{width:40px;height:40px}
+.pvsk-nm{font-size:15px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pvsk-ab{width:100%;box-sizing:border-box;border-radius:12px;padding:8px 9px;background:rgba(255,255,255,.06);box-shadow:inset 0 0 0 1px var(--l);display:flex;flex-direction:column;gap:3px}
+.pvsk-ab em{font-style:normal;font-size:10px;color:var(--m)}
+.pvsk-ab b{font-size:15px;color:var(--k)}
+.pvsk-ab span{font-size:11px;line-height:1.35}
+.pvsk-ch{display:flex;gap:5px;flex-wrap:wrap;justify-content:center}
+.pvsk-ch i{font-style:normal;font-size:10px;padding:2px 8px;border-radius:99px;box-shadow:inset 0 0 0 1px var(--l)}
+.pvan{position:absolute;left:50%;top:calc(54px + env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:9;max-width:94%;box-sizing:border-box;padding:7px 14px;border-radius:99px;font:600 12px/1.25 Inter,system-ui,sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none;color:var(--t);background:rgba(18,10,38,.95);box-shadow:0 0 0 1.5px var(--k),0 6px 18px rgba(0,0,0,.45)}
+.pvan b{color:var(--k)}
+#pvb .cd.pv-tg{outline:2px dashed var(--r);outline-offset:3px}
+@media(max-width:600px){.pvan{top:calc(40px + env(safe-area-inset-top,0px));font-size:11px;padding:6px 11px}}
+@media(prefers-reduced-motion:reduce){.pvsk,.pvsk-bd{transition:none}}`;document.head.appendChild(s)}
+/* Cuadro de habilidad: o={n,sub,sk,d,chips[],enemy,mon,boss,cat}. Devuelve una promesa que se cumple al terminar de mostrarse. */
+window.skCard=function(o){return new Promise(res=>{
+ try{const k=o.enemy?'var(--r)':'var(--a)';
+  let av;try{av=o.mon?monSvg(!!o.boss,40,o.cat||'melee'):ic('her',40)}catch(e){av=''}
+  const bd=document.createElement('div');bd.className='pvsk-bd';
+  const c=document.createElement('div');c.className='pvsk';c.style.setProperty('--k',k);
+  c.innerHTML=`<span class="pvsk-who">${esc(o.enemy?'Habilidad del rival':'Tu habilidad')}</span><div class="pvsk-av">${av}</div><b class="pvsk-nm">${esc(o.n)}</b><span class="pvsk-who">${esc(o.sub||'')}</span><div class="pvsk-ab"><em>Habilidad</em><b>${esc(o.sk)}</b>${o.d?`<span>${esc(o.d)}</span>`:''}</div>${o.chips&&o.chips.length?`<div class="pvsk-ch">${o.chips.map(x=>`<i>${esc(x)}</i>`).join('')}</div>`:''}`;
+  document.body.appendChild(bd);document.body.appendChild(c);
+  const rm=()=>{bd.remove();c.remove()};
+  if(RM){setTimeout(()=>{rm();res()},500);return}
+  bd.animate([{opacity:0},{opacity:1}],{duration:220,fill:'forwards'});
+  c.animate([{opacity:0,transform:'translate(-50%,-44%) scale(.6) rotate(-4deg)'},{opacity:1,transform:'translate(-50%,-50%) scale(1.06) rotate(1deg)',offset:.62},{opacity:1,transform:'translate(-50%,-50%) scale(1) rotate(0)'}],{duration:340,easing:'cubic-bezier(.2,.9,.25,1)',fill:'forwards'});
+  setTimeout(()=>{const a=c.animate([{opacity:1,transform:'translate(-50%,-50%) scale(1)'},{opacity:0,transform:'translate(-50%,-56%) scale(.94)'}],{duration:240,easing:'ease-in',fill:'forwards'});bd.animate([{opacity:1},{opacity:0}],{duration:240,fill:'forwards'});
+   a.finished.then(()=>{rm();res()},()=>{rm();res()})},1500)
+ }catch(e){res()}})};
+/* Anuncio de ataque: franja superior "X ataca a Y"; devuelve la función que la retira */
+function pvAnn(html,enemy){const h=$$('pvb');if(!h)return()=>{};const e=document.createElement('div');e.className='pvan';e.style.setProperty('--k',enemy?'var(--r)':'var(--a)');e.innerHTML=html;h.appendChild(e);
+ if(!RM)e.animate([{opacity:0,transform:'translate(-50%,-8px)'},{opacity:1,transform:'translate(-50%,0)'}],{duration:180,easing:'ease-out',fill:'forwards'});
+ return()=>{if(RM){e.remove();return}e.animate([{opacity:1},{opacity:0}],{duration:220,fill:'forwards'}).finished.then(()=>e.remove(),()=>e.remove())}}
+/* Resplandor del que va a atacar */
+function pvAim(el,c){if(RM||!el)return;el.animate([{boxShadow:`0 0 0 0 ${c},0 0 0 0 ${c}`},{boxShadow:`0 0 0 3px ${c},0 0 26px ${c}`,offset:.5},{boxShadow:`0 0 0 0 ${c},0 0 0 0 ${c}`}],{duration:700,easing:'ease-in-out'})}
 /* ---------- reglas del estilo nuevo (resistencia, velocidad, líneas) ---------- */
 const stOf=(cls,lv)=>((typeof STM!=='undefined'&&STM[cls])||4)+Math.floor((lv|0)/4);
 const spd=cls=>(typeof SPD!=='undefined'&&SPD[cls])||1;
@@ -4151,7 +4193,7 @@ async function act(a,fr){const st=R.st;if(R.cd||R.busy||st.win||st.turn!=R.me)re
  if(a=='atk'||a=='gp'){ns.vs=ns.vs||{a:0,b:0};ns.vs[R.me]=0;let d=u.atk;if(a=='gp'){d=(u.gp&&u.gp.d)||u.atk+1;u.cd.gp=2;if(u.cls=='guerrero')d++}if(u.cls=='arquero'&&Math.random()<.2){d++;ln.push('¡Disparo certero!')}const x=hit(t,d);t.hp=Math.max(0,t.hp-x);ev.d=x;if(!x)ev.x='Esquiva';ln.push(x?`${u.n} ataca a ${t.n}: -${x} HP.`:`${t.n} esquiva el ataque de ${u.n}.`)}
  else if(a=='def'){u.g=Math.max(u.g,1);u.mp=Math.min(u.mmp,u.mp+1);ev.x='Guardia';ln.push(`${u.n} se defiende (reduce 1 el próximo golpe y recupera 1 de maná).`)}
  else if(a=='sb'||a=='sv'){const al=U[ally],g=Math.min(HEAL[a=='sb'?'b':'v'],al.mhp-al.hp);al.hp+=g;ns.sup[R.me][a=='sb'?'b':'v']--;ns.bt=ns.bt||{a:0,b:0};ns.vs=ns.vs||{a:0,b:0};if(a=='sb')ns.bt[R.me]++;else ns.vs[R.me]++;ev.x='+'+g;ev.j=ally;ev.o=R.me;ev.hl=[[ally,g]];ev.sup=a;ln.push(`${u.n} usa ${a=='sb'?'un botiquín':'un vendaje'} sobre ${al.n}: +${g} HP.`);try{if(S&&S.sup){const f=a=='sb'?'botiquin':'vendaje';S.sup[f]=Math.max(0,(S.sup[f]|0)-1);save()}}catch(e){}}
- else{u.cd[a]=k.cd||0;ln.push(`${u.n} usa ${k.n}.`);
+ else{u.cd[a]=k.cd||0;ev.k=a;ln.push(`${u.n} usa ${k.n}.`);
   if(['dmg','mag','slow','psn'].includes(kind)){const d=Math.max(1,hit(t,k.v)||1);t.hp=Math.max(0,t.hp-d);if(kind=='slow')t.slw=2;if(kind=='psn'){t.pz=3;t.hp=Math.max(1,t.hp)}ev.d=d;ln.push(`${t.n} recibe ${d} de daño.`)}
   else if(kind=='guard'){u.g=Math.max(u.g,k.v);ev.x='Guardia '+k.v}
   else if(kind=='heal'){const al=U[ally],g=Math.min(k.v,al.mhp-al.hp);al.hp+=g;ev.x='+'+g;ev.j=ally;ev.o=R.me;ev.hl=[[ally,g]];ln.push(`${al.n} recupera ${g} HP.`)}
@@ -4166,20 +4208,34 @@ async function act(a,fr){const st=R.st;if(R.cd||R.busy||st.win||st.turn!=R.me)re
  if(!alive(E).length){ns.win=R.me}
  else if(!free){const o=ord(U),p=o.indexOf(ns.ai),nx=p>=0?o[p+1]:undefined;if(nx!=null)ns.ai=nx;else{ns.bt=ns.bt||{a:0,b:0};ns.bt[R.me]=0;ns.turn=R.o;upkeep(E);ns.ai=ord(E)[0]||0;ln.push(`— Turno de ${R.rn} —`)}}
  ns.log=ns.log.concat(ln).slice(-30);ns.seq=st.seq+1;ns.ev=ev;
- await play(ev,R.st,ns);R.st=ns;upd();
+ await play(ev,R.st,ns);R.st=ns;R.last=Math.max(R.last|0,ns.seq);upd();
  try{await C().battleSet(R.id,{bs:clone(ns),estado:ns.win?'fin':'activa',t:Date.now()})}catch(e){notice('Sin conexión','No se pudo enviar tu jugada: '+(e.message||'error'))}
  R.busy=false;R.seqAt=Date.now();upd();if(ns.win)finish()}
 /* animación de una jugada (propia o recibida): mismo ataque que las aventuras */
-async function play(ev,before,after){if(!ev||!$$('pvM'))return;const id=(s,i)=>$$((s==R.me?'pvh':'pvm')+i),A=id(ev.s,ev.i),B=ev.j!=null?id(ev.o,ev.j):null;
- try{if(ev.hl&&ev.hl.length){/* curación: partículas verdes y barra que sube en verde; la ve también el rival */
+async function play(ev,before,after){if(!ev||!$$('pvM'))return;const id=(s,i)=>$$((s==R.me?'pvh':'pvm')+i),A=id(ev.s,ev.i),B=ev.j!=null?id(ev.o,ev.j):null,enemy=ev.s!=R.me,
+  stt=after||before,u0=stt&&stt.u&&stt.u[ev.s]&&stt.u[ev.s][ev.i],t0=ev.j!=null&&stt&&stt.u&&stt.u[ev.o]&&stt.u[ev.o][ev.j];
+ try{
+  /* 1) habilidad: aparece el cuadro con su nombre y efecto (propia o del rival) */
+  if(ev.k&&typeof SKL!=='undefined'&&SKL[ev.k]&&u0){const k=SKL[ev.k],c=cst(ev.k);
+   await window.skCard({n:u0.n,sub:clsOf(u0).n+' · Nivel '+(u0.lv|0),sk:k.n,d:k.d||'',chips:[c.v+' '+(c.r=='st'?'res.':'maná')].concat(k.cd?['Recarga '+k.cd]:[]),enemy})}
+  if(ev.hl&&ev.hl.length){/* curación: partículas verdes y barra que sube en verde; la ve también el rival */
    const mine=ev.s==R.me,tm=after&&after.u&&after.u[ev.s];
    for(const h of ev.hl){const e=id(ev.s,h[0]);if(!e)continue;if(window.supFx)window.supFx(e,h[1],{id:ev.sup=='sb'?'botiquin':'vendaje'});
     const u=tm&&tm[h[0]],bb=$$((mine?'pvhb':'pvmb')+h[0]),tt=$$((mine?'pvhv':'pvmv')+h[0]);if(u&&bb)bb.style.width=100*Math.max(0,u.hp)/u.mhp+'%';if(u&&tt)tt.textContent=Math.max(0,u.hp)+'/'+u.mhp}
    await wait(900)}
-  else if(A&&B&&ev.d>0){const an=lunge(A,B,RM?200:1200);await wait(550);slash(B);impact(B,'-'+ev.d);await wait(350);await an.finished}
+  else if(A&&B&&ev.j!=null&&(ev.d>0||ev.x=='Esquiva')){
+   /* 2) ataque: se anuncia quién ataca a quién, el atacante brilla, el objetivo queda marcado y recién ahí embiste */
+   const col=enemy?'var(--r)':'var(--a)',nm=x=>x?esc(x.n):'?',
+    done=pvAnn(ev.k&&SKL[ev.k]?`<b>${nm(u0)}</b> usa <b>${esc(SKL[ev.k].n)}</b> sobre <b>${nm(t0)}</b>`:`<b>${nm(u0)}</b> ${enemy?'te ataca':'ataca'} a <b>${nm(t0)}</b>`,enemy);
+   B.classList.add('pv-tg');pvAim(A,col);await wait(enemy?700:480);
+   const an=lunge(A,B,RM?200:1400);await wait(600);
+   if(ev.d>0){slash(B);impact(B,'-'+ev.d)}else fl('Esquiva',B,'var(--b)');
+   await wait(400);await an.finished;done();B.classList.remove('pv-tg');await wait(120)}
   else if(A&&B&&ev.x){fl(ev.x,B,'var(--b)');await wait(500)}
   else if(A&&ev.x){fl(ev.x,A,'var(--b)');await wait(500)}
-  else if(A&&B){await wait(300)}}catch(e){}}
+  else if(A&&B){await wait(300)}
+ }catch(e){}
+ finally{document.querySelectorAll('#pvb .pv-tg').forEach(x=>x.classList.remove('pv-tg'));document.querySelectorAll('#pvb .pvan').forEach(x=>x.remove())}}
 /* ---------- fin del duelo ---------- */
 async function finish(){if(!R||R.fin)return;R.fin=1;cdStop();const won=R.st.win==R.me;let rk=null;
  try{if(R.tipo!='amistad')rk=await window.arenaDuel({won,id:R.id,oppUid:R.ou,oppName:R.rn})}catch(e){}
@@ -4215,7 +4271,12 @@ addEventListener('cloudbattle',e=>{const{r,me}=e.detail;if(R||r.tipo=='x')return
  const me0=R;
  R.un=C().battleWatch(r.id,async d=>{if(!R)return;
   if(!d){if(!R.st.win&&!R.fin){const ns=clone(R.st);ns.win=R.me;ns.log.push(`${R.rn} abandonó el duelo.`);R.st=ns;upd();finish()}return}
-  if(d.bs&&d.bs.u&&d.bs.seq>R.st.seq){const prev=R.st,ns=d.bs;R.seqAt=Date.now();R.stale=false;R.busy=true;await play(ns.ev,prev,ns);R.st=ns;R.busy=false;upd();if(ns.win)finish()}});
+  if(d.bs&&d.bs.u&&d.bs.seq>Math.max(R.last|0,R.st.seq)){const ns=d.bs;R.last=ns.seq;R.seqAt=Date.now();R.stale=false;R.busy=true;R.pq=(R.pq|0)+1;
+   /* las jugadas del rival se animan una detrás de otra; si aún está la cuenta atrás, esperan a que termine para que SÍ se vea el ataque */
+   R.q=(R.q||Promise.resolve()).then(async()=>{if(R!==me0)return;
+    if(R.cd){while(R===me0&&R.cd)await tick(120);if(R!==me0)return;await tick(600)}
+    const prev=R.st;await play(ns.ev,prev,ns);if(R!==me0)return;
+    R.st=ns;R.pq--;if(R.pq<=0){R.pq=0;R.busy=false}upd();if(ns.win)finish()}).catch(()=>{if(R===me0){R.pq=Math.max(0,(R.pq|0)-1);if(!R.pq)R.busy=false}})}});
  R.iv=setInterval(()=>{if(!R||R.st.win||R.cd)return;const s=R.st.turn!=R.me&&Date.now()-R.seqAt>100000;if(s!==R.stale){R.stale=s;upd()}},3000);
  runCd(me0)});
 /* arena.js ya no usa el sim automático; evita que el viejo listener (si existe) abra otra pantalla */
