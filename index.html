@@ -640,7 +640,36 @@ body.onscr #game *{animation:none!important}
 .mgm i{border-right:1px solid var(--l);border-bottom:1px solid var(--l);display:flex;align-items:center;justify-content:center;color:var(--a)}
 #nav{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr)}#nav button svg.si{width:30px;height:30px;fill:currentColor;stroke:none;display:block}#nav button,#nav #n4{gap:0;padding:0;align-items:center;justify-content:center;min-height:62px}#nav #n4{border:0;background:rgba(255,255,255,.035);color:var(--t);box-shadow:inset 0 0 0 1px var(--l);cursor:pointer}#nav #n4 svg{color:var(--a)}#nav #n4:hover{background:rgba(233,152,86,.12);box-shadow:inset 0 0 0 1px var(--a)}#nav #n2 svg.si{color:#1A1836}@media(min-width:900px){#nav button svg.si{width:36px;height:36px}#nav button,#nav #n4{min-height:76px}}
 #view{touch-action:pan-x pan-y;scrollbar-width:none;-ms-overflow-style:none}#view::-webkit-scrollbar{display:none;width:0;height:0}#zw{width:max-content;margin:0 auto}#zw #grid{margin:0;transform-origin:0 0}
-</style></head><body>
+</style><style id="hcol-css">
+.cd.hc.hcol{background:linear-gradient(170deg,color-mix(in srgb,var(--hc) 26%,var(--s)),color-mix(in srgb,var(--hc) 8%,var(--s)) 55%,var(--s) 92%)!important}
+.cd.hc.hcol:not(.eq){box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--hc) 34%,var(--l))}
+.cd.hc.hcol .hav{border-color:color-mix(in srgb,var(--hc) 65%,var(--l));background:color-mix(in srgb,var(--hc) 16%,transparent)}
+.cd.hc.hcol .hlv{background:color-mix(in srgb,var(--hc) 24%,transparent)}
+.hpal{display:grid;grid-template-columns:repeat(5,1fr);gap:9px;margin:6px 0 2px}
+.hpal button{width:100%;height:auto;min-height:0;padding:0;aspect-ratio:1;border-radius:50%;border:2px solid transparent;background:var(--c);cursor:pointer;box-shadow:inset 0 0 0 1px rgba(255,255,255,.18)}
+.hpal button.on{border-color:var(--t);box-shadow:0 0 0 2px var(--bg),0 0 0 4px var(--c)}
+</style>
+<style id="hud-css">
+/* ===== Barra superior ordenada: fila 1 = menú · ciudad · amigos; fila 2 = monedas y diamantino ===== */
+header{grid-template-columns:auto minmax(0,1fr) auto!important;align-items:center}
+header #mb{grid-column:1;grid-row:1}
+header .city{grid-column:2;grid-row:1;min-width:0;padding-right:0!important}
+header .frb{position:static!important;transform:none!important;top:auto!important;right:auto!important;grid-column:3;grid-row:1;justify-self:end;margin:0;width:34px;height:34px}
+header .coins{grid-column:1/-1!important;grid-row:2}
+/* ===== Avisos de invasión y evento: fichas compactas en la esquina, sin empujar el encabezado ===== */
+#alerts{position:absolute;right:8px;top:calc(var(--hh,60px) + 8px);z-index:12;display:flex;flex-direction:column;align-items:flex-end;gap:6px;max-width:calc(100% - 16px);pointer-events:none}
+#alerts>button{pointer-events:auto;width:auto;margin:0;padding:5px 12px;font-size:11px;line-height:1.2;border-radius:999px;background:var(--s);color:var(--t);box-shadow:0 6px 16px rgba(0,0,0,.4),inset 0 0 0 1px var(--l);letter-spacing:.02em;white-space:nowrap;display:inline-flex;align-items:center;gap:6px}
+#alerts #iva.ivact::before{content:"";flex:none;width:8px;height:8px;border-radius:50%;background:currentColor;animation:ivDot 1s ease-in-out infinite}
+@keyframes ivDot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.7)}}
+@media(min-width:900px){#alerts>button{font-size:13px;padding:7px 14px}}
+/* aviso emergente de invasión: esquina superior derecha, compacto; los demás avisos siguen arriba al centro y se apilan */
+.ntc.ivn{left:auto;right:8px;top:calc(var(--hh,60px) + var(--ah,0px) + 14px);transform:none;max-width:min(300px,88vw);padding:9px 12px;gap:9px;border-radius:14px;animation:ivnIn .4s cubic-bezier(.2,.9,.3,1.1) backwards,ivPulse 1.3s ease-in-out .45s infinite}
+.ntc.ivn.out{transform:translateX(24px)}
+.ntc.ivn b{font-size:12px}.ntc.ivn .m{font-size:11px}.ntc.ivn .nti svg{width:20px;height:20px}
+@keyframes ivnIn{from{opacity:0;transform:translateX(24px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.ntc.ivn,#alerts #iva.ivact::before{animation:none}}
+</style>
+</head><body>
 <div class="ld" id="ld"><div class="ldstage"><svg class="ldring" viewBox="0 0 112 112" aria-hidden="true"><circle class="tr" cx="56" cy="56" r="44"/><circle class="w" cx="56" cy="56" r="44" pathLength="100" transform="rotate(-90 56 56)"/><circle class="p" cx="56" cy="56" r="44" pathLength="100" transform="rotate(-90 56 56)"/><path class="c" pathLength="100" transform="translate(-1.14 3.63)" d="M40 67H72A9 9 0 0 0 73 49A13 13 0 0 0 48 46A10 10 0 0 0 40 67"/></svg><div class="ldtt">CIUDAD</div><div class="ldsub">Forja tu leyenda</div><div class="ldbar"><i id="ldf"></i></div><div class="ldm" id="ldm">Iniciando…</div></div></div></div></div>
 <section id="slots"></section>
 <section id="game" class="hide">
@@ -1006,7 +1035,12 @@ $('hb').onclick=heroes;
 const hd=h=>h.dead&&Date.now()<h.dead;
 const eqH=()=>S.eq.map(id=>S.heroes.find(x=>x.id==id)).filter(Boolean);
 const lead=()=>{const e=eqH();if(e.length>=3){const p=e.find(x=>x.id==S.sel);if(p&&!hd(p))return p}for(const id of S.eq){const h=S.heroes.find(x=>x.id==id);if(h&&!hd(h))return h}return null};
-const hcard=(h,x='',oc='',slot='')=>`<div class="cd hc ${x}" ${oc?`onclick="${oc}"`:''}><span class="hlv">Nv ${h.lv}</span>${slot?`<span class="hsn">${slot}</span>`:''}<div class="hart"><div class="hav">${ic('her',26)}</div></div><b>${h.n}</b><span class="hat">${clsN(h)} · ATQ ${h.atk}</span><div class="hb r"><i style="width:${100*h.hp/h.mhp}%"></i><span>HP ${h.hp}/${h.mhp}</span></div><div class="hb b"><i style="width:${100*h.mp/h.mmp}%"></i><span>Maná ${h.mp}/${h.mmp}</span></div>${hd(h)?`<span class="hdd">Inhabilitado ${Math.ceil((h.dead-Date.now())/1000)} s</span>`:''}</div>`;
+const HPAL=[['Rojo','#e05656'],['Coral','#f0705a'],['Naranja','#f08a3c'],['Ámbar','#f2a93b'],['Amarillo','#e8cf4a'],['Lima','#b7d84a'],['Verde','#5cc26a'],['Esmeralda','#2fb887'],['Menta','#7fd8b0'],['Turquesa','#2ec4c0'],['Cian','#3bb8e8'],['Celeste','#5aa0f0'],['Azul','#4a72e0'],['Índigo','#6a5ae0'],['Violeta','#8f5ae0'],['Lavanda','#b9a0ee'],['Púrpura','#b05ad8'],['Magenta','#d84fb8'],['Rosa','#ee6aa0'],['Vino','#a03a5a'],['Marrón','#a87850'],['Arena','#c9b48a'],['Oliva','#8a9a40'],['Pizarra','#5f7088'],['Gris','#8d94a0']],HCOL=HPAL.map(x=>x[1]);
+let RCOL=null;
+const hpal=()=>`<div class="sx">Color de la tarjeta</div><div class="hpal">${HPAL.map(c=>`<button type="button" class="${c[1]==RCOL?'on':''}" data-c="${c[1]}" style="--c:${c[1]}" title="${c[0]}" aria-label="${c[0]}" onclick="pickCol('${c[1]}')"></button>`).join('')}</div><p class="m hint">Opcional. Da un degradado suave a la tarjeta del héroe.</p>`;
+function pickCol(c){RCOL=RCOL==c?null:c;document.querySelectorAll('.hpal button').forEach(b=>b.classList.toggle('on',b.dataset.c==RCOL))}
+const hcc=h=>HCOL.includes(h.color)?' hcol':'',hcs=h=>HCOL.includes(h.color)?` style="--hc:${h.color}"`:'';
+const hcard=(h,x='',oc='',slot='')=>`<div class="cd hc ${x}${hcc(h)}"${hcs(h)} ${oc?`onclick="${oc}"`:''}><span class="hlv">Nv ${h.lv}</span>${slot?`<span class="hsn">${slot}</span>`:''}<div class="hart"><div class="hav">${ic('her',26)}</div></div><b>${h.n}</b><span class="hat">${clsN(h)} · ATQ ${h.atk}</span><div class="hb r"><i style="width:${100*h.hp/h.mhp}%"></i><span>HP ${h.hp}/${h.mhp}</span></div><div class="hb b"><i style="width:${100*h.mp/h.mmp}%"></i><span>Maná ${h.mp}/${h.mmp}</span></div>${hd(h)?`<span class="hdd">Inhabilitado ${Math.ceil((h.dead-Date.now())/1000)} s</span>`:''}</div>`;
 let PD=false;
 const screen=(t,b)=>{const o=$('ov'),h=`<div class="scr"><div class="sh"><b>${t}</b><button onclick="sheetClose()">Volver</button></div><div class="sb">${b}</div></div>`;
  if(o.firstChild&&o.firstChild===o._el&&o._h===h)return;
@@ -1024,10 +1058,10 @@ function heroes(){SCR='heroes';
 function eqh(id){if(!S.eq.includes(id)){const i=S.eq.indexOf(null);S.eq[i<0?0:i]=id;save()}heroes()}
 function uneq(i){S.eq[i]=null;save();heroes()}
 function uneqId(id){const i=S.eq.indexOf(id);if(i>=0){S.eq[i]=null;save()}heroes()}
-function train(){SCR=null;
- $('ov').innerHTML=`<div class="sheet"><div class="panel" style="margin:auto;width:340px;max-width:92vw"><h2>Nombre del héroe</h2><input id="hn" maxlength="20" placeholder="Nombre"><p></p><button id="hk">Entrenar</button></div></div>`;
+function train(){SCR=null;RCOL=null;
+ $('ov').innerHTML=`<div class="sheet"><div class="panel" style="margin:auto;width:340px;max-width:92vw"><h2>Nombre del héroe</h2>${hpal()}<input id="hn" maxlength="20" placeholder="Nombre"><p></p><button id="hk">Entrenar</button></div></div>`;
  $('hk').onclick=()=>{const n=$('hn').value.trim();if(!n)return;
-  S.pop--;const h={id:S.id++,n,lv:0,atk:1,hp:5,mhp:5,mp:3,mmp:3};S.heroes.push(h);const i=S.eq.indexOf(null);if(i>=0)S.eq[i]=h.id;S.step=7;save();heroes();tut();setTimeout(()=>startBattle(null),1800)}}
+  S.pop--;const h={id:S.id++,n,lv:0,atk:1,hp:5,mhp:5,mp:3,mmp:3};if(RCOL)h.color=RCOL;RCOL=null;S.heroes.push(h);const i=S.eq.indexOf(null);if(i>=0)S.eq[i]=h.id;S.step=7;save();heroes();tut();setTimeout(()=>startBattle(null),1800)}}
 /* ===== Datos de niveles (separados del combate): [nombre, ataque, vida]. Añadir más filas = más niveles ===== */
 const MN=[['Babosa del bosque',1,2],['Rata salvaje',1,3],['Murciélago joven',1,3],['Araña pequeña',1,4],['Babosa colosal',1,8],['Goblin explorador',1,5],['Lobo gris',2,5],['Escarabajo acorazado',1,7],['Cuervo sombrío',2,6],['Goblin saqueador',2,12],['Esqueleto errante',2,8],['Serpiente venenosa',2,8],['Murciélago carmesí',2,9],['Hongo tóxico',2,11],['Araña reina',2,18],['Ladrón de cristales',2,11],['Lobo de guerra',2,13],['Gólem de piedra',2,18],['Hechicero caído',3,13],['Caballero maldito',3,25],['Sanguijuela abisal',3,15],['Orco devastador',3,18],['Espectro del bosque',3,16],['Escorpión de obsidiana',3,20],['Ogro rompefortalezas',4,32],['Gólem de cristal',3,22],['Bruja de las cenizas',4,20],['Wyvern joven',4,25],['Guardián de la grieta',4,28],['Dragón de la grieta',5,40]];
 const LVS=MN.map((m,i)=>({id:i+1,b:(i+1)%5==0,m:i?[i-1,i]:[0]}));
@@ -1445,10 +1479,10 @@ function rcUI(){const c=CLS[RC],ok=S.heroes.length<S.cards&&S.pop-used()>=1,cost
  $('ov').innerHTML=`<div class="sheet"><div class="panel pm" style="margin:auto;max-height:92%"><div class="uh"><div class="ib big">${ic('her',30)}</div><div class="uhi"><h2>Reclutar héroe</h2><span class="m">Elige una clase</span></div></div><div class="pmb"><div class="chips">${Object.keys(CLS).map(k=>`<button class="pk${k==RC?' on':''}" onclick="RN2=$('hn').value;RC='${k}';rcUI()">${CLS[k].n}</button>`).join('')}</div>
  <div class="ucard"><div class="uct"><b>${c.n}</b><span class="chip">${c.pos}</span></div><p class="m" style="margin:0">${c.d}</p><div class="chips"><span class="chip r">HP ${c.hp}</span><span class="chip a">Atq ${c.atk}</span><span class="chip">Maná ${c.mp}</span></div></div>
  ${un?'':`<div class="note warn">${c.ut}</div>`}<div class="uc"><div><span class="m">Costo</span><div class="cost">${chipsCost(cost)}</div></div><div><span class="m">Habitante</span><b>1</b></div></div>
- <input id="hn" maxlength="20" placeholder="Nombre" value="${esc(RN2)}"></div><div class="pmf two"><button class="pri" id="hk" ${can2?'':'disabled'}>Reclutar</button><button onclick="centro()">Cancelar</button></div></div></div>`;
+ ${hpal()}<input id="hn" maxlength="20" placeholder="Nombre" value="${esc(RN2)}"></div><div class="pmf two"><button class="pri" id="hk" ${can2?'':'disabled'}>Reclutar</button><button onclick="centro()">Cancelar</button></div></div></div>`;
  $('hk').onclick=()=>{const nm=$('hn').value.trim(),c2=CLS[RC],cs=rcost(RC);if(!nm||S.heroes.length>=S.cards||S.pop-used()<1||(c2.unlock&&!c2.unlock())||!pay(cs))return;
-  S.pop--;const h={id:S.id++,n:nm,cls:RC,lv:1,xp:0,atk:c2.atk,hp:c2.hp,mhp:c2.hp,mp:c2.mp,mmp:c2.mp};S.heroes.push(h);const i=S.eq.indexOf(null);if(i>=0)S.eq[i]=h.id;RN2='';save();draw();centro()}}
-recruit=function(){if(S.heroes.length>=S.cards||S.pop-used()<1)return;RN2='';RC='guerrero';rcUI()};
+  S.pop--;const h={id:S.id++,n:nm,cls:RC,lv:1,xp:0,atk:c2.atk,hp:c2.hp,mhp:c2.hp,mp:c2.mp,mmp:c2.mp};if(RCOL)h.color=RCOL;S.heroes.push(h);const i=S.eq.indexOf(null);if(i>=0)S.eq[i]=h.id;RN2='';RCOL=null;save();draw();centro()}}
+recruit=function(){if(S.heroes.length>=S.cards||S.pop-used()<1)return;RN2='';RC='guerrero';RCOL=null;rcUI()};
 {const _go=go;go=function(n,f){_go(n,f);if(!S)return;S.heroes.forEach(h=>{if(!h.cls)h.cls='guerrero'});S.ver=2;S.mlog=S.mlog||[];save()}}
 /* efectos de clase en combate */
 {const _h=hit;hit=async function(k){if(B)B.k=k;return _h(k)};
@@ -2271,13 +2305,17 @@ const ready=dbOpen().then(()=>{try{navigator.storage&&navigator.storage.persist&
 function fade(a,to,ms,end){clearInterval(a._iv);const from=a.volume,t0=performance.now();if(!ms){a.volume=to;end&&end();return}
  a._iv=setInterval(()=>{const p=Math.min(1,(performance.now()-t0)/ms);a.volume=Math.max(0,Math.min(1,from+(to-from)*p));if(p>=1){clearInterval(a._iv);end&&end()}},50)}
 async function getEl(k){if(MT.el[k])return MT.el[k];const rec=await idb('readonly',s=>s.get(k));if(!rec||!rec.blob)return null;if(MT.el[k])return MT.el[k];
- const a=new Audio(URL.createObjectURL(rec.blob));a.loop=true;a.preload='auto';a.volume=0;a._u=a.src;MT.el[k]=a;return a}
+ const a=new Audio(URL.createObjectURL(rec.blob)),dq=k.startsWith('duelo:');a.loop=!dq;a.preload='auto';a.volume=0;a._u=a.src;if(dq)a.addEventListener('ended',()=>duelNext(k));MT.el[k]=a;return a}
+const duelKeys=()=>Object.keys(MT.meta).filter(k=>k.startsWith('duelo:')).sort((a,b)=>a.split(':')[1]-b.split(':')[1]);
+/* playlist de duelo: al terminar una pista pasa a la siguiente; al final vuelve a empezar (con una sola, se repite) */
+function duelNext(k){if(MT.cur!==k||MT.away)return;const ks=duelKeys();if(ks.length>1){MT.dk=ks[(ks.indexOf(k)+1)%ks.length]}else{const a=MT.el[k];if(a){a.currentTime=0;a.volume=MT.MV;MT.lastTry=Date.now();a.play().catch(()=>{})}}}
 function dropEl(k){const a=MT.el[k];if(!a)return;clearInterval(a._iv);a.pause();try{URL.revokeObjectURL(a._u)}catch(e){}delete MT.el[k];if(MT.cur===k)MT.cur=undefined}
 async function switchTo(k){const pk=MT.cur;MT.cur=k;const tr=k&&MT.meta[k]?MT.meta[k].tr:(pk&&MT.meta[pk]?MT.meta[pk].tr:2000);
  if(pk&&pk!==k&&MT.el[pk]){const p=MT.el[pk];fade(p,0,tr,()=>{if(MT.cur!==pk)p.pause()})}
  if(!k)return;let a;try{a=await getEl(k)}catch(e){a=null}if(MT.cur!==k)return;if(!a){MT.cur=null;return}
  if(a.paused){a.currentTime=0;a.volume=0}MT.lastTry=Date.now();a.play().catch(()=>{});fade(a,MT.MV,tr)}
 function want(){if(!S||$('game').classList.contains('hide'))return null;
+ if($('pvb')){const ks=duelKeys();if(ks.length){if(!MT.dk||!ks.includes(MT.dk))MT.dk=ks[Math.random()*ks.length|0];return MT.dk}}else MT.dk=null;
  const bat=$('ov').querySelector('#hc,#sqM');
  if(bat&&B){const ad=B.adv,lv=ad&&ad.lv,boss=ad&&(ad.boss||(lv&&LVS[lv-1]&&LVS[lv-1].b));
   if(boss){return (lv&&mtHas('jefe:'+lv))?'jefe:'+lv:mtHas('jefe')?'jefe':mtHas('aventura')?'aventura':null}
@@ -2285,9 +2323,20 @@ function want(){if(!S||$('game').classList.contains('hide'))return null;
  return mtHas('aldea')?'aldea':null}
 setInterval(()=>{try{
  const f=$('mfab');if(f)f.style.display=(typeof ADM!='undefined'&&ADM)?'flex':'none';
- if(MT.hold)return;const w=want();if(w!==MT.cur)switchTo(w);
+ if(MT.hold||MT.away)return;const w=want();if(w!==MT.cur)switchTo(w);
  else if(MT.cur){const a=MT.el[MT.cur];if(a&&a.paused&&Date.now()-MT.lastTry>1500){MT.lastTry=Date.now();a.volume=MT.MV;a.play().catch(()=>{})}}}catch(e){}},500);
-['pointerdown','keydown'].forEach(t=>document.addEventListener(t,()=>{if(MT.cur&&!MT.hold){const a=MT.el[MT.cur];if(a&&a.paused)a.play().catch(()=>{})}},true));
+['pointerdown','keydown'].forEach(t=>document.addEventListener(t,()=>{if(MT.cur&&!MT.hold&&!MT.away){const a=MT.el[MT.cur];if(a&&a.paused)a.play().catch(()=>{})}},true));
+/* segundo plano: al salir de la pestaña/app la música baja poco a poco y se pausa; al volver sube gradualmente. Los efectos de sonido también se silencian */
+{let st=null;
+ const down=()=>{if(MT.away)return;MT.away=true;clearTimeout(st);try{mtStopPv()}catch(e){}
+  const a=MT.cur&&MT.el[MT.cur];if(a&&!a.paused)fade(a,0,3000,()=>{if(MT.away)a.pause()});
+  st=setTimeout(()=>{if(!MT.away)return;try{if(typeof SND!=='undefined'&&SND.ctx)SND.ctx.suspend()}catch(e){}try{if(AC)AC.suspend()}catch(e){}},3200)};
+ const up=()=>{if(!MT.away)return;MT.away=false;clearTimeout(st);
+  try{if(typeof SND!=='undefined'&&SND.ctx&&SND.ctx.state=='suspended')SND.ctx.resume()}catch(e){}try{if(AC&&AC.state=='suspended')AC.resume()}catch(e){}
+  const a=MT.cur&&MT.el[MT.cur];if(a&&!MT.hold){if(a.paused){a.volume=0;MT.lastTry=Date.now();a.play().catch(()=>{})}fade(a,MT.MV,3000)}};
+ document.addEventListener('visibilitychange',()=>document.visibilityState==='hidden'?down():up());
+ addEventListener('pagehide',down);addEventListener('pageshow',up);
+ if(document.visibilityState==='hidden')MT.away=true}
 /* sincronización con la nube: lo que publica el administrador lo reciben todas las cuentas */
 const syncing={};
 async function syncMusic(d){if(d.fromCache)return;const list=d.list.filter(x=>x&&x.k&&x.n&&x.v),keys=new Set(list.map(x=>x.k));
@@ -2316,7 +2365,7 @@ const row=(k,title,desc,del)=>{const m=MT.meta[k],has=!!m,pv=MT.pv===k;
  <div class="uf"><select ${has?'':'disabled'} onchange="mtTr('${k}',this.value)" aria-label="Transición" style="background:rgba(255,255,255,.06);color:var(--t);border:1px solid var(--l);border-radius:10px;padding:8px;font:inherit;max-width:46%">${TRS.map(t=>`<option value="${t[0]}" ${(m?m.tr:2000)==t[0]?'selected':''}>${t[1]}</option>`).join('')}</select>
  <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end"><button onclick="mtUp('${k}')">${has?'Reemplazar':'Subir MP3'}</button>${has?`<button onclick="mtPv('${k}')">${pv?'■ Parar':'▶ Probar'}</button><button onclick="mtDel('${k}')">Quitar</button>`:''}${del&&!has?`<button onclick="mtDel('${k}')">Quitar fila</button>`:''}</div></div></div>`};
 function musUI(){let w=$('musw');const keep=w&&w.querySelector('.menu')?w.querySelector('.menu').scrollTop:0;
- const sp=Object.keys(MT.meta).filter(k=>k.startsWith('jefe:')).sort((a,b)=>a.split(':')[1]-b.split(':')[1]);
+ const sp=Object.keys(MT.meta).filter(k=>k.startsWith('jefe:')).sort((a,b)=>a.split(':')[1]-b.split(':')[1]),dq=duelKeys();
  const tot=Object.values(MT.meta).reduce((a,m)=>a+m.size,0);
  const h=`<div class="panel side menu" style="width:min(420px,94vw)!important"><div class="mhd"><span class="mem">♪</span><div><h1>Música</h1><span class="m">Modo administrador · ${Object.keys(MT.meta).length} pistas · ${sz(tot)}</span></div><button class="mx" aria-label="Cerrar" onclick="musClose()">✕</button></div>
  ${MT.err?`<div class="note warn" style="margin-top:14px">${MT.err} Las canciones no se podrán guardar.</div>`:''}
@@ -2324,7 +2373,8 @@ function musUI(){let w=$('musw');const keep=w&&w.querySelector('.menu')?w.queryS
  <p class="m hint">Las canciones que subas se publican para TODAS las cuentas (se descargan solas y quedan guardadas en cada dispositivo). Cada canción hace su transición al empezar y al irse la anterior. <b>Máximo 60 MB por canción.</b></p>
  ${Object.values(MT.meta).some(m=>!m.v)?`<div class="note" style="margin-top:14px">Hay canciones que solo suenan en este dispositivo. <button onclick="mtPubAll()">Publicar para todos</button></div>`:''}<div class="sx">Secciones</div>${MTS.map(s=>row(s[0],s[1],s[2])).join('')}
  <div class="sx">Jefes específicos</div>${sp.map(k=>row(k,lvName(k),'Solo suena en ese jefe; tiene prioridad sobre «Jefes (general)».')).join('')||'<p class="m hint">Aún no hay jefes con música propia.</p>'}
- <div class="ucard"><div class="uct"><b>Añadir jefe específico</b></div><span class="m">Nivel de jefe (múltiplo de 5, 5–140). El nivel 60 es Yloka.</span><div class="uf"><input id="mtl" type="number" min="5" max="140" step="5" value="60" style="width:90px"><button onclick="mtNew()">Elegir MP3</button></div></div>
+ <div class="sx">Música de duelos (playlist)</div><p class="m hint">Suena solo durante los duelos entre jugadores. Puedes subir varias: se reproducen en orden, empezando por una al azar, y al terminar la lista vuelve a empezar. Con una sola pista, se repite. Si no hay ninguna, en los duelos sigue la música de la aldea.</p>${dq.map((k,i)=>row(k,'Duelo · pista '+(i+1),'Pista '+(i+1)+' de '+dq.length+' en la playlist de duelos.')).join('')}<div class="ucard"><div class="uct"><b>Añadir canción de duelo</b><span class="m">${dq.length}/12</span></div><div class="uf"><button ${dq.length>=12?'disabled':''} onclick="mtNewDq()">Elegir MP3</button></div></div>
+<div class="ucard"><div class="uct"><b>Añadir jefe específico</b></div><span class="m">Nivel de jefe (múltiplo de 5, 5–140). El nivel 60 es Yloka.</span><div class="uf"><input id="mtl" type="number" min="5" max="140" step="5" value="60" style="width:90px"><button onclick="mtNew()">Elegir MP3</button></div></div>
  <div class="mft"><button onclick="mtStopPv();musClose()">Cerrar</button><button onclick="mtStopPv()">Parar prueba</button></div></div>`;
  if(!w){w=document.createElement('div');w.id='musw';w.className='sheet';w.style.zIndex=70;w.onclick=e=>{if(e.target===w)musClose()};document.body.appendChild(w)}
  w.innerHTML=h;const mn=w.querySelector('.menu');if(mn)mn.scrollTop=keep}
@@ -2341,6 +2391,7 @@ fi.onchange=async()=>{const f=fi.files[0],k=fi._k;fi.value='';if(!f||!k)return;
   MT.meta[k]={name:f.name,size:f.size,tr,v};dropEl(k);if(MT.pv===k)mtStopPv();
   notice(v?'Publicada para todas las cuentas':'Canción guardada',msg)}catch(e){notice('No se pudo guardar',String(e.message||e))}musUI()};
 window.mtUp=k=>{fi._k=k;fi.click()};
+window.mtNewDq=()=>{const ks=duelKeys();if(ks.length>=12)return;mtUp('duelo:'+((ks.length?Math.max(...ks.map(k=>+k.split(':')[1])):0)+1))};
 window.mtNew=()=>{const n=Math.round(+$('mtl').value);if(!(n>=5&&n<=140&&n%5==0)){notice('Nivel no válido','Los jefes están en los niveles múltiplos de 5 (5 a 140).');return}mtUp('jefe:'+n)};
 window.mtTr=async(k,v)=>{const m=MT.meta[k];if(!m)return;try{const r=await idb('readonly',s=>s.get(k));if(r){r.tr=+v;await idb('readwrite',s=>s.put(r));m.tr=+v}if(m.v&&window.Cloud&&Cloud.musicTr)Cloud.musicTr(k,+v).catch(()=>{})}catch(e){notice('No se pudo guardar',String(e.message||e))}};
 window.mtDel=async k=>{if(MT.meta[k]&&!confirm('¿Quitar esta canción?'))return;const was=MT.meta[k]&&MT.meta[k].v;try{await idb('readwrite',s=>s.delete(k))}catch(e){}if(was&&window.Cloud&&Cloud.musicDel){try{await Cloud.musicDel(k)}catch(e){notice('No se pudo quitar de la nube',String(e.message||e))}}if(MT.pv===k)mtStopPv();delete MT.meta[k];dropEl(k);musUI()};
@@ -3054,7 +3105,7 @@ const SNDS={
  fanfarria:()=>{[523,659,784,1047].forEach((f,i)=>sndTone(f,i*.14,.3,'triangle',.22));[523,659,784].forEach(f=>sndTone(f,.56,.9,'triangle',.16))},
  derrota:()=>{sndTone(392,0,.8,'sawtooth',.1,196);sndTone(147,.3,.7,'sine',.2)},
  fin:()=>{[880,1109,1319].forEach((f,i)=>sndTone(f,i*.25,1.2,'sine',.14))}};
-function snd(k){if(!SND.on||!SND.vol||!SNDS[k])return;try{SNDS[k]()}catch(_){}}
+function snd(k){if(document.hidden||!SND.on||!SND.vol||!SNDS[k])return;try{SNDS[k]()}catch(_){}}
 
 const epCell=()=>{const e=S&&S.b.find(b=>b.type=='est');return e&&G?G[e.y*15+e.x]:null};
 const epBan=t=>{const w=S.lastWin,d=S.lastDefeat;banner(t);S.lastWin=w;S.lastDefeat=d};
@@ -3538,7 +3589,7 @@ Object.assign(window.Cloud,{
  async setColor(c){await setDoc(doc(db,'perfiles',uid),{color:c},{merge:true});window.Cloud.me={...window.Cloud.me,color:c}}
 });
 /* ===== ADMIN, VISTA DE PARTIDA Y BATALLAS ===== */
-const team=()=>{try{return S.eq.map(id=>S.heroes.find(h=>h.id==id)).filter(Boolean).map(h=>{let x={n:h.n,atk:h.atk,hp:h.mhp,lv:h.lv||0};try{const u=sqMk(h),g=GP(h);x={n:h.n,atk:u.atk|0,hp:u.mhp|0,lv:h.lv||0,cls:u.cls||'guerrero',mp:u.mmp|0,sk:((h.sk&&h.sk.l)||[]).filter(id=>SKL[id]),gp:{mp:+g.mp||0,d:+g.d||0,ig:+g.ig||0}}}catch(e){}return x})}catch(e){return[]}};
+const team=()=>{try{return S.eq.map(id=>S.heroes.find(h=>h.id==id)).filter(Boolean).map(h=>{let x={n:h.n,atk:h.atk,hp:h.mhp,lv:h.lv||0,col:h.color||''};try{const u=sqMk(h),g=GP(h);x={n:h.n,atk:u.atk|0,hp:u.mhp|0,lv:h.lv||0,col:h.color||'',cls:u.cls||'guerrero',mp:u.mmp|0,sk:((h.sk&&h.sk.l)||[]).filter(id=>SKL[id]),gp:{mp:+g.mp||0,d:+g.d||0,ig:+g.ig||0}}}catch(e){}return x})}catch(e){return[]}};
 let vt=null,searching=false,inB=false,cun=null,qi=null,bun=[];const pend=new Set(),bseen=new Set();
 function viewSoon(){if(!uid)return;clearTimeout(vt);vt=setTimeout(async()=>{try{if(typeof S==='undefined'||!S)return;const e=S.b.find(b=>b.type=='est');
  await setDoc(doc(db,'perfiles',uid),{vista:{city:S.city,pop:S.pop,est:e?(e.lv||1):0,b:S.b.map(b=>[b.type,b.x,b.y,b.lv||1]),h:(S.heroes||[]).map(h=>[h.n,h.lv||0,h.atk,h.mhp])},vt:Date.now()},{merge:true})}catch(e){}},5000)}
@@ -3942,53 +3993,121 @@ setInterval(()=>{try{const g=$$('game');if(!g||g.classList.contains('hide')||typ
 })();
 </script>
 <script>
-/* ===== DUELO POR TURNOS (jugador vs jugador): sin acciones automáticas, mismo estilo que las Aventuras =====
-   Estado compartido en batallas/{id}.bs. Solo el jugador que tiene el turno escribe; el otro lo recibe en tiempo real. */
+/* ===== DUELO POR TURNOS (jugador vs jugador): misma pantalla y estilo de ataque de las aventuras de escuadra =====
+   Estado compartido en batallas/{id}.bs. Solo el jugador que tiene el turno escribe; el otro lo recibe en tiempo real.
+   Al empezar: 5 s "Esperando jugadores" (carga) + 5 s "El duelo empieza en…" y recién ahí se puede jugar. */
 (function(){
 'use strict';
-const C=()=>window.Cloud,$$=id=>document.getElementById(id),esc=x=>String(x==null?'':x).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])),wait=ms=>new Promise(r=>setTimeout(r,RM?Math.min(ms,80):ms));
+const C=()=>window.Cloud,$$=id=>document.getElementById(id),esc=x=>String(x==null?'':x).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])),wait=ms=>new Promise(r=>setTimeout(r,RM?Math.min(ms,80):ms)),tick=ms=>new Promise(r=>setTimeout(r,ms));
 const OK=['dmg','mag','slow','psn','guard','heal','gheal','taunt','mark','eva','regen','haste']; /* habilidades soportadas en duelo */
 const HEAL={b:10,v:3}; /* botiquín / vendaje */
 let R=null; /* duelo activo */
 const clone=o=>JSON.parse(JSON.stringify(o));
-const mkU=x=>({n:x.n,cls:x.cls||'guerrero',atk:x.atk|0,hp:x.hp|0,mhp:x.hp|0,mp:x.mp|0,mmp:x.mp|0,sk:(x.sk||[]).filter(id=>window.SKL&&SKL[id]&&OK.includes(SKL[id].k)),gp:x.gp||null,g:0,tk:0,eva:0,rg:0,pz:0,mk:0,cd:{}});
+/* ---------- reglas del estilo nuevo (resistencia, velocidad, líneas) ---------- */
+const stOf=(cls,lv)=>((typeof STM!=='undefined'&&STM[cls])||4)+Math.floor((lv|0)/4);
+const spd=cls=>(typeof SPD!=='undefined'&&SPD[cls])||1;
+const clsOf=u=>(typeof CLS!=='undefined'?(CLS[u.cls]||CLS.guerrero):{n:'Héroe',pos:'Primera línea'});
+const front=u=>clsOf(u).pos=='Primera línea',melee=u=>u.cls=='guerrero'||u.cls=='escudero';
+const isPhys=id=>typeof PHYS!=='undefined'&&PHYS.has(id);
+const cst=id=>{if(id=='gp')return{r:'st',v:0};const k=SKL[id];return{r:isPhys(id)?'st':'mp',v:k.mp|0}};
+const mkU=x=>{const cls=x.cls||'guerrero',lv=x.lv|0,s=stOf(cls,lv);return{n:x.n,cls,lv,col:(typeof HCOL!=='undefined'&&HCOL.includes(x.col))?x.col:'',atk:x.atk|0,hp:x.hp|0,mhp:x.hp|0,mp:x.mp|0,mmp:x.mp|0,st:s,mst:s,sk:(x.sk||[]).filter(id=>typeof SKL!=='undefined'&&SKL[id]&&OK.includes(SKL[id].k)),gp:x.gp||null,g:0,tk:0,eva:0,rg:0,pz:0,mk:0,cd:{}}};
 const alive=a=>a.map((u,i)=>u.hp>0?i:-1).filter(i=>i>=0);
+const ord=a=>alive(a).sort((x,y)=>spd(a[y].cls)-spd(a[x].cls)||x-y); /* orden de actuación: más rápido primero */
 const opp=s=>s=='a'?'b':'a';
-function initState(r){const sp=x=>({v:(x&&x.v)|0,b:(x&&x.b)|0}),u={a:r.ta.map(mkU),b:r.tb.map(mkU)};return{u,sup:{a:sp(r.ua),b:sp(r.ub)},turn:'a',ai:alive(u.a)[0]||0,seq:0,log:['¡Comienza el duelo!'],win:null,ev:null}}
-/* ---------- pantalla ---------- */
-const bar=(c,p)=>`<div class="bar"><i style="width:${p}%;background:${c}"></i></div>`;
-function stTx(u){return(u.tk>0?' · provoca':'')+(u.g>0?' · guardia':'')+(u.eva>0?' · esquiva':'')+(u.rg>0?' · regenera':'')+(u.pz>0?' · envenenado':'')+(u.mk>0?' · marcado':'')}
-function build(){const e=$$('pvb');e.innerHTML=`<div class="sh"><b>Duelo</b><span class="m" id="pvt"></span></div><div class="sb" style="display:flex;flex-direction:column;align-items:center;gap:10px"><div id="pvM" style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center"></div><div id="pvLog" style="flex:1;min-height:40px;width:100%;overflow:auto"></div><div id="pvA" style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center"></div><div id="pvH" style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center"></div></div>`;
- $$('pvM').innerHTML=R.st.u[R.o].map((u,i)=>`<div class="cd mc" id="pvm${i}" onclick="PVB.tgt(${i})"><div class="fg">${window.MONI?MONI('melee',false,24):''}</div><b>${esc(u.n)}</b><span class="m">Rival: ${esc(R.rn)} · Atq ${u.atk}</span><div id="pvmb${i}"></div><span class="m" id="pvmt${i}"></span></div>`).join('');
- $$('pvH').innerHTML=R.st.u[R.me].map((u,i)=>`<div class="cd eq" id="pvh${i}" onclick="PVB.ally(${i})"><div class="fg">${ic('her',24)}</div><b>${esc(u.n)}</b><span class="m">${esc((CLS[u.cls]||CLS.guerrero).n)} · Atq ${u.atk}</span><div id="pvhb${i}"></div><div id="pvhm${i}"></div><span class="m" id="pvht${i}"></span></div>`).join('')}
-function upd(){if(!R||!$$('pvM'))return;const st=R.st,mine=st.turn==R.me&&!st.win,U=st.u[R.me],E=st.u[R.o];
+function initState(r){const sp=x=>({v:(x&&x.v)|0,b:(x&&x.b)|0}),u={a:r.ta.map(mkU),b:r.tb.map(mkU)};return{u,sup:{a:sp(r.ua),b:sp(r.ub)},turn:'a',ai:ord(u.a)[0]||0,seq:0,log:['¡Comienza el duelo!'],win:null,ev:null}}
+/* ---------- estilos de la cuenta atrás ---------- */
+if(!$$('pvcd-css')){const s=document.createElement('style');s.id='pvcd-css';s.textContent=`
+.pvcd{position:fixed;inset:0;z-index:170;display:flex;align-items:center;justify-content:center;padding:max(20px,env(safe-area-inset-top,0px)) 20px max(20px,env(safe-area-inset-bottom,0px));background:radial-gradient(120% 90% at 50% 20%,color-mix(in srgb,var(--a) 16%,var(--bg)),var(--bg) 70%);color:var(--t);text-align:center;animation:pvcdIn .35s ease both}
+.pvcd.out{animation:pvcdOut .45s ease both;pointer-events:none}
+.pvcd-in{width:min(420px,100%);display:flex;flex-direction:column;align-items:center;gap:14px}
+.pvcd-vs{display:flex;align-items:center;justify-content:center;gap:12px;font-weight:700;font-size:clamp(15px,4.4vw,20px);max-width:100%}
+.pvcd-vs span{max-width:36%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pvcd-vs i{font-style:normal;font-size:12px;letter-spacing:.2em;color:var(--a);border:1.5px solid var(--a);border-radius:999px;padding:3px 10px}
+.pvcd-t{font-size:clamp(17px,5vw,24px);font-weight:700;letter-spacing:.06em;min-height:1.4em}
+.pvcd-n{font-size:clamp(84px,30vw,150px);line-height:1;font-weight:800;color:var(--a);font-variant-numeric:tabular-nums;text-shadow:0 0 38px color-mix(in srgb,var(--a) 55%,transparent)}
+.pvcd-n.pop{animation:pvcdPop .9s cubic-bezier(.2,.9,.25,1) both}
+.pvcd-n.go{font-size:clamp(46px,16vw,84px);letter-spacing:.06em;color:var(--t)}
+.pvcd-b{width:min(300px,80%);height:6px;border-radius:999px;background:var(--l);overflow:hidden}
+.pvcd-b i{display:block;height:100%;width:0;background:var(--a);transition:width .95s linear}
+.pvcd-d{display:inline-block;width:1.2em;text-align:left}
+@keyframes pvcdIn{from{opacity:0}to{opacity:1}}@keyframes pvcdOut{from{opacity:1}to{opacity:0}}
+@keyframes pvcdPop{0%{transform:scale(1.6);opacity:0}25%{transform:scale(1);opacity:1}100%{transform:scale(.92);opacity:.85}}
+@media(prefers-reduced-motion:reduce){.pvcd,.pvcd.out,.pvcd-n.pop{animation:none!important}.pvcd-b i{transition:none}}`;document.head.appendChild(s)}
+/* ---------- cuenta atrás: 5 s esperando jugadores + 5 s para empezar ---------- */
+function cdStop(){if(R&&R.ov){const o=R.ov;R.ov=null;o.remove()}}
+async function runCd(r){
+ const ov=document.createElement('div');ov.className='pvcd';ov.id='pvcd';
+ ov.innerHTML=`<div class="pvcd-in"><div class="pvcd-vs"><span>Tú</span><i>VS</i><span>${esc(r.rn)}</span></div><div class="pvcd-t" id="pvcdt"></div><div class="pvcd-n" id="pvcdn"></div><div class="pvcd-b"><i id="pvcdb"></i></div><div class="m" id="pvcds"></div></div>`;
+ document.body.appendChild(ov);r.ov=ov;
+ const alive_=()=>R===r&&r.ov===ov&&!r.st.win;
+ const phase=async(title,sub,dots)=>{for(let n=5;n>=1;n--){if(!alive_())return false;
+   const t=$$('pvcdt'),nn=$$('pvcdn'),b=$$('pvcdb'),s=$$('pvcds');if(!t)return false;
+   t.innerHTML=esc(title)+(dots?'<span class="pvcd-d" id="pvcdd">'+'.'.repeat(1+(5-n)%3)+'</span>':'');nn.textContent=n;nn.className='pvcd-n';void nn.offsetWidth;nn.className='pvcd-n pop';
+   s.textContent=sub;b.style.width=(100*(6-n)/5)+'%';await tick(1000)}
+  return alive_()};
+ if(!await phase('Esperando jugadores','Cargando el duelo contra '+r.rn,true)){cdStop();return}
+ { const b=$$('pvcdb');if(b){b.style.transition='none';b.style.width='0%';void b.offsetWidth;b.style.transition=''} }
+ const hs=r.st.u[r.me].length;
+ if(!await phase('El duelo empieza en','Tu equipo: '+hs+' héroe'+(hs>1?'s':'')+' · Prepárate',false)){cdStop();return}
+ if(!alive_()){cdStop();return}
+ const t=$$('pvcdt'),nn=$$('pvcdn');if(t)t.textContent='¡Que comience!';if(nn){nn.textContent='¡A luchar!';nn.className='pvcd-n go pop'}
+ const s=$$('pvcds');if(s)s.textContent='';await tick(700);
+ r.cd=false;r.seqAt=Date.now();r.stale=false;
+ if(R===r&&r.ov===ov){ov.classList.add('out');r.ov=null;setTimeout(()=>ov.remove(),460);upd()}else ov.remove()}
+/* ---------- pantalla: tarjetas modernas (las mismas de Héroes), con color propio de cada héroe ---------- */
+if(!$$('pvg-css')){const c=document.createElement('style');c.id='pvg-css';c.textContent=`
+.pvg{display:grid;grid-template-columns:repeat(var(--n,3),minmax(0,1fr));gap:10px;width:100%;max-width:calc(var(--n,3)*176px)}
+.pvg .cd.hc{aspect-ratio:5/7;cursor:pointer}
+.pvg#pvH .cd.hc{aspect-ratio:5/8.6}
+.pvs{font-size:11px;letter-spacing:.14em;text-transform:uppercase;align-self:center;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pvp{position:absolute;top:3cqw;right:3.4cqw;font-size:max(8px,6cqw);padding:1px 2.4cqw;border-radius:99px;background:color-mix(in srgb,var(--t) 10%,transparent);color:var(--m)}
+.hb.s i{background:color-mix(in srgb,var(--a) 75%,transparent)}
+.pvx{font-size:max(8px,5.8cqw);color:var(--m);min-height:1.3em;text-align:center;line-height:1.2;padding-top:1cqw}`;document.head.appendChild(c)}
+const stTx=u=>(u.tk>0?' · provoca':'')+(u.g>0?' · guardia':'')+(u.eva>0?' · esquiva':'')+(u.rg>0?' · regenera':'')+(u.pz>0?' · envenenado':'')+(u.mk>0?' · marcado':'')+(u.slw>0?' · lento':'');
+const pos=u=>front(u)?'Delante':'Detrás';
+function pcard(u,id,oc,own){const c=u.col&&typeof HCOL!=='undefined'&&HCOL.includes(u.col)?u.col:'';
+ return `<div class="cd hc pvc${own?' eq':''}${c?' hcol':''}" id="${id}"${c?` style="--hc:${c}"`:''} onclick="${oc}"><span class="hlv">Nv ${u.lv|0}</span><span class="pvp">${pos(u)}</span><div class="hart"><div class="hav">${ic('her',26)}</div></div><b>${esc(u.n)}</b><span class="hat">${esc(clsOf(u).n)} · ATQ ${u.atk}${own?' · Vel '+spd(u.cls):''}</span><div class="hb r"><i id="${id}b"></i><span id="${id}bt"></span></div>${own?`<div class="hb b"><i id="${id}m"></i><span id="${id}mt"></span></div><div class="hb s"><i id="${id}s"></i><span id="${id}st"></span></div>`:''}<span class="pvx" id="${id}x"></span></div>`}
+function build(){const e=$$('pvb'),nE=R.st.u[R.o].length,nM=R.st.u[R.me].length;
+ e.innerHTML=`<div class="sh"><b>Duelo · vs ${esc(R.rn)}</b><span class="m" id="pvt"></span></div><div class="sb" style="display:flex;flex-direction:column;align-items:center;gap:10px"><div class="pvs m">${esc(R.rn)}</div><div class="pvg" id="pvM" style="--n:${nE}"></div><div id="pvLog" style="flex:1;min-height:40px;width:100%;overflow:auto"></div><div id="pvA" style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center"></div><div class="pvs m">Tu equipo</div><div class="pvg" id="pvH" style="--n:${nM}"></div></div>`;
+ $$('pvM').innerHTML=R.st.u[R.o].map((u,i)=>pcard(u,'pvm'+i,`PVB.tgt(${i})`,false)).join('');
+ $$('pvH').innerHTML=R.st.u[R.me].map((u,i)=>pcard(u,'pvh'+i,`PVB.ally(${i})`,true)).join('')}
+function upd(){if(!R||!$$('pvM'))return;const st=R.st,mine=st.turn==R.me&&!st.win&&!R.cd,U=st.u[R.me],E=st.u[R.o],fx=u=>stTx(u).replace(/^ · /,'');
+ if(st.win&&R.ov)cdStop();
  /* el rival solo muestra lo que está activo: nombre, ataque, vida y efectos */
- E.forEach((u,i)=>{const e=$$('pvm'+i);if(!e)return;$$('pvmb'+i).innerHTML=bar('var(--r)',100*Math.max(0,u.hp)/u.mhp);$$('pvmt'+i).textContent='HP '+Math.max(0,u.hp)+'/'+u.mhp+stTx(u);e.classList.toggle('dead',u.hp<=0);e.classList.toggle('sel',R.t==i&&u.hp>0)});
- U.forEach((u,i)=>{const e=$$('pvh'+i);if(!e)return;$$('pvhb'+i).innerHTML=bar('var(--r)',100*Math.max(0,u.hp)/u.mhp);$$('pvhm'+i).innerHTML=bar('var(--b)',u.mmp?100*u.mp/u.mmp:0);$$('pvht'+i).textContent=`HP ${Math.max(0,u.hp)}/${u.mhp} · Maná ${u.mp}/${u.mmp}`+stTx(u);e.classList.toggle('dead',u.hp<=0);e.classList.toggle('sel',mine&&i==st.ai&&u.hp>0);e.style.outline=(i==R.a&&u.hp>0)?'1px dashed var(--b)':''});
+ E.forEach((u,i)=>{const e=$$('pvm'+i);if(!e)return;$$('pvm'+i+'b').style.width=100*Math.max(0,u.hp)/u.mhp+'%';$$('pvm'+i+'bt').textContent='HP '+Math.max(0,u.hp)+'/'+u.mhp;$$('pvm'+i+'x').textContent=fx(u);e.classList.toggle('dead',u.hp<=0);e.classList.toggle('sel',R.t==i&&u.hp>0)});
+ U.forEach((u,i)=>{const e=$$('pvh'+i);if(!e)return;const q=k=>$$('pvh'+i+k);q('b').style.width=100*Math.max(0,u.hp)/u.mhp+'%';q('bt').textContent='HP '+Math.max(0,u.hp)+'/'+u.mhp;q('m').style.width=100*u.mp/Math.max(1,u.mmp)+'%';q('mt').textContent='Maná '+u.mp+'/'+u.mmp;q('s').style.width=100*Math.max(0,u.st|0)/Math.max(1,u.mst|0)+'%';q('st').textContent='Res '+(u.st|0)+'/'+(u.mst|0);q('x').textContent=fx(u);
+  e.classList.toggle('dead',u.hp<=0);e.classList.toggle('sel',mine&&i==st.ai&&u.hp>0);e.style.outline=(i==R.a&&u.hp>0)?'1px dashed var(--b)':''});
  if(!E[R.t]||E[R.t].hp<=0){const k=alive(E)[0];if(k!=null)R.t=k}
- $$('pvt').textContent=st.win?'':(mine?'Tu turno':'Turno de '+R.rn);
+ $$('pvt').textContent=st.win?'':(R.cd?'Preparando…':mine?'Tu turno':'Turno de '+R.rn);
  $$('pvLog').innerHTML=st.log.slice(-14).reverse().map(l=>`<div class="m">${esc(l)}</div>`).join('');
  const u=U[st.ai],off=!mine||R.busy||!u||u.hp<=0;
  if(st.win){$$('pvA').innerHTML=R.res||'<span class="m">Calculando resultado…</span>';return}
- let h=`<div class="m" style="width:100%;text-align:center">${mine?`Turno de <b>${esc(u&&u.n||'')}</b> (toca un rival para elegir objetivo; toca un aliado para curar)`:`Esperando la jugada de <b>${esc(R.rn)}</b>…`}</div>`;
- if(u&&mine){const gp=u.gp;h+=`<button ${off?'disabled':''} onclick="PVB.act('atk')">Atacar</button>`+(gp&&gp.mp?`<button ${off||u.mp<gp.mp?'disabled':''} onclick="PVB.act('gp')">Golpe (${gp.mp} maná)</button>`:'')+`<button ${off?'disabled':''} onclick="PVB.act('def')">Defender</button>`+u.sk.map(id=>{const k=SKL[id],c=u.cd[id]|0;return `<button ${off||u.mp<k.mp||c>0?'disabled':''} onclick="PVB.act('${id}')">${esc(k.n)} (${k.mp})${c>0?' · '+c:''}</button>`}).join('')+`<button ${off||!st.sup[R.me].b?'disabled':''} onclick="PVB.act('sb')">Botiquín (${st.sup[R.me].b})</button><button ${off||!st.sup[R.me].v?'disabled':''} onclick="PVB.act('sv')">Vendaje (${st.sup[R.me].v})</button>`}
+ let h=`<div class="m" style="width:100%;text-align:center">${R.cd?'El duelo está por comenzar…':mine?`Turno de <b>${esc(u&&u.n||'')}</b> · toca un enemigo (objetivo) o un aliado (curación)`:`Esperando la jugada de <b>${esc(R.rn)}</b>…`}</div>`;
+ if(u&&mine){const bt=id=>{const c=cst(id);return `${c.v} ${c.r=='st'?'res.':'maná'}`};
+  h+=`<button ${off?'disabled':''} onclick="PVB.act('atk')">Atacar</button>`+(u.gp?`<button ${off||(u.cd.gp|0)>0?'disabled':''} onclick="PVB.act('gp')">Ataque fuerte${(u.cd.gp|0)>0?' R'+u.cd.gp:''}</button>`:'')+u.sk.map(id=>{const k=SKL[id],c=cst(id),cd=u.cd[id]|0;return `<button ${off||u[c.r]<c.v||cd>0?'disabled':''} onclick="PVB.act('${id}')">${esc(k.n)} (${bt(id)})${cd>0?' R'+cd:''}</button>`}).join('')+`<button ${off?'disabled':''} onclick="PVB.act('def')">Defender</button>`+`<button ${off||!st.sup[R.me].b?'disabled':''} onclick="PVB.act('sb')">Botiquín (${st.sup[R.me].b})</button><button ${off||!st.sup[R.me].v?'disabled':''} onclick="PVB.act('sv')">Vendaje (${st.sup[R.me].v})</button>`}
  h+=`<button class="sm" onclick="PVB.quit()">Rendirse</button>`;
- if(!mine&&R.stale)h+=`<button class="pri" style="width:100%" onclick="PVB.claim()">El rival no responde: reclamar victoria</button>`;
+ if(!mine&&!R.cd&&R.stale)h+=`<button class="pri" style="width:100%" onclick="PVB.claim()">El rival no responde: reclamar victoria</button>`;
  $$('pvA').innerHTML=h}
 /* ---------- acciones (solo el jugador con el turno) ---------- */
 function hit(t,d){if(t.eva>0){t.eva--;return 0}if(t.g>0){d=Math.max(1,d-t.g);t.g=0}if(t.mk>0&&d>0){d++;t.mk--}return Math.max(1,d)}
-function upkeep(list){list.forEach(u=>{if(u.hp<=0)return;if(u.pz>0){u.hp=Math.max(1,u.hp-1);u.pz--}if(u.rg>0){u.hp=Math.min(u.mhp,u.hp+1);u.rg--}if(u.tk>0)u.tk--;u.mp=Math.min(u.mmp,u.mp+1);for(const k in u.cd)u.cd[k]=Math.max(0,u.cd[k]-1)})}
-async function act(a){const st=R.st;if(R.busy||st.win||st.turn!=R.me)return;const ns=clone(st),U=ns.u[R.me],E=ns.u[R.o],u=U[ns.ai];if(!u||u.hp<=0)return;
- const k=window.SKL&&SKL[a],kind=k?k.k:null,needT=a=='atk'||a=='gp'||['dmg','mag','slow','psn','mark'].includes(kind);
+function upkeep(list){list.forEach(u=>{if(u.hp<=0)return;if(u.pz>0){u.hp=Math.max(1,u.hp-1);u.pz--}if(u.rg>0){u.hp=Math.min(u.mhp,u.hp+1);u.rg--}if(u.tk>0)u.tk--;u.mp=Math.min(u.mmp,u.mp+1);u.st=Math.min(u.mst|0,(u.st|0)+1);for(const k in u.cd)u.cd[k]=Math.max(0,u.cd[k]-1)})}
+async function act(a){const st=R.st;if(R.cd||R.busy||st.win||st.turn!=R.me)return;const ns=clone(st),U=ns.u[R.me],E=ns.u[R.o],u=U[ns.ai];if(!u||u.hp<=0)return;
+ const k=typeof SKL!=='undefined'?SKL[a]:null,kind=k?k.k:null,needT=a=='atk'||a=='gp'||['dmg','mag','slow','psn','mark'].includes(kind);
  let j=R.t;const tk=alive(E).filter(i=>E[i].tk>0);if(tk.length&&!tk.includes(j))j=tk[0];if(needT&&(!E[j]||E[j].hp<=0))return;
- if(k&&(u.mp<k.mp||(u.cd[a]|0)>0||!u.sk.includes(a)))return;if(a=='gp'&&(!u.gp||u.mp<u.gp.mp))return;
+ if(k&&(!u.sk.includes(a)||(u.cd[a]|0)>0))return;if(a=='gp'&&(!u.gp||(u.cd.gp|0)>0))return;
+ const cost=(a=='gp'||k)?cst(a):null;if(cost&&(u[cost.r]|0)<cost.v)return;
  let ally=U[R.a]&&U[R.a].hp>0?R.a:alive(U).sort((x,y)=>U[x].hp/U[x].mhp-U[y].hp/U[y].mhp)[0];
- if((a=='sb'||a=='sv')){const al=U[ally];if(!ns.sup[R.me][a=='sb'?'b':'v']||!al||al.mhp-al.hp<=0){R.nt='Ese aliado no necesita curación.';notice('Sin efecto','Ese aliado ya tiene la vida completa.');return}}
- R.busy=true;upd();let free=0,ev={s:R.me,i:ns.ai,o:R.o,j:needT?j:null,d:0,x:''},ln=[];const t=E[j];
- if(a=='atk'||a=='gp'){let d=u.atk,x=0;if(a=='gp'){u.mp-=u.gp.mp;d=u.gp.d||u.atk+1;if(u.cls=='guerrero')d++}if(u.cls=='arquero'&&Math.random()<.2){d++;ln.push('¡Disparo certero!')}x=hit(t,d);t.hp=Math.max(0,t.hp-x);ev.d=x;ln.push(x?`${u.n} ataca a ${t.n}: -${x} HP.`:`${t.n} esquiva el ataque de ${u.n}.`)}
+ if((a=='sb'||a=='sv')){const al=U[ally];if(!ns.sup[R.me][a=='sb'?'b':'v']||!al||al.mhp-al.hp<=0){notice('Sin efecto','Ese aliado ya tiene la vida completa.');return}}
+ let free=0,ln=[];
+ /* la primera línea enemiga protege a la retaguardia de los ataques cuerpo a cuerpo */
+ const physHit=a=='atk'||a=='gp'||(k&&isPhys(a)&&['dmg','slow','psn'].includes(kind));
+ if(needT&&physHit&&melee(u)&&!tk.length&&!front(E[j])){const f=alive(E).find(i=>front(E[i]));if(f!=null){ln.push(`${u.n} no alcanza a ${E[j].n}: la primera línea enemiga lo protege.`);j=f}}
+ R.busy=true;upd();const ev={s:R.me,i:ns.ai,o:R.o,j:needT?j:null,d:0,x:''},t=E[j];
+ if(cost)u[cost.r]=(u[cost.r]|0)-cost.v;
+ if(a=='atk'||a=='gp'){let d=u.atk;if(a=='gp'){d=(u.gp&&u.gp.d)||u.atk+1;u.cd.gp=2;if(u.cls=='guerrero')d++}if(u.cls=='arquero'&&Math.random()<.2){d++;ln.push('¡Disparo certero!')}const x=hit(t,d);t.hp=Math.max(0,t.hp-x);ev.d=x;if(!x)ev.x='Esquiva';ln.push(x?`${u.n} ataca a ${t.n}: -${x} HP.`:`${t.n} esquiva el ataque de ${u.n}.`)}
  else if(a=='def'){u.g=Math.max(u.g,1);u.mp=Math.min(u.mmp,u.mp+1);ev.x='Guardia';ln.push(`${u.n} se defiende (reduce 1 el próximo golpe y recupera 1 de maná).`)}
  else if(a=='sb'||a=='sv'){const al=U[ally],g=Math.min(HEAL[a=='sb'?'b':'v'],al.mhp-al.hp);al.hp+=g;ns.sup[R.me][a=='sb'?'b':'v']--;ev.x='+'+g;ev.j=ally;ev.o=R.me;ln.push(`${u.n} usa ${a=='sb'?'un botiquín':'un vendaje'} sobre ${al.n}: +${g} HP.`);try{if(S&&S.sup){const f=a=='sb'?'botiquin':'vendaje';S.sup[f]=Math.max(0,(S.sup[f]|0)-1);save()}}catch(e){}}
- else{u.mp-=k.mp;u.cd[a]=k.cd||0;ln.push(`${u.n} usa ${k.n}.`);
+ else{u.cd[a]=k.cd||0;ln.push(`${u.n} usa ${k.n}.`);
   if(['dmg','mag','slow','psn'].includes(kind)){const d=Math.max(1,hit(t,k.v)||1);t.hp=Math.max(0,t.hp-d);if(kind=='slow')t.slw=2;if(kind=='psn'){t.pz=3;t.hp=Math.max(1,t.hp)}ev.d=d;ln.push(`${t.n} recibe ${d} de daño.`)}
   else if(kind=='guard'){u.g=Math.max(u.g,k.v);ev.x='Guardia '+k.v}
   else if(kind=='heal'){const al=U[ally],g=Math.min(k.v,al.mhp-al.hp);al.hp+=g;ev.x='+'+g;ev.j=ally;ev.o=R.me;ln.push(`${al.n} recupera ${g} HP.`)}
@@ -3999,44 +4118,62 @@ async function act(a){const st=R.st;if(R.busy||st.win||st.turn!=R.me)return;cons
   else if(kind=='regen'){u.rg=3;ev.x='Regenera';ln.push(`${u.n} se regenera durante 3 turnos.`)}
   else if(kind=='haste'){u.mp=Math.min(u.mmp,u.mp+k.v);free=1;ln.push(`${u.n} recupera maná y puede actuar de nuevo.`)}}
  if(t&&t.hp<=0&&needT)ln.push(`${t.n} cae.`);
- /* siguiente héroe, o pasa el turno al rival */
+ /* siguiente héroe (por velocidad), o pasa el turno al rival */
  if(!alive(E).length){ns.win=R.me}
- else if(!free){const nx=alive(U).find(i=>i>ns.ai);if(nx!=null)ns.ai=nx;else{ns.turn=R.o;upkeep(E);ns.ai=alive(E)[0]||0;ln.push(`— Turno de ${R.rn} —`)}}
+ else if(!free){const o=ord(U),p=o.indexOf(ns.ai),nx=p>=0?o[p+1]:undefined;if(nx!=null)ns.ai=nx;else{ns.turn=R.o;upkeep(E);ns.ai=ord(E)[0]||0;ln.push(`— Turno de ${R.rn} —`)}}
  ns.log=ns.log.concat(ln).slice(-30);ns.seq=st.seq+1;ns.ev=ev;
  await play(ev,R.st);R.st=ns;upd();
  try{await C().battleSet(R.id,{bs:clone(ns),estado:ns.win?'fin':'activa',t:Date.now()})}catch(e){notice('Sin conexión','No se pudo enviar tu jugada: '+(e.message||'error'))}
  R.busy=false;R.seqAt=Date.now();upd();if(ns.win)finish()}
-/* animación de una jugada (propia o recibida) */
+/* animación de una jugada (propia o recibida): mismo ataque que las aventuras */
 async function play(ev,before){if(!ev||!$$('pvM'))return;const id=(s,i)=>$$((s==R.me?'pvh':'pvm')+i),A=id(ev.s,ev.i),B=ev.j!=null?id(ev.o,ev.j):null;
- try{if(A&&B&&ev.d>0){const an=lunge(A,B,RM?200:1000);await wait(450);slash(B);impact(B,'-'+ev.d);await wait(350);await an.finished}
+ try{if(A&&B&&ev.d>0){const an=lunge(A,B,RM?200:1200);await wait(550);slash(B);impact(B,'-'+ev.d);await wait(350);await an.finished}
   else if(A&&B&&ev.x){fl(ev.x,B,'var(--b)');await wait(500)}
   else if(A&&ev.x){fl(ev.x,A,'var(--b)');await wait(500)}
   else if(A&&B){await wait(300)}}catch(e){}}
 /* ---------- fin del duelo ---------- */
-async function finish(){if(!R||R.fin)return;R.fin=1;const won=R.st.win==R.me;let rk=null;
+async function finish(){if(!R||R.fin)return;R.fin=1;cdStop();const won=R.st.win==R.me;let rk=null;
  try{if(R.tipo!='amistad')rk=await window.arenaDuel({won,id:R.id,oppUid:R.ou,oppName:R.rn})}catch(e){}
- R.res=`<div style="width:100%;text-align:center"><b>${won?'¡Victoria!':'Derrota'}</b>${rk?`<br><span class="m">${rk.gain>0?'+':''}${rk.gain} pts de Arena · +${rk.pr} prestigio${rk.star?(rk.up?' · ¡subes de rango!':' · ¡nueva estrella!'):''}</span>`:''}</div><button class="pri" style="width:100%" onclick="PVB.close()">Continuar</button>`;R.rk=rk;upd();if(rk&&window.arenaFx)setTimeout(()=>arenaFx(rk),250)}
-function close(){if(!R)return;const r=R;R=null;clearInterval(r.iv);try{r.un&&r.un()}catch(e){}const e=$$('pvb');if(e)e.remove();try{C().endBattle(r.id)}catch(e){}}
+ R.res=`<div style="width:100%;text-align:center"><b>${won?'¡Victoria!':'Derrota'}</b>${rk?`<br><span class="m">${rk.gain>0?'+':''}${rk.gain} pts de Arena · +${rk.pr} prestigio${rk.star?(rk.up?' · ¡subes de rango!':' · ¡nueva estrella!'):''}</span>`:''}</div><button class="pri" style="width:100%" onclick="PVB.close()">Continuar</button>`;R.rk=rk;try{banner(won?'VICTORIA':'DERROTA')}catch(e){}upd();if(rk&&window.arenaFx)setTimeout(()=>arenaFx(rk),250)}
+function close(){if(!R)return;const r=R;cdStop();R=null;clearInterval(r.iv);try{r.un&&r.un()}catch(e){}const e=$$('pvb');if(e)e.remove();try{C().endBattle(r.id)}catch(e){}}
 window.PVB={
  tgt:i=>{if(R&&R.st.u[R.o][i].hp>0){R.t=i;upd()}},
  ally:i=>{if(R&&R.st.u[R.me][i].hp>0){R.a=i;upd()}},
  act,
  close,
- quit:async()=>{if(!R||R.st.win)return;if(!confirm('¿Rendirte? Contará como derrota.'))return;const ns=clone(R.st);ns.win=R.o;ns.seq++;ns.log.push(`${esc(C().name||'Un jugador')} se rinde.`);ns.ev=null;R.st=ns;try{await C().battleSet(R.id,{bs:clone(ns),estado:'fin',t:Date.now()})}catch(e){}upd();finish()},
+ quit:async()=>{if(!R||R.st.win)return;if(!confirm('¿Rendirte? Contará como derrota.'))return;const ns=clone(R.st);ns.win=R.o;ns.seq++;ns.log.push(`${C().name||'Un jugador'} se rinde.`);ns.ev=null;R.st=ns;try{await C().battleSet(R.id,{bs:clone(ns),estado:'fin',t:Date.now()})}catch(e){}upd();finish()},
  claim:async()=>{if(!R||R.st.win)return;const ns=clone(R.st);ns.win=R.me;ns.seq++;ns.log.push(`${R.rn} no responde: victoria por abandono.`);ns.ev=null;R.st=ns;try{await C().battleSet(R.id,{bs:clone(ns),estado:'fin',t:Date.now()})}catch(e){}upd();finish()}
 };
 /* ---------- inicio: llega el evento del emparejamiento / reto ---------- */
 addEventListener('cloudbattle',e=>{const{r,me}=e.detail;if(R||r.tipo=='x')return;const s=me==r.a?'a':'b',o=opp(s);
  if(!Array.isArray(r.ta)||!Array.isArray(r.tb)||!r.ta.length||!r.tb.length){notice('Duelo cancelado','No se recibieron los datos del rival.');try{C().endBattle(r.id)}catch(e){};return}
  const po=$$('pvpov');if(po)po.remove();const w=document.createElement('div');w.id='pvb';w.className='scr';w.style.zIndex=150;document.body.appendChild(w);
- R={id:r.id,me:s,o,ou:s=='a'?r.b:r.a,rn:(s=='a'?r.bN:r.aN)||'Rival',st:r.bs&&r.bs.u?r.bs:initState(r),t:0,a:0,busy:false,fin:0,seqAt:Date.now(),stale:false,tipo:r.tipo};
+ R={id:r.id,me:s,o,ou:s=='a'?r.b:r.a,rn:(s=='a'?r.bN:r.aN)||'Rival',st:r.bs&&r.bs.u?r.bs:initState(r),t:0,a:0,busy:false,fin:0,seqAt:Date.now(),stale:false,tipo:r.tipo,cd:true,ov:null};
  R.st.log=R.st.log||[];R.st.sup=R.st.sup||{a:{v:0,b:0},b:{v:0,b:0}};
  build();upd();
+ const me0=R;
  R.un=C().battleWatch(r.id,async d=>{if(!R)return;
   if(!d){if(!R.st.win&&!R.fin){const ns=clone(R.st);ns.win=R.me;ns.log.push(`${R.rn} abandonó el duelo.`);R.st=ns;upd();finish()}return}
   if(d.bs&&d.bs.u&&d.bs.seq>R.st.seq){const prev=R.st,ns=d.bs;R.seqAt=Date.now();R.stale=false;R.busy=true;await play(ns.ev,prev);R.st=ns;R.busy=false;upd();if(ns.win)finish()}});
- R.iv=setInterval(()=>{if(!R||R.st.win)return;const s=R.st.turn!=R.me&&Date.now()-R.seqAt>100000;if(s!==R.stale){R.stale=s;upd()}},3000)});
+ R.iv=setInterval(()=>{if(!R||R.st.win||R.cd)return;const s=R.st.turn!=R.me&&Date.now()-R.seqAt>100000;if(s!==R.stale){R.stale=s;upd()}},3000);
+ runCd(me0)});
 /* arena.js ya no usa el sim automático; evita que el viejo listener (si existe) abra otra pantalla */
+})();
+</script>
+<script>
+/* ===== Orden de la parte superior: fichas de invasión/evento en la esquina y avisos apilados ===== */
+(function(){
+const $=id=>document.getElementById(id),g=$('game'),h=g&&g.querySelector('header');if(!g||!h)return;
+let box=$('alerts');if(!box){box=document.createElement('div');box.id='alerts';g.appendChild(box)}
+const take=()=>{const a=$('iva'),e=$('eva');if(a&&a.parentNode!==box)box.insertBefore(a,box.firstChild);if(e&&e.parentNode!==box)box.appendChild(e)};
+new MutationObserver(take).observe(h,{childList:true});take();
+const fb=$('fb'),root=document.documentElement.style;
+const metr=()=>{root.setProperty('--hh',(h.offsetHeight+(fb?fb.offsetHeight:0))+'px');root.setProperty('--ah',box.offsetHeight+'px')};
+if(window.ResizeObserver){const ro=new ResizeObserver(metr);ro.observe(h);if(fb)ro.observe(fb);ro.observe(box)}
+addEventListener('resize',metr);setInterval(metr,1500);metr();
+/* los avisos normales (eventos, etc.) se apilan hacia abajo en vez de taparse entre sí */
+const stack=()=>{let y=14;document.querySelectorAll('.ntc:not(.ivn)').forEach(e=>{if(e.classList.contains('out'))return;e.style.top='calc('+y+'px + env(safe-area-inset-top,0px))';y+=e.offsetHeight+10})};
+new MutationObserver(stack).observe(document.body,{childList:true});
 })();
 </script>
 </body></html>
