@@ -669,6 +669,25 @@ header .coins{grid-column:1/-1!important;grid-row:2}
 @keyframes ivnIn{from{opacity:0;transform:translateX(24px)}to{opacity:1;transform:none}}
 @media(prefers-reduced-motion:reduce){.ntc.ivn,#alerts #iva.ivact::before{animation:none}}
 </style>
+<style id="card-css">
+/* ===== Tarjetas de combate en celular: formato de carta vertical (5:7) con ventana de arte, como en el computador ===== */
+@media(max-width:600px){
+:is(#sqM,#sqH,#pvM,#pvH){align-items:flex-start!important}
+:is(#sqM,#sqH,#pvM,#pvH)>.cd{aspect-ratio:5/7!important;justify-content:flex-start!important;padding:16px 5px 6px!important;gap:3px!important;border-radius:14px!important;background-image:linear-gradient(168deg,rgba(255,255,255,.1),rgba(255,255,255,0) 50%),radial-gradient(110% 55% at 50% 0%,color-mix(in srgb,var(--a) 16%,transparent),transparent 72%)}
+:is(#sqM,#sqH,#pvM,#pvH)>.cd .qnm{font-size:12px!important;height:15px!important}
+:is(#sqM,#sqH,#pvM,#pvH)>.cd .qpt{flex:1 1 auto!important;height:auto!important;min-height:34px;width:100%;margin:1px 0!important;border-radius:10px;background:radial-gradient(circle at 50% 42%,rgba(255,255,255,.13),rgba(255,255,255,.03) 72%);box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center}
+:is(#sqM,#sqH,#pvM,#pvH)>.cd .qpt svg{width:36px!important;height:36px!important}
+}
+</style>
+<style id="sup-css">
+.suppop{position:fixed;z-index:180;display:flex;flex-direction:row;gap:8px;padding:8px;border-radius:16px;background:var(--s,#1f1a3e);border:1px solid #4cdf7a;box-shadow:0 8px 24px rgba(0,0,0,.5);animation:supIn .18s ease-out}
+@media(min-width:601px){.suppop{flex-direction:column}}
+.supic{display:flex;align-items:center;justify-content:center;gap:8px;min-width:78px;padding:8px 12px;border-radius:12px}
+.supic b{font-size:15px;font-variant-numeric:tabular-nums}
+.supic[disabled]{opacity:.38}
+@keyframes supIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.suppop{animation:none}}
+</style>
 </head><body>
 <div class="ld" id="ld"><div class="ldstage"><svg class="ldring" viewBox="0 0 112 112" aria-hidden="true"><circle class="tr" cx="56" cy="56" r="44"/><circle class="w" cx="56" cy="56" r="44" pathLength="100" transform="rotate(-90 56 56)"/><circle class="p" cx="56" cy="56" r="44" pathLength="100" transform="rotate(-90 56 56)"/><path class="c" pathLength="100" transform="translate(-1.14 3.63)" d="M40 67H72A9 9 0 0 0 73 49A13 13 0 0 0 48 46A10 10 0 0 0 40 67"/></svg><div class="ldtt">CIUDAD</div><div class="ldsub">Forja tu leyenda</div><div class="ldbar"><i id="ldf"></i></div><div class="ldm" id="ldm">Iniciando…</div></div></div></div></div>
 <section id="slots"></section>
@@ -2744,14 +2763,14 @@ document.addEventListener('keydown',e=>{if(e.key=='Escape'&&MV.b)mvEnd()});
 {
 /* Datos reutilizables: para añadir otro consumible basta con añadir una entrada aquí */
 const SUP={
- vendaje:{id:'vendaje',n:'Vendaje',d:'Tela limpia y ungüento básico para cerrar heridas leves.',ic:'ven',cap:15,per:3,heal:3,tg:'aliado',fx:'cruces',
+ vendaje:{id:'vendaje',n:'Vendaje',d:'Tela limpia y ungüento básico para cerrar heridas leves.',ic:'ven',cap:15,per:99,heal:3,tg:'aliado',fx:'cruces',
   eff:'Recupera 3 HP al héroe elegido.',cost:{solar:20,filar:12,recursos:3,cristal:1},
-  rules:['Almacenamiento máximo: 15.','Hasta 3 usos por ronda.','Requiere elegir un héroe aliado herido.','No sirve con vida completa ni con héroes caídos.']},
+  rules:['Almacenamiento máximo: 15.','Hasta 5 usos seguidos; después hay que atacar.','Requiere elegir un héroe aliado herido.','No sirve con vida completa ni con héroes caídos.']},
  botiquin:{id:'botiquin',n:'Botiquín',d:'Instrumental y reactivos arcanos para curaciones serias.',ic:'bot',cap:2,per:2,heal:10,tg:'aliado',fx:'cruces',
   eff:'Recupera 10 HP al héroe elegido.',cost:{solar:90,filar:60,recursos:20,cristal:4,polvo:2},
-  rules:['Almacenamiento máximo: 2 en total.','Hasta 2 usos por ronda.','Requiere elegir un héroe aliado herido.','No sirve con vida completa ni con héroes caídos.']}};
+  rules:['Almacenamiento máximo: 2 en total.','Hasta 2 usos por turno.','Requiere elegir un héroe aliado herido.','No sirve con vida completa ni con héroes caídos.']}};
 window.SUP=SUP;
-SH.tal={n:'Taller de Suministros',d:'Fabrica vendajes y botiquines para las aventuras.',cost:{solar:120,filar:60},t:45000,e:'Vendajes y botiquines'};NM.tal=SH.tal.n;LV.tal=[{vc:15,bc:2}];gen('tal',{solar:120,filar:60},45000,[{},{recursos:15},{recursos:40,cristal:3},{recursos:100,cristal:8}],[{vc:20,bc:3},{vc:25,bc:4},{vc:30,bc:5},{vc:40,bc:6}]);
+SH.tal={n:'Taller de Suministros',d:'Fabrica vendajes y botiquines para las aventuras.',cost:{solar:120,filar:60},t:45000,e:'Vendajes y botiquines'};NM.tal=SH.tal.n;LV.tal=[{vc:15,bc:2}];gen('tal',{solar:120,filar:60},45000,[{},{recursos:15},{recursos:40,cristal:3},{recursos:100,cristal:8}],[{vc:20,bc:3},{vc:25,bc:4},{vc:30,bc:5},{vc:40,bc:5}]);
 /* El almacenamiento máximo depende del nivel del taller (el resto del código sigue leyendo s.cap) */
 {const tier=()=>{try{return Math.max(1,...S.b.filter(b=>b.type=='tal'&&Date.now()>=b.end).map(L))}catch(e){return 1}};
  const lvv=(k)=>{const d=LV.tal[tier()-1]||LV.tal[0];return d[k]};
@@ -2781,7 +2800,7 @@ window.taller=function(b){b=b||S.b.find(x=>x.type=='tal'&&Date.now()>=x.end);if(
   <div class="uct"><span class="m">Cantidad a fabricar</span><span style="display:flex;gap:8px;align-items:center"><button ${q<=1?'disabled':''} onclick="tlQ('${s.id}',-1)">−</button><b>${q}</b><button ${q>=sp?'disabled':''} onclick="tlQ('${s.id}',1)">+</button><button ${sp<1?'disabled':''} onclick="tlQ('${s.id}',0)">Máx</button></span></div>
   <div><span class="m">Total (×${q})</span><div class="cost">${chipsCost(tot)}</div></div>
   <button class="pri" ${ok?'':'disabled'} onclick="tlMake('${s.id}')">${sp<=0?'Almacén lleno':mx<1?'Faltan materiales':'Fabricar ×'+q}</button></div>`}).join('');
- modal(head(b,'Fabrica consumibles para tus aventuras')+`<div class="note">En combate, usar un suministro cuenta como la acción del héroe que actúa. Los límites de uso se reinician cada ronda.</div>`+cards+upBlock(b))};
+ modal(head(b,'Fabrica consumibles para tus aventuras')+`<div class="note">En combate, usar un suministro cuenta como la acción del héroe que actúa. Botiquín: hasta 2 usos por turno. Vendaje: hasta 5 usos seguidos; después hay que atacar.</div>`+cards+upBlock(b))};
 window.tlQ=(id,d)=>{const s=SUP[id];if(!s)return;const sp=Math.max(1,s.cap-sn(id));let q=TLQ[id]||1;
  q=d==0?Math.max(1,Math.min(maxMake(id),sp)):q+d;TLQ[id]=Math.max(1,Math.min(sp,q));const t=stt2();taller();stt3(t)};
 window.tlMake=id=>{if(TLK||!S)return;const s=SUP[id];if(!s)return;const q=Math.min(TLQ[id]||1,s.cap-sn(id));
@@ -2810,32 +2829,52 @@ function supBar(){let b=$('supbar');if(!SU.item){if(b)b.remove();return}
  const s=SUP[SU.item],u=SU.tg!=null?units()[SU.tg]:null;if(!b){b=document.createElement('div');b.id='supbar';document.body.appendChild(b)}
  b.innerHTML=u?`<span class="ib">${ic(s.ic,22)}</span><span><b>${s.n}</b> → ${u.n}: <b style="color:#4cdf7a">+${amt(u,s)} HP</b> <span class="m">(${u.hp} → ${u.hp+amt(u,s)} de ${u.mhp})</span></span><button class="pri" ${SU.busy?'disabled':''} onclick="supConfirm()">Confirmar</button><button ${SU.busy?'disabled':''} onclick="supCancel()">Cancelar</button>`
   :`<span class="ib">${ic(s.ic,22)}</span><span><b>${s.n}</b>: elige un héroe resaltado en verde</span><button onclick="supCancel()">Cancelar</button>`}
+const VMAX=5;
+const vsOf=()=>{const o=inSq()?SQ:B;return o?(o.vs|0):0};
+try{const _sa=sqAct;sqAct=function(a){try{if(typeof SQ!='undefined'&&SQ&&!SQ.busy&&!SQ.over&&(a=='atk'||a=='gp'))SQ.vs=0}catch(e){}return _sa.apply(this,arguments)}}catch(e){}
+try{const _h=hit;hit=function(n){try{if(B&&!busy&&!B.over)B.vs=0}catch(e){}return _h.apply(this,arguments)}}catch(e){}
+/* ficha emergente de suministros: icono + total de cada uno. En celular va en fila; en computador, en columna */
+window.supPop=(anchor,items,cb,wid)=>{const old=document.getElementById(wid);if(old)old.remove();
+ const w=document.createElement('div');w.id=wid;w.className='suppop';
+ w.innerHTML=items.map(it=>`<button type="button" class="supic" ${it.off?'disabled':''} data-id="${it.id}" title="${it.tip}" aria-label="${it.tip}">${ic(it.ic,26)}<b>${it.count}</b></button>`).join('');
+ w.onclick=e=>{const b=e.target.closest('.supic');if(!b||b.disabled)return;w.remove();cb(b.dataset.id)};
+ document.body.appendChild(w);const r=anchor?anchor.getBoundingClientRect():null;
+ w.style.left=r?Math.max(8,Math.min(innerWidth-w.offsetWidth-8,r.left))+'px':'8px';w.style.bottom=r?(innerHeight-r.top+8)+'px':'90px';
+ const off=e=>{if(w.contains(e.target)||(anchor&&anchor.contains(e.target)))return;w.remove();document.removeEventListener('pointerdown',off,true)};
+ setTimeout(()=>document.addEventListener('pointerdown',off,true),0)};
+/* curación: la barra de vida sube suave, se pone verde y vuelve a su color */
+function hpFx(e){try{const b=e.querySelector('[id^="sqhb"],[id^="pvhb"],[id^="pvmb"],.bar i');if(!b)return;const c=getComputedStyle(b).backgroundColor;b.style.transition='width .9s ease';setTimeout(()=>{b.style.transition=''},1100);if(RM)return;
+ b.animate([{backgroundColor:'#4cdf7a',filter:'brightness(1.3)',offset:0},{backgroundColor:'#4cdf7a',filter:'brightness(1.15)',offset:.6},{backgroundColor:c,filter:'none',offset:1}],{duration:1500,easing:'ease-out'})}catch(x){}}
 window.supClose=()=>{const w=$('supw');if(w)w.remove()};
 window.supCancel=()=>{if(SU.busy)return;SU.item=null;SU.tg=null;supClose();supPaint();supBar()};
-window.supOpen=()=>{if(SU.busy||!canAct())return;supCancel();const sp=turnSp(),a=actor();
- const rows=Object.values(SUP).map(s=>{const n=sn(s.id),left=Math.max(0,s.per-sp[s.id]),off=n<1||left<1;
-  return `<button class="supit" ${off?'disabled':''} onclick="supPick('${s.id}')"><span class="ib">${ic(s.ic,28)}</span><span style="flex:1;text-align:left"><b>${s.n}</b> <span class="chip a">+${s.heal} HP</span><br><span class="m">En inventario: ${n} · Usos restantes esta ronda: ${left}/${s.per}</span></span></button>`}).join('');
- const w=document.createElement('div');w.id='supw';w.className='sheet';w.style.zIndex=80;w.onclick=e=>{if(e.target===w)supClose()};
- w.innerHTML=`<div class="panel bot" style="display:flex;flex-direction:column;gap:10px"><h2>Suministros</h2><span class="m">Usar uno consume la acción de ${a.n}.</span>${rows}<button onclick="supClose()">Cerrar</button></div>`;document.body.appendChild(w)};
+window.supOpen=()=>{if(SU.busy||!canAct())return;supCancel();const sp=turnSp(),vs=vsOf();
+ const items=Object.values(SUP).map(s=>{const n=sn(s.id);let off=n<1,tip=s.n+' (+'+s.heal+' HP) · en inventario: '+n;
+  if(s.id=='vendaje'){tip+=' · seguidos: '+vs+'/'+VMAX;if(vs>=VMAX){off=true;tip+=' · ataca antes de seguir'}}
+  else{const used=sp[s.id]|0;tip+=' · usos este turno: '+used+'/'+s.per;if(used>=s.per)off=true}
+  return{id:s.id,ic:s.ic,count:n,off,tip}});
+ supPop($('supb'),items,id=>supPick(id),'supw')};
 window.supPick=id=>{const s=SUP[id];if(!s||SU.busy||!canAct())return;const sp=turnSp();
  if(sn(id)<1){supToast('No te quedan '+s.n.toLowerCase()+'s.');return}
- if(sp[id]>=s.per){supToast('Límite de '+s.per+' por ronda alcanzado.');return}
+ if(id=='vendaje'&&vsOf()>=VMAX){supToast('Ya usaste '+VMAX+' vendajes seguidos: ataca antes de usar otro.');return}
+ if(sp[id]>=s.per){supToast('Límite de '+s.per+' por turno alcanzado.');return}
  if(!units().some(u=>!why(u))){supToast('Ningún héroe necesita curación.');return}
  supClose();SU.item=id;SU.tg=null;supPaint();supBar()};
 function supTarget(i){const s=SUP[SU.item],u=units()[i],w=why(u);if(!s)return;if(w){supToast(w);return}SU.tg=i;supPaint();supBar()}
-function supFx(e,n,s){if(!e)return;try{fl('+'+n+' HP',e,'#4cdf7a')}catch(x){}if(RM)return;
+function supFx(e,n,s){if(!e)return;hpFx(e);try{fl('+'+n+' HP',e,'#4cdf7a')}catch(x){}if(RM)return;
  e.animate([{boxShadow:'0 0 0 0 rgba(76,223,122,0)',filter:'none'},{boxShadow:'0 0 26px 8px rgba(76,223,122,.85)',filter:'brightness(1.35) saturate(1.3)',offset:.35},{boxShadow:'0 0 0 0 rgba(76,223,122,0)',filter:'none'}],{duration:800,easing:'ease-out'});
  const r=e.getBoundingClientRect();for(let i=0;i<(s.id=='botiquin'?12:7);i++){const d=document.createElement('i');d.textContent='+';d.className='supx';
   d.style.cssText=`left:${r.left+Math.random()*r.width}px;top:${r.top+r.height*(.35+Math.random()*.5)}px;font-size:${10+Math.random()*10}px`;document.body.appendChild(d);
   d.animate([{opacity:0,transform:'translateY(0) scale(.5)'},{opacity:1,offset:.25},{opacity:0,transform:`translateY(${-30-Math.random()*40}px) scale(1.1)`}],{duration:700+Math.random()*500,easing:'ease-out',delay:Math.random()*150,fill:'both'}).finished.then(()=>d.remove(),()=>d.remove())}}
+window.supFx=supFx;window.hpFx=hpFx;
 window.supConfirm=async()=>{if(SU.busy||!SU.item||SU.tg==null)return;const s=SUP[SU.item],u=units()[SU.tg];
  if(!canAct()||!u){supCancel();return}const sp=turnSp(),w=why(u);
  if(sn(s.id)<1){supToast('No te quedan '+s.n.toLowerCase()+'s.');supCancel();return}
- if(sp[s.id]>=s.per){supToast('Límite de '+s.per+' por ronda alcanzado.');supCancel();return}
+ if(s.id=='vendaje'&&vsOf()>=VMAX){supToast('Ya usaste '+VMAX+' vendajes seguidos: ataca antes de usar otro.');supCancel();return}
+ if(sp[s.id]>=s.per){supToast('Límite de '+s.per+' por turno alcanzado.');supCancel();return}
  if(w){supToast(w);SU.tg=null;supPaint();supBar();return}
  SU.busy=1;const sq=inSq(),a=actor(),n=amt(u,s),e=elOf(SU.tg);
  if(sq)SQ.busy=true;else busy=true;               /* bloquea el resto de acciones: esto es la acción del héroe */
- ssn(s.id,sn(s.id)-1);sp[s.id]++;u.hp+=n;save();
+ ssn(s.id,sn(s.id)-1);sp[s.id]++;if(s.id=='vendaje'){const o2=sq?SQ:B;o2.vs=(o2.vs|0)+1}u.hp+=n;save();
  B.log.push(`${a.n} usa ${s.n} sobre ${u.n}: +${n} HP.`);
  supBar();supFx(e,n,s);if(sq)sqUpd();else bupd();
  const ib=document.querySelector('#supbar .ib');if(ib&&!RM)ib.animate([{transform:'scale(1)'},{transform:'scale(1.55) rotate(-12deg)'},{transform:'scale(1)'}],{duration:420});
@@ -4014,7 +4053,7 @@ const mkU=x=>{const cls=x.cls||'guerrero',lv=x.lv|0,s=stOf(cls,lv);return{n:x.n,
 const alive=a=>a.map((u,i)=>u.hp>0?i:-1).filter(i=>i>=0);
 const ord=a=>alive(a).sort((x,y)=>spd(a[y].cls)-spd(a[x].cls)||x-y); /* orden de actuación: más rápido primero */
 const opp=s=>s=='a'?'b':'a';
-function initState(r){const sp=x=>({v:(x&&x.v)|0,b:(x&&x.b)|0}),u={a:r.ta.map(mkU),b:r.tb.map(mkU)};return{u,sup:{a:sp(r.ua),b:sp(r.ub)},turn:'a',ai:ord(u.a)[0]||0,seq:0,log:['¡Comienza el duelo!'],win:null,ev:null}}
+function initState(r){const sp=x=>({v:(x&&x.v)|0,b:(x&&x.b)|0}),u={a:r.ta.map(mkU),b:r.tb.map(mkU)};return{u,sup:{a:sp(r.ua),b:sp(r.ub)},turn:'a',ai:ord(u.a)[0]||0,bt:{a:0,b:0},vs:{a:0,b:0},seq:0,log:['¡Comienza el duelo!'],win:null,ev:null}}
 /* ---------- estilos de la cuenta atrás ---------- */
 if(!$$('pvcd-css')){const s=document.createElement('style');s.id='pvcd-css';s.textContent=`
 .pvcd{position:fixed;inset:0;z-index:170;display:flex;align-items:center;justify-content:center;padding:max(20px,env(safe-area-inset-top,0px)) 20px max(20px,env(safe-area-inset-bottom,0px));background:radial-gradient(120% 90% at 50% 20%,color-mix(in srgb,var(--a) 16%,var(--bg)),var(--bg) 70%);color:var(--t);text-align:center;animation:pvcdIn .35s ease both}
@@ -4045,10 +4084,9 @@ async function runCd(r){
    t.innerHTML=esc(title)+(dots?'<span class="pvcd-d" id="pvcdd">'+'.'.repeat(1+(5-n)%3)+'</span>':'');nn.textContent=n;nn.className='pvcd-n';void nn.offsetWidth;nn.className='pvcd-n pop';
    s.textContent=sub;b.style.width=(100*(6-n)/5)+'%';await tick(1000)}
   return alive_()};
- if(!await phase('Esperando jugadores','Cargando el duelo contra '+r.rn,true)){cdStop();return}
- { const b=$$('pvcdb');if(b){b.style.transition='none';b.style.width='0%';void b.offsetWidth;b.style.transition=''} }
  const hs=r.st.u[r.me].length;
- if(!await phase('El duelo empieza en','Tu equipo: '+hs+' héroe'+(hs>1?'s':'')+' · Prepárate',false)){cdStop();return}
+ /* una sola cuenta atrás de 5 s: mientras carga el duelo, "esperando jugadores", y al llegar a 0 empieza */
+ if(!await phase('El duelo empieza en','Esperando jugadores · Tu equipo: '+hs+' héroe'+(hs>1?'s':''),false)){cdStop();return}
  if(!alive_()){cdStop();return}
  const t=$$('pvcdt'),nn=$$('pvcdn');if(t)t.textContent='¡Que comience!';if(nn){nn.textContent='¡A luchar!';nn.className='pvcd-n go pop'}
  const s=$$('pvcds');if(s)s.textContent='';await tick(700);
@@ -4057,11 +4095,10 @@ async function runCd(r){
 /* ---------- pantalla: la MISMA de las aventuras de escuadra (diseño nuevo): tarjetas arriba/abajo, ATACAR grande, habilidades que se suman al ataque ---------- */
 const LIM={guerrero:[3,2],mago:[5,3],arquero:[4,2],escudero:[3,4]},narrow=matchMedia('(max-width:600px)');
 /* copia las reglas de la pantalla de escuadra (#sqM, #sqH, #sqa, #ov .scr…) para #pvM, #pvH, #pvA, #pvb: así se ve idéntica y sigue los mismos ajustes responsivos */
-function dupCss(){if($$('pvq-css'))return;const map=t=>t.replace(/#sqM/g,'#pvM').replace(/#sqH/g,'#pvH').replace(/#sqa/g,'#pvA').replace(/#sqlog/g,'#pvLog').replace(/#ov \.scr/g,'#pvb'),test=/#sqM|#sqH|#sqa|#sqlog|#ov \.scr/;
- const walk=rules=>{let o='';for(const r of rules){try{if(r.selectorText!==undefined){if(test.test(r.selectorText))o+=map(r.cssText)}else if(r.media&&r.cssRules){const i=walk(r.cssRules);if(i)o+='@media '+r.media.mediaText+'{'+i+'}'}}catch(e){}}return o};
- let css='';for(const sh of document.styleSheets){try{css+=walk(sh.cssRules)}catch(e){}}
- css+='#pvb .cd.hcol{background:linear-gradient(170deg,color-mix(in srgb,var(--hc) 24%,transparent),color-mix(in srgb,var(--hc) 6%,transparent) 65%,transparent)!important}#pvb .qlgd{z-index:6}';
- const c=document.createElement('style');c.id='pvq-css';c.textContent=css;document.head.appendChild(c)}
+const DUEL_CSS="#pvb .sh{justify-content:center;padding:12px 14px 6px;border:0;background:none;box-shadow:none;backdrop-filter:none}\n.qbh{display:flex;flex-direction:column;align-items:center;gap:3px}\n.qbt{font:800 clamp(22px,6vw,34px)/1 Inter,system-ui,sans-serif;letter-spacing:.05em}\n.qlgb{position:absolute;right:12px;top:12px;font-size:11px;padding:5px 10px;border-radius:8px}\n#pvb .sb{display:flex!important;flex-direction:column!important;justify-content:space-between;align-items:stretch!important;gap:12px!important;padding:8px 10px!important}\n#pvM,#pvH{display:flex!important;flex-wrap:nowrap!important;justify-content:center;gap:clamp(6px,2vw,14px)!important;width:100%;max-width:720px;margin:0 auto}\n#pvM{align-items:stretch}#pvH{align-items:stretch}\n#pvM>.cd,#pvH>.cd{flex:1 1 0;min-width:0;max-width:200px;width:auto!important;aspect-ratio:auto!important;padding:16px 6px 8px;gap:4px;align-items:center;border-radius:12px;cursor:pointer}\n#pvH>.cd{margin-top:22px}#pvH>.cd:nth-child(2),#pvH>.cd:only-child{margin-top:0}\n.cd.qbs{box-shadow:inset 0 0 0 1.5px var(--r)}\n.cd .qnm{font-size:12px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;height:16px}\n.cd .qpt{margin:2px 0;height:46px;align-items:center}\n.cd .qlv{font-size:10px;white-space:nowrap;color:var(--m)}\n.qchs{display:flex;gap:3px;justify-content:center;flex-wrap:nowrap;height:18px;overflow:hidden;max-width:100%}.qchs .chip{font-size:9px;padding:2px 6px;white-space:nowrap}\n.qsls{display:flex;gap:3px;justify-content:center;height:16px;flex:none}\n.qsl{width:16px;height:16px;flex:none;border:1px solid var(--l);border-radius:4px;opacity:.3;position:relative;box-sizing:border-box}\n.qsl.on{opacity:1;border-color:var(--a);cursor:help}.qsl.on i{position:absolute;inset:4px;background:var(--a);transform:rotate(45deg)}\n.qbq{position:relative;width:100%;height:15px;flex:none;border-radius:6px;background:rgba(224,180,178,.12);overflow:hidden;margin:1px 0}\n.qbq i{position:absolute;left:0;top:0;bottom:0;display:block;transition:width .4s;opacity:.85}\n.qbq span{position:relative;display:block;text-align:center;font:600 9px/15px Inter,system-ui,sans-serif;color:var(--t);white-space:nowrap}\n.cd .qstt{font-size:9px;line-height:1.25;height:23px;overflow:hidden;color:var(--m);text-align:center}\n.qtip{display:none;position:fixed;z-index:9;width:min(250px,82vw);padding:10px 12px;border-radius:12px;background:rgba(18,10,38,.98);border:1px solid var(--l);box-shadow:0 8px 24px rgba(0,0,0,.5);font-size:11px;line-height:1.4;pointer-events:none}\n.qtip .t{display:block;font-size:12px;margin-bottom:3px}.qtip>.m{display:block;margin-bottom:6px}\n.qtip .r{display:flex;justify-content:space-between;gap:10px;padding:4px 0;border-top:1px solid var(--l)}.qtip .r span{color:var(--m)}\n#pvM>.cd.sel::after,#pvH>.cd.sel::after,#pvH>.cd.qal::after{position:absolute;top:3px;left:50%;transform:translateX(-50%);font:700 8px/1 Inter,system-ui,sans-serif;letter-spacing:.1em;text-transform:uppercase;padding:2px 7px;border-radius:99px;background:var(--a);color:#1A1836;z-index:2}\n#pvM>.cd.sel::after{content:'Objetivo'}#pvH>.cd.sel::after{content:'Turno'}#pvH>.cd.qal:not(.sel)::after{content:'Aliado';background:var(--b)}\n#pvA{display:block!important;flex:none;padding:8px 10px calc(10px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--l);background:rgba(26,24,54,.85)}\n#pvA .qtn{text-align:center;font-size:11px;color:var(--m);margin-bottom:6px}#pvA .qtn b{color:var(--t)}\n.qcb{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:end;max-width:720px;margin:0 auto}\n.qcl,.qcr{display:flex;flex-direction:column;gap:4px}.qcl{align-items:flex-start}.qcr{align-items:flex-end}\n.qlb{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--m)}\n.qag{display:flex;flex-wrap:wrap;gap:5px}.qcr .qag{justify-content:flex-end}\n.qab,.qpv{width:42px;height:42px;border-radius:10px;padding:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;line-height:1;box-sizing:border-box}\n.qab b{font-size:12px}.qab small{font-size:8px;color:var(--m)}.qab[disabled]{opacity:.35}\n.qpv{border:1px dashed var(--l);opacity:.4;font-size:9px;color:var(--m)}\n.qcc{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:150px}\n.qdm{font-size:10px;color:var(--m)}.qdm b{color:var(--t)}\n.qatk{width:100%;padding:14px 18px;font:800 17px/1 Inter,system-ui,sans-serif;letter-spacing:.1em;clip-path:polygon(7% 0,93% 0,100% 50%,93% 100%,7% 100%,0 50%)}\n.qsub{display:flex;gap:6px;width:100%}.qsub button{flex:1;font-size:11px;padding:7px 4px}.qsub small{display:block;font-size:9px;color:var(--m)}\n.qab.qon{border-color:var(--a)!important;box-shadow:0 0 0 1.5px var(--a),0 0 12px color-mix(in srgb,var(--a) 45%,transparent)}\n.qatk.qarm{background-image:linear-gradient(100deg,#E99856,#e4836f,#c466a8,#9b4dff,#b27fd6,#d9a8a0,#f0c040,#c7c752,#8fcb68,#5fbf7a,#9fb36a,#E99856)!important;background-size:400% 100%!important;background-color:transparent!important;color:#120a26!important;animation:qgrad 9s linear infinite}\n@keyframes qgrad{to{background-position:133.3333% 0}}\n@media(prefers-reduced-motion:reduce){.qatk.qarm{animation:none}}\n.qlgd{display:none;position:absolute!important;right:10px;top:58px;width:min(300px,82vw)!important;max-height:42vh;flex:none!important;min-height:0!important;overflow:auto!important;background:rgba(26,24,54,.97);border:1px solid var(--l);border-radius:12px;padding:10px;z-index:4}.qlgd.on{display:block}\n@media(max-width:480px){.qab,.qpv{width:36px;height:36px}.qcc{min-width:130px}.qatk{font-size:15px;padding:12px 14px}}\n/* --- Tarjetas más pequeñas (celular vertical y horizontal) --- */\n@media(max-width:600px),(max-height:520px){\n #pvb .sb{gap:6px!important;padding:4px 8px 8px!important}\n #pvM,#pvH{gap:6px!important}\n #pvM{flex-wrap:wrap!important}\n #pvM>.cd{flex:1 1 calc(33.333% - 6px)!important;max-width:calc(33.333% - 2px)!important}\n #pvM>.cd,#pvH>.cd{padding:14px 4px 5px;gap:2px;border-radius:10px}\n #pvH>.cd,#pvH>.cd:nth-child(2){margin-top:0}\n #pvH>.cd:only-child{max-width:150px}\n .cd .qnm{font-size:11px;height:14px}\n .cd .qpt{height:34px;margin:0}.cd .qpt svg{width:32px;height:32px}\n .cd .qlv{font-size:9px}\n .qchs{height:11px;gap:0;justify-content:center}\n .qchs .chip{border:0;background:none;padding:0;gap:0;font-size:8px;color:var(--m)}\n .qchs .chip+.chip::before{content:\" · \";white-space:pre}\n #pvM>.cd .qchs .chip:nth-child(2){display:none}\n .qsls{height:auto;gap:2px}.qsl:not(.on){display:none}.qsl{width:14px;height:14px}.qsl.on i{inset:3px}\n .qbq{height:12px;margin:0;border-radius:5px}.qbq span{font-size:8px;line-height:12px}\n .cd .qstt{font-size:8px;height:auto;min-height:0;line-height:1.2}.cd .qstt:empty{display:none}\n #pvM>.cd.sel::after,#pvH>.cd.sel::after,#pvH>.cd.qal::after{font-size:7px;padding:2px 6px;top:2px}\n}\n\n/* --- Cabecera y panel de acciones en celular vertical --- */\n@media(max-width:600px){\n #pvb .sh{padding:6px 12px 0}\n .qbt{font-size:19px}#pvr{font-size:10px}\n .qlgb{top:8px;right:8px;font-size:10px;padding:4px 8px}\n .qlgd{top:44px}\n #pvA{padding:5px 8px calc(8px + env(safe-area-inset-bottom,0px))}\n #pvA .qtn{font-size:10px;margin-bottom:4px}\n .qcb{display:flex!important;flex-direction:column;gap:6px;align-items:stretch}\n .qcl{flex-direction:row;align-items:center;overflow-x:auto;gap:6px;-webkit-overflow-scrolling:touch}\n .qcl .qlb,.qcr,.qpv{display:none}\n .qag{flex-wrap:nowrap;gap:5px}\n .qab{width:auto;min-width:54px;height:38px;padding:0 9px;flex:none}\n .qab b{font-size:10px;white-space:nowrap}.qab small{font-size:8px}\n .qcc{min-width:0;width:100%;gap:5px}\n .qdm{font-size:9px}\n .qatk{padding:11px 14px;font-size:15px}\n .qsub button{padding:6px 4px;font-size:10px}.qsub small{display:inline;margin-left:4px;font-size:8px}\n}\n\n/* --- Celular horizontal: todo en una fila --- */\n@media(max-height:520px) and (min-width:601px){\n .qbt{font-size:16px}.qbh .m{display:none}\n #pvb .sh{padding:4px 10px 0}\n .cd .qpt{height:24px}.cd .qpt svg{width:22px;height:22px}\n .qchs,.qsls{display:none}\n #pvA{padding:4px 10px calc(6px + env(safe-area-inset-bottom,0px))}#pvA .qtn{display:none}\n .qcb{align-items:center}.qatk{padding:8px 12px;font-size:13px}\n .qlgd{top:36px}\n}";
+/* estilos del duelo: idénticos a los de la pantalla de escuadra, fijos y válidos en celular y computador */
+function dupCss(){if($$('pvq-css'))return;const c=document.createElement('style');c.id='pvq-css';
+ c.textContent=DUEL_CSS+'#pvb .cd.hcol{background:linear-gradient(170deg,color-mix(in srgb,var(--hc) 24%,transparent),color-mix(in srgb,var(--hc) 6%,transparent) 65%,transparent)!important}#pvb .qlgd{z-index:6}#pvb .cd{position:relative}';document.head.appendChild(c)}
 const stTx=u=>(u.tk>0?' · provoca':'')+(u.g>0?' · guardia':'')+(u.eva>0?' · esquiva':'')+(u.rg>0?' · regenera':'')+(u.pz>0?' · envenenado':'')+(u.mk>0?' · marcado':'')+(u.slw>0?' · lento':'');
 const pos=u=>front(u)?'Delante':'Detrás';
 const bq=(id,vid,c)=>`<div class="qbq"><i id="${id}" style="background:${c};width:100%"></i><span id="${vid}"></span></div>`;
@@ -4075,23 +4112,24 @@ function build(){dupCss();const e=$$('pvb');
 function upd(){if(!R||!$$('pvM'))return;const st=R.st,mine=st.turn==R.me&&!st.win&&!R.cd,U=st.u[R.me],E=st.u[R.o],fx=u=>stTx(u).replace(/^ · /,'');
  if(st.win&&R.ov)cdStop();
  if(R.arm&&(R.armSeq!==st.seq||!mine))R.arm=null;
+ if(R.sup&&(!mine||R.busy))R.sup=null;
  if(!E[R.t]||E[R.t].hp<=0){const k=alive(E)[0];if(k!=null)R.t=k}
  if(!U[R.a]||U[R.a].hp<=0){const k=alive(U)[0];if(k!=null)R.a=k}
  const au=mine?U[st.ai]:(U.find(x=>x.hp>0)||U[0]),healer=!!au&&au.sk.some(id=>['heal','gheal'].includes(SKL[id].k));
  /* el rival solo muestra lo que está activo: nombre, nivel, ataque, vida y efectos */
  E.forEach((u,i)=>{const e=$$('pvm'+i);if(!e)return;$$('pvmb'+i).style.width=100*Math.max(0,u.hp)/u.mhp+'%';$$('pvmv'+i).textContent=Math.max(0,u.hp)+'/'+u.mhp;$$('pvmt'+i).textContent=fx(u);e.classList.toggle('dead',u.hp<=0);e.classList.toggle('sel',R.t==i&&u.hp>0)});
  U.forEach((u,i)=>{const e=$$('pvh'+i);if(!e)return;$$('pvhb'+i).style.width=100*Math.max(0,u.hp)/u.mhp+'%';$$('pvhv'+i).textContent=Math.max(0,u.hp)+'/'+u.mhp;$$('pvhm'+i).style.width=100*u.mp/Math.max(1,u.mmp)+'%';$$('pvhmv'+i).textContent='Maná '+u.mp+'/'+u.mmp;$$('pvhs'+i).style.width=100*Math.max(0,u.st|0)/Math.max(1,u.mst|0)+'%';$$('pvhsv'+i).textContent='Res '+(u.st|0)+'/'+(u.mst|0);$$('pvht'+i).textContent=fx(u);
-  e.classList.toggle('dead',u.hp<=0);e.classList.toggle('sel',mine&&i==st.ai&&u.hp>0);e.classList.toggle('qal',!!(healer&&mine&&!st.win&&i==R.a&&u.hp>0&&i!=st.ai))});
+  e.classList.toggle('dead',u.hp<=0);e.classList.toggle('sel',mine&&i==st.ai&&u.hp>0);e.classList.toggle('sup-ok',!!(R.sup&&mine&&u.hp>0&&u.hp<u.mhp));e.classList.toggle('qal',!!(healer&&mine&&!st.win&&i==R.a&&u.hp>0&&i!=st.ai))});
  $$('pvr').textContent='vs '+R.rn+(R.cd?' · Preparando…':'');
  $$('pvLog').innerHTML=st.log.slice(-30).reverse().map(l=>`<div class="m">${esc(l)}</div>`).join('');
  if(st.win){$$('pvA').innerHTML=R.res||'<div class="qtn">Calculando resultado…</div>';return}
- const off=!mine||R.busy||!au||au.hp<=0,lim=LIM[au&&au.cls]||[3,2],tg=E[R.t],al=U[R.a],ak=R.arm&&SKL[R.arm],tot=au?au.atk+(ak&&['dmg','mag','slow','psn'].includes(ak.k)?ak.v:0):0;
- const txt=R.cd?'El duelo está por comenzar…':mine?`Turno de <b>${esc(au.n)}</b>${tg&&tg.hp>0?' · Objetivo: <b>'+esc(tg.n)+'</b>':''}${healer&&al&&al.hp>0?' · Aliado: <b>'+esc(al.n)+'</b>':''}`:`Esperando la jugada de <b>${esc(R.rn)}</b>…`;
+ const off=!mine||R.busy||!au||au.hp<=0||!!R.sup,lim=LIM[au&&au.cls]||[3,2],tg=E[R.t],al=U[R.a],ak=R.arm&&SKL[R.arm],tot=au?au.atk+(ak&&['dmg','mag','slow','psn'].includes(ak.k)?ak.v:0):0;
+ const txt=R.sup?`Elige a quién curar con <b>${R.sup=='sb'?'Botiquín':'Vendaje'}</b> · toca un héroe herido`:R.cd?'El duelo está por comenzar…':mine?`Turno de <b>${esc(au.n)}</b>${tg&&tg.hp>0?' · Objetivo: <b>'+esc(tg.n)+'</b>':''}${healer&&al&&al.hp>0?' · Aliado: <b>'+esc(al.n)+'</b>':''}`:`Esperando la jugada de <b>${esc(R.rn)}</b>…`;
  const ab=(au?au.sk:[]).map(id=>{const k=SKL[id],c=cst(id),cd=au.cd[id]|0,dis=off||cd>0||(au[c.r]|0)<c.v,ct=c.v+' '+(c.r=='st'?'res.':'maná'),why=dis?(cd>0?'Recarga: '+cd+' ronda(s)':off?'Espera tu turno':'Falta de '+(c.r=='st'?'resistencia':'maná')):'';
    return `<button class="qab${R.arm==id?' qon':''}" aria-pressed="${R.arm==id}" ${dis?'disabled':''} title="${esc(k.n+': '+(k.d||'')+' · Coste '+ct+(why?' · '+why:'')+(dis?'':' · Toca para sumarla al siguiente ataque'))}" onclick="PVB.arm('${id}')"><b>${esc(narrow.matches?k.n:k.n.slice(0,2))}</b><small>${cd>0?'R'+cd:esc(ct)}</small></button>`}).join('')+Array.from({length:Math.max(0,lim[0]-(au?au.sk.length:0))},()=>'<div class="qpv" title="Espacio de habilidad activa libre">+</div>').join('');
  const pv=Array.from({length:lim[1]},()=>'<div class="qpv" title="Espacio de habilidad pasiva libre"></div>').join('');
  const gcd=au?(au.cd.gp|0):0,gOff=off||!au||!au.gp||gcd>0,sv=st.sup[R.me].v|0,sb=st.sup[R.me].b|0;
- $$('pvA').innerHTML=`<div class="qtn">${txt}</div><div class="qcb"><div class="qcl"${narrow.matches&&!(au&&au.sk.length)?' style="display:none"':''}><span class="qlb">Activas</span><div class="qag">${ab}</div></div><div class="qcc"><span class="qdm">Daño total: <b>${tot} ATQ</b>${ak?' · <b>+ '+esc(ak.n)+'</b>':''}</span><button class="pri qatk${ak?' qarm':''}" ${off?'disabled':''} title="${off?'Espera tu turno':(ak?'Ataca y aplica '+esc(ak.n):'Ataque normal: sin coste')}" onclick="PVB.go('atk')">ATACAR</button><div class="qsub"><button ${gOff?'disabled':''} title="${gOff?'Recarga: '+gcd+' ronda(s) o turno no disponible':'Ataque fuerte'}" onclick="PVB.go('gp')">Ataque fuerte<small>${gcd>0?'Recarga '+gcd:'Sin coste'}</small></button><button ${off?'disabled':''} onclick="PVB.act('def')">Defender<small>Guardia</small></button></div></div><div class="qcr"><span class="qlb">Pasivas</span><div class="qag">${pv}</div></div></div>${sv+sb>0?`<button id="pvsb" ${off?'disabled':''} onclick="PVB.sup()">${ic('ven',14)} Suministros (${sv} · ${sb})</button>`:''}${!mine&&!R.cd&&R.stale?'<button class="pri" style="width:100%;margin-top:8px" onclick="PVB.claim()">El rival no responde: reclamar victoria</button>':''}`}
+ $$('pvA').innerHTML=`<div class="qtn">${txt}</div><div class="qcb"><div class="qcl"${narrow.matches&&!(au&&au.sk.length)?' style="display:none"':''}><span class="qlb">Activas</span><div class="qag">${ab}</div></div><div class="qcc"><span class="qdm">Daño total: <b>${tot} ATQ</b>${ak?' · <b>+ '+esc(ak.n)+'</b>':''}</span><button class="pri qatk${ak?' qarm':''}" ${off?'disabled':''} title="${off?'Espera tu turno':(ak?'Ataca y aplica '+esc(ak.n):'Ataque normal: sin coste')}" onclick="PVB.go('atk')">ATACAR</button><div class="qsub"><button ${gOff?'disabled':''} title="${gOff?'Recarga: '+gcd+' ronda(s) o turno no disponible':'Ataque fuerte'}" onclick="PVB.go('gp')">Ataque fuerte<small>${gcd>0?'Recarga '+gcd:'Sin coste'}</small></button><button ${off?'disabled':''} onclick="PVB.act('def')">Defender<small>Guardia</small></button></div></div><div class="qcr"><span class="qlb">Pasivas</span><div class="qag">${pv}</div></div></div>${R.sup?'<button id="pvsb" onclick="PVB.supNo()">Cancelar selección</button>':sv+sb>0?`<button id="pvsb" ${off?'disabled':''} onclick="PVB.sup()">${ic('ven',14)} Suministros (${sv} · ${sb})</button>`:''}${!mine&&!R.cd&&R.stale?'<button class="pri" style="width:100%;margin-top:8px" onclick="PVB.claim()">El rival no responde: reclamar victoria</button>':''}`}
 /* ---------- acciones (solo el jugador con el turno) ---------- */
 function hit(t,d){if(t.eva>0){t.eva--;return 0}if(t.g>0){d=Math.max(1,d-t.g);t.g=0}if(t.mk>0&&d>0){d++;t.mk--}return Math.max(1,d)}
 function upkeep(list){list.forEach(u=>{if(u.hp<=0)return;if(u.pz>0){u.hp=Math.max(1,u.hp-1);u.pz--}if(u.rg>0){u.hp=Math.min(u.mhp,u.hp+1);u.rg--}if(u.tk>0)u.tk--;u.mp=Math.min(u.mmp,u.mp+1);u.st=Math.min(u.mst|0,(u.st|0)+1);for(const k in u.cd)u.cd[k]=Math.max(0,u.cd[k]-1)})}
@@ -4101,21 +4139,23 @@ async function act(a,fr){const st=R.st;if(R.cd||R.busy||st.win||st.turn!=R.me)re
  if(k&&(!u.sk.includes(a)||(u.cd[a]|0)>0))return;if(a=='gp'&&(!u.gp||(u.cd.gp|0)>0))return;
  const cost=(a=='gp'||k)?cst(a):null;if(cost&&(u[cost.r]|0)<cost.v)return;
  let ally=U[R.a]&&U[R.a].hp>0?R.a:alive(U).sort((x,y)=>U[x].hp/U[x].mhp-U[y].hp/U[y].mhp)[0];
- if((a=='sb'||a=='sv')){const al=U[ally];if(!ns.sup[R.me][a=='sb'?'b':'v']||!al||al.mhp-al.hp<=0){notice('Sin efecto','Ese aliado ya tiene la vida completa.');return}}
+ if((a=='sb'||a=='sv')){const al=U[ally];if(!ns.sup[R.me][a=='sb'?'b':'v']||!al||al.mhp-al.hp<=0){notice('Sin efecto','Ese aliado ya tiene la vida completa.');return}
+  if(a=='sb'&&((ns.bt&&ns.bt[R.me])|0)>=2){notice('Límite del turno','Solo puedes usar 2 botiquines por turno.');return}
+  if(a=='sv'&&((ns.vs&&ns.vs[R.me])|0)>=5){notice('Ataca primero','Ya usaste 5 vendajes seguidos: ataca antes de usar otro.');return}}
  let free=fr?1:0,ln=[];
  /* la primera línea enemiga protege a la retaguardia de los ataques cuerpo a cuerpo */
  const physHit=a=='atk'||a=='gp'||(k&&isPhys(a)&&['dmg','slow','psn'].includes(kind));
  if(needT&&physHit&&melee(u)&&!tk.length&&!front(E[j])){const f=alive(E).find(i=>front(E[i]));if(f!=null){ln.push(`${u.n} no alcanza a ${E[j].n}: la primera línea enemiga lo protege.`);j=f}}
  R.busy=true;upd();const ev={s:R.me,i:ns.ai,o:R.o,j:needT?j:null,d:0,x:''},t=E[j];
  if(cost)u[cost.r]=(u[cost.r]|0)-cost.v;
- if(a=='atk'||a=='gp'){let d=u.atk;if(a=='gp'){d=(u.gp&&u.gp.d)||u.atk+1;u.cd.gp=2;if(u.cls=='guerrero')d++}if(u.cls=='arquero'&&Math.random()<.2){d++;ln.push('¡Disparo certero!')}const x=hit(t,d);t.hp=Math.max(0,t.hp-x);ev.d=x;if(!x)ev.x='Esquiva';ln.push(x?`${u.n} ataca a ${t.n}: -${x} HP.`:`${t.n} esquiva el ataque de ${u.n}.`)}
+ if(a=='atk'||a=='gp'){ns.vs=ns.vs||{a:0,b:0};ns.vs[R.me]=0;let d=u.atk;if(a=='gp'){d=(u.gp&&u.gp.d)||u.atk+1;u.cd.gp=2;if(u.cls=='guerrero')d++}if(u.cls=='arquero'&&Math.random()<.2){d++;ln.push('¡Disparo certero!')}const x=hit(t,d);t.hp=Math.max(0,t.hp-x);ev.d=x;if(!x)ev.x='Esquiva';ln.push(x?`${u.n} ataca a ${t.n}: -${x} HP.`:`${t.n} esquiva el ataque de ${u.n}.`)}
  else if(a=='def'){u.g=Math.max(u.g,1);u.mp=Math.min(u.mmp,u.mp+1);ev.x='Guardia';ln.push(`${u.n} se defiende (reduce 1 el próximo golpe y recupera 1 de maná).`)}
- else if(a=='sb'||a=='sv'){const al=U[ally],g=Math.min(HEAL[a=='sb'?'b':'v'],al.mhp-al.hp);al.hp+=g;ns.sup[R.me][a=='sb'?'b':'v']--;ev.x='+'+g;ev.j=ally;ev.o=R.me;ln.push(`${u.n} usa ${a=='sb'?'un botiquín':'un vendaje'} sobre ${al.n}: +${g} HP.`);try{if(S&&S.sup){const f=a=='sb'?'botiquin':'vendaje';S.sup[f]=Math.max(0,(S.sup[f]|0)-1);save()}}catch(e){}}
+ else if(a=='sb'||a=='sv'){const al=U[ally],g=Math.min(HEAL[a=='sb'?'b':'v'],al.mhp-al.hp);al.hp+=g;ns.sup[R.me][a=='sb'?'b':'v']--;ns.bt=ns.bt||{a:0,b:0};ns.vs=ns.vs||{a:0,b:0};if(a=='sb')ns.bt[R.me]++;else ns.vs[R.me]++;ev.x='+'+g;ev.j=ally;ev.o=R.me;ev.hl=[[ally,g]];ev.sup=a;ln.push(`${u.n} usa ${a=='sb'?'un botiquín':'un vendaje'} sobre ${al.n}: +${g} HP.`);try{if(S&&S.sup){const f=a=='sb'?'botiquin':'vendaje';S.sup[f]=Math.max(0,(S.sup[f]|0)-1);save()}}catch(e){}}
  else{u.cd[a]=k.cd||0;ln.push(`${u.n} usa ${k.n}.`);
   if(['dmg','mag','slow','psn'].includes(kind)){const d=Math.max(1,hit(t,k.v)||1);t.hp=Math.max(0,t.hp-d);if(kind=='slow')t.slw=2;if(kind=='psn'){t.pz=3;t.hp=Math.max(1,t.hp)}ev.d=d;ln.push(`${t.n} recibe ${d} de daño.`)}
   else if(kind=='guard'){u.g=Math.max(u.g,k.v);ev.x='Guardia '+k.v}
-  else if(kind=='heal'){const al=U[ally],g=Math.min(k.v,al.mhp-al.hp);al.hp+=g;ev.x='+'+g;ev.j=ally;ev.o=R.me;ln.push(`${al.n} recupera ${g} HP.`)}
-  else if(kind=='gheal'){alive(U).forEach(i=>{U[i].hp=Math.min(U[i].mhp,U[i].hp+k.v)});ev.x='+'+k.v;ln.push('La curación grupal alcanza a todo el grupo.')}
+  else if(kind=='heal'){const al=U[ally],g=Math.min(k.v,al.mhp-al.hp);al.hp+=g;ev.x='+'+g;ev.j=ally;ev.o=R.me;ev.hl=[[ally,g]];ln.push(`${al.n} recupera ${g} HP.`)}
+  else if(kind=='gheal'){ev.hl=[];alive(U).forEach(i=>{const g0=Math.min(k.v,U[i].mhp-U[i].hp);U[i].hp+=g0;if(g0>0)ev.hl.push([i,g0])});ev.x='+'+k.v;ln.push('La curación grupal alcanza a todo el grupo.')}
   else if(kind=='taunt'){u.tk=k.v;ev.x='¡Provoca!';ln.push(`${u.n} provoca a los rivales durante ${k.v} turnos.`)}
   else if(kind=='mark'){t.mk=k.v;ev.x='Marca';ln.push(`${t.n} queda marcado.`)}
   else if(kind=='eva'){u.eva=2;ev.x='Esquiva';ln.push(`${u.n} se prepara para esquivar.`)}
@@ -4124,14 +4164,19 @@ async function act(a,fr){const st=R.st;if(R.cd||R.busy||st.win||st.turn!=R.me)re
  if(t&&t.hp<=0&&needT)ln.push(`${t.n} cae.`);
  /* siguiente héroe (por velocidad), o pasa el turno al rival */
  if(!alive(E).length){ns.win=R.me}
- else if(!free){const o=ord(U),p=o.indexOf(ns.ai),nx=p>=0?o[p+1]:undefined;if(nx!=null)ns.ai=nx;else{ns.turn=R.o;upkeep(E);ns.ai=ord(E)[0]||0;ln.push(`— Turno de ${R.rn} —`)}}
+ else if(!free){const o=ord(U),p=o.indexOf(ns.ai),nx=p>=0?o[p+1]:undefined;if(nx!=null)ns.ai=nx;else{ns.bt=ns.bt||{a:0,b:0};ns.bt[R.me]=0;ns.turn=R.o;upkeep(E);ns.ai=ord(E)[0]||0;ln.push(`— Turno de ${R.rn} —`)}}
  ns.log=ns.log.concat(ln).slice(-30);ns.seq=st.seq+1;ns.ev=ev;
- await play(ev,R.st);R.st=ns;upd();
+ await play(ev,R.st,ns);R.st=ns;upd();
  try{await C().battleSet(R.id,{bs:clone(ns),estado:ns.win?'fin':'activa',t:Date.now()})}catch(e){notice('Sin conexión','No se pudo enviar tu jugada: '+(e.message||'error'))}
  R.busy=false;R.seqAt=Date.now();upd();if(ns.win)finish()}
 /* animación de una jugada (propia o recibida): mismo ataque que las aventuras */
-async function play(ev,before){if(!ev||!$$('pvM'))return;const id=(s,i)=>$$((s==R.me?'pvh':'pvm')+i),A=id(ev.s,ev.i),B=ev.j!=null?id(ev.o,ev.j):null;
- try{if(A&&B&&ev.d>0){const an=lunge(A,B,RM?200:1200);await wait(550);slash(B);impact(B,'-'+ev.d);await wait(350);await an.finished}
+async function play(ev,before,after){if(!ev||!$$('pvM'))return;const id=(s,i)=>$$((s==R.me?'pvh':'pvm')+i),A=id(ev.s,ev.i),B=ev.j!=null?id(ev.o,ev.j):null;
+ try{if(ev.hl&&ev.hl.length){/* curación: partículas verdes y barra que sube en verde; la ve también el rival */
+   const mine=ev.s==R.me,tm=after&&after.u&&after.u[ev.s];
+   for(const h of ev.hl){const e=id(ev.s,h[0]);if(!e)continue;if(window.supFx)window.supFx(e,h[1],{id:ev.sup=='sb'?'botiquin':'vendaje'});
+    const u=tm&&tm[h[0]],bb=$$((mine?'pvhb':'pvmb')+h[0]),tt=$$((mine?'pvhv':'pvmv')+h[0]);if(u&&bb)bb.style.width=100*Math.max(0,u.hp)/u.mhp+'%';if(u&&tt)tt.textContent=Math.max(0,u.hp)+'/'+u.mhp}
+   await wait(900)}
+  else if(A&&B&&ev.d>0){const an=lunge(A,B,RM?200:1200);await wait(550);slash(B);impact(B,'-'+ev.d);await wait(350);await an.finished}
   else if(A&&B&&ev.x){fl(ev.x,B,'var(--b)');await wait(500)}
   else if(A&&ev.x){fl(ev.x,A,'var(--b)');await wait(500)}
   else if(A&&B){await wait(300)}}catch(e){}}
@@ -4142,19 +4187,20 @@ async function finish(){if(!R||R.fin)return;R.fin=1;cdStop();const won=R.st.win=
 function close(){if(!R)return;const r=R;cdStop();const sw=$$('pvsw');if(sw)sw.remove();R=null;clearInterval(r.iv);try{r.un&&r.un()}catch(e){}const e=$$('pvb');if(e)e.remove();try{C().endBattle(r.id)}catch(e){}}
 window.PVB={
  tgt:i=>{if(R&&R.st.u[R.o][i].hp>0){R.t=i;upd()}},
- ally:i=>{if(R&&R.st.u[R.me][i].hp>0){R.a=i;upd()}},
+ ally:i=>{if(!R)return;const u=R.st.u[R.me][i];if(R.sup){if(!u||u.hp<=0||u.hp>=u.mhp){notice('Sin efecto',u&&u.hp>=u.mhp?u.n+' ya tiene la vida completa.':'Ese héroe no puede recibir curación.');return}const a=R.sup;R.sup=null;R.a=i;act(a);return}if(u&&u.hp>0){R.a=i;upd()}},
  act,
  arm:id=>{if(!R||R.busy||R.cd||R.st.win||R.st.turn!=R.me)return;R.arm=R.arm==id?null:id;R.armSeq=R.st.seq;upd()},
  go:async w=>{if(!R||R.busy||R.cd||R.st.win||R.st.turn!=R.me)return;const id=R.arm;R.arm=null;
   if(id){await act(id,true);if(!R||R.st.win||R.st.turn!=R.me)return;const u=R.st.u[R.me][R.st.ai];if(!u||u.hp<=0)return}
   return act(w)},
  log:()=>{const l=$$('pvLog');if(l)l.classList.toggle('on')},
- sup:()=>{if(!R||R.busy||R.cd||R.st.win||R.st.turn!=R.me)return;const U=R.st.u[R.me],u=U[R.st.ai],sp=R.st.sup[R.me],al=U[R.a]&&U[R.a].hp>0?U[R.a]:alive(U).sort((x,y)=>U[x].hp/U[x].mhp-U[y].hp/U[y].mhp).map(i=>U[i])[0];
-  const row=(id,k)=>{const s0=typeof SUP!=='undefined'&&SUP[id]?SUP[id]:{n:id=='botiquin'?'Botiquín':'Vendaje',ic:id=='botiquin'?'bot':'ven',heal:HEAL[k]},n=sp[k]|0;
-   return `<button class="supit" ${n<1?'disabled':''} onclick="PVB.useSup('s${k}')"><span class="ib">${ic(s0.ic,28)}</span><span style="flex:1;text-align:left"><b>${s0.n}</b> <span class="chip a">+${s0.heal} HP</span><br><span class="m">Disponibles: ${n}</span></span></button>`};
-  const w=document.createElement('div');w.id='pvsw';w.className='sheet';w.style.zIndex=180;w.onclick=e=>{if(e.target===w)w.remove()};
-  w.innerHTML=`<div class="panel bot" style="display:flex;flex-direction:column;gap:10px"><h2>Suministros</h2><span class="m">Usar uno consume la acción de ${esc(u.n)}. Se aplica a <b>${esc(al?al.n:'—')}</b>; para elegir a otro, toca su tarjeta antes.</span>${row('vendaje','v')}${row('botiquin','b')}<button onclick="this.closest('.sheet').remove()">Cerrar</button></div>`;document.body.appendChild(w)},
- useSup:a=>{const w=$$('pvsw');if(w)w.remove();act(a)},
+ sup:()=>{if(!R||R.busy||R.cd||R.st.win||R.st.turn!=R.me)return;const old=$$('pvsw');if(old){old.remove();return}
+  const st=R.st,sp=st.sup[R.me],vs=(st.vs&&st.vs[R.me])|0,bt=(st.bt&&st.bt[R.me])|0;
+  const info=(id,k,n,off,extra)=>{const s0=typeof SUP!=='undefined'&&SUP[id]?SUP[id]:{n:id=='botiquin'?'Botiquín':'Vendaje',ic:id=='botiquin'?'bot':'ven',heal:HEAL[k]};return{id:'s'+k,ic:s0.ic,count:n,off,tip:s0.n+' (+'+s0.heal+' HP) · disponibles: '+n+extra}};
+  const items=[info('vendaje','v',sp.v|0,(sp.v|0)<1||vs>=5,' · seguidos: '+vs+'/5'+(vs>=5?' · ataca antes de seguir':'')),info('botiquin','b',sp.b|0,(sp.b|0)<1||bt>=2,' · usos este turno: '+bt+'/2')];
+  if(window.supPop)window.supPop($$('pvsb'),items,id=>PVB.useSup(id),'pvsw')},
+ useSup:a=>{const w=$$('pvsw');if(w)w.remove();if(!R)return;R.sup=a;upd()},
+ supNo:()=>{if(R){R.sup=null;upd()}},
  close,
  quit:async()=>{if(!R||R.st.win)return;if(!confirm('¿Rendirte? Contará como derrota.'))return;const ns=clone(R.st);ns.win=R.o;ns.seq++;ns.log.push(`${C().name||'Un jugador'} se rinde.`);ns.ev=null;R.st=ns;try{await C().battleSet(R.id,{bs:clone(ns),estado:'fin',t:Date.now()})}catch(e){}upd();finish()},
  claim:async()=>{if(!R||R.st.win)return;const ns=clone(R.st);ns.win=R.me;ns.seq++;ns.log.push(`${R.rn} no responde: victoria por abandono.`);ns.ev=null;R.st=ns;try{await C().battleSet(R.id,{bs:clone(ns),estado:'fin',t:Date.now()})}catch(e){}upd();finish()}
@@ -4169,7 +4215,7 @@ addEventListener('cloudbattle',e=>{const{r,me}=e.detail;if(R||r.tipo=='x')return
  const me0=R;
  R.un=C().battleWatch(r.id,async d=>{if(!R)return;
   if(!d){if(!R.st.win&&!R.fin){const ns=clone(R.st);ns.win=R.me;ns.log.push(`${R.rn} abandonó el duelo.`);R.st=ns;upd();finish()}return}
-  if(d.bs&&d.bs.u&&d.bs.seq>R.st.seq){const prev=R.st,ns=d.bs;R.seqAt=Date.now();R.stale=false;R.busy=true;await play(ns.ev,prev);R.st=ns;R.busy=false;upd();if(ns.win)finish()}});
+  if(d.bs&&d.bs.u&&d.bs.seq>R.st.seq){const prev=R.st,ns=d.bs;R.seqAt=Date.now();R.stale=false;R.busy=true;await play(ns.ev,prev,ns);R.st=ns;R.busy=false;upd();if(ns.win)finish()}});
  R.iv=setInterval(()=>{if(!R||R.st.win||R.cd)return;const s=R.st.turn!=R.me&&Date.now()-R.seqAt>100000;if(s!==R.stale){R.stale=s;upd()}},3000);
  runCd(me0)});
 /* arena.js ya no usa el sim automático; evita que el viejo listener (si existe) abra otra pantalla */
