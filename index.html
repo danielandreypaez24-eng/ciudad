@@ -1309,10 +1309,11 @@ const TS=()=>{S.tomos=S.tomos||{};S.frag=S.frag||0;return S.tomos},dnL=()=>LVS.f
 const pay=c=>{if(!can(c))return false;spend(c);return true};
 function bossTome(){const a=B.adv;if(!a||!a.lv||a.lv%5||S.done['T'+a.lv])return;S.done['T'+a.lv]=1;const id=BT[a.lv];if(id){TS()[id]=(TS()[id]||0)+1;B.log.push('¡El jefe suelta el '+TOMO[id].n+'!')}else{TS();S.frag+=3;B.log.push('El jefe suelta 3 fragmentos arcanos.')}save()}
 function bib(tab){tab=tab||'shelf';const T=TS(),dn=dnL(),own=Object.keys(T).filter(k=>T[k]>0);
- const card=(id,x)=>{const t=TOMO[id],r=RAR[t.r],k=SKL[t.s];return `<div class="tm" style="--rc:${r[1]}"><div class="tms">${BOOK}</div><div class="tmb"><span class="tmr">${r[0]}</span><b>${t.n}</b><span class="m">${k.n} · ${k.mp} maná${k.cd?' · recarga '+k.cd:''}</span><span class="m">${k.d}</span>${x}</div></div>`};
+ const card=(id,x,n)=>{const t=TOMO[id],r=RAR[t.r],k=SKL[t.s];return `<div class="tm2" style="--rc:${r[1]}"><div class="tm2h"><span class="tm2i">${BOOK}</span><div class="tm2t"><b>${t.n}</b><span class="tm2r">${r[0]}</span></div>${n?`<span class="tm2n">x${n}</span>`:''}</div><div class="tm2s"><b>${k.n}</b><span class="tm2c">${k.mp} maná${k.cd?' · recarga '+k.cd:''}</span></div><p class="tm2d">${k.d}</p>${window.tomeReq?tomeReq(id):''}<div class="tm2a">${x}</div></div>`};
  const shelf=Object.keys(TOMO).map(id=>{const t=TOMO[id];return card(id,!t.buy?'<span class="note">Solo como botín de jefe</span>':RN[t.r]>blv()?`<span class="note">Requiere Biblioteca nivel ${RN[t.r]}</span>`:dn<t.q?`<span class="note">Completa ${t.q} niveles (${dn}/${t.q})</span>`:`<div class="cost">${chipsCost(t.c)}</div><button ${can(t.c)?'':'disabled'} onclick="bibBuy('${id}')">Comprar</button>`)}).join('');
- const inv=own.length?own.map(id=>card(id,`<span class="chip">x${T[id]}</span><div class="hwa"><button onclick="bibUse('${id}')">Usar</button><button onclick="bibSell('${id}')">Vender ${SELLV[TOMO[id].r]}</button></div><button onclick="bibConv('${id}')">A fragmentos (+${FRAG[TOMO[id].r]})</button>`)).join(''):'<div class="note">No tienes tomos. Cómpralos en los estantes o vence jefes.</div>';
- modal(`<div class="uh"><div class="ib big">${ic('bib',30)}</div><div class="uhi"><h2>Biblioteca Solar</h2><span class="m">Tomos: ${own.reduce((a,k)=>a+T[k],0)} · Fragmentos arcanos: ${S.frag}</span></div></div><!--E--><div class="hwa"><button class="${tab=='shelf'?'pri':''}" onclick="bib('shelf')">Estantes</button><button class="${tab=='inv'?'pri':''}" onclick="bib('inv')">Mis tomos</button></div><div class="tmg">${tab=='shelf'?shelf:inv}</div>`)}
+ const inv=own.length?own.map(id=>card(id,`<button class="pri" onclick="bibUse('${id}')">Usar</button><button onclick="bibSell('${id}')">Vender ${SELLV[TOMO[id].r]}</button><button onclick="bibConv('${id}')">A fragmentos +${FRAG[TOMO[id].r]}</button>`,T[id])).join(''):'<div class="note" style="grid-column:1/-1">No tienes tomos. Cómpralos en los estantes o vence jefes.</div>';
+ modal(`<div class="uh"><div class="ib big">${ic('bib',30)}</div><div class="uhi"><h2>Biblioteca Solar</h2><span class="m">Tomos: ${own.reduce((a,k)=>a+T[k],0)} · Fragmentos arcanos: ${S.frag}</span></div></div><!--E--><div class="hwa"><button class="${tab=='shelf'?'pri':''}" onclick="bib('shelf')">Estantes</button><button class="${tab=='inv'?'pri':''}" onclick="bib('inv')">Mis tomos</button></div><div class="tmg">${tab=='shelf'?shelf:inv}</div>`);
+ try{const pn=$('ov').querySelector('.panel');if(pn)pn.classList.add('bibp')}catch(e){}}
 function bibBuy(id){const t=TOMO[id];if(!t||!t.buy||RN[t.r]>blv()||dnL()<t.q||!pay(t.c))return;TS();S.tomos[id]=(S.tomos[id]||0)+1;save();bib('shelf')}
 function bibUse(id){const T=TS();if(!(T[id]>0))return;const sk=TOMO[id].s;modal(`<div class="uh"><div class="ib big">${ic('bib',30)}</div><div class="uhi"><h2>${TOMO[id].n}</h2><span class="m">Elige quién aprenderá ${SKL[sk].n}</span></div></div><!--E-->`+(S.heroes.length?S.heroes.map(h=>{const kn=knows(h,sk);return `<button ${kn?'disabled':''} onclick="bibLearn('${id}',${h.id})">${h.n} · Nv ${h.lv}${kn?' · ya la conoce':''}</button>`}).join(''):'<div class="note">Aún no tienes héroes.</div>')+`<button onclick="bib('inv')">Volver</button>`)}
 function bibLearn(id,hid){const T=TS(),h=S.heroes.find(x=>x.id==hid),sk=TOMO[id].s;if(!h||!(T[id]>0)||knows(h,sk))return;if(!confirm(`¿Enseñar ${SKL[sk].n} a ${h.n}? El tomo se consumirá.`))return;T[id]--;h.sk=h.sk||{};h.sk.l=[...(h.sk.l||[]),sk];save();notice('Habilidad aprendida',`${h.n} aprendió ${SKL[sk].n}.`);bib('inv')}
@@ -1531,15 +1532,16 @@ function moodTick(){if(!S||$('game').classList.contains('hide'))return;const t=m
  S.mn=nm}
 setInterval(moodTick,5000);
 /* ===== Felicidad de los aldeanos: barra de 100; al llenarse da +2 diamantino y se reinicia ===== */
-const FEL={max:100,reward:2,k:0.0111,capDt:1800000}; /* k: ritmo (aldeanos x ánimo). capDt: máx. tiempo sin conexión que cuenta */
+const FEL={max:100,reward:2,k:0.006,capDt:1800000}; /* k: ritmo (aldeanos x ánimo). capDt: máx. tiempo sin conexión que cuenta */
+const felEta=()=>{const mv=S.mv==null?50:S.mv,r=(S.pop||0)*(mv/100)*FEL.k;return r>0?Math.max(1,Math.ceil((FEL.max-(S.fel||0))/r/60)):null};
 function felTick(){if(!S||$('game').classList.contains('hide'))return;const n=Date.now(),dt=Math.max(0,Math.min(n-(S.felT||n),FEL.capDt))/1000;S.felT=n;felUpd();
  const mv=S.mv==null?50:S.mv;S.fel=(S.fel||0)+dt*(S.pop||0)*(mv/100)*FEL.k;let g=0;while(S.fel>=FEL.max){S.fel-=FEL.max;g+=FEL.reward}
  if(g){S.coins.diamantino=(S.coins.diamantino||0)+g;save();coins();try{fl('+'+g+' diamantino',$('cv-diamantino'),'var(--k-diamantino)')}catch(e){}notice('¡Felicidad al máximo!','Los aldeanos están felices: recibes +'+g+' diamantino.')}}
 setInterval(felTick,5000);
-const felUpd=()=>{const e=$('fb');if(!e||!S)return;const v=Math.max(0,Math.min(100,S.fel||0));e.innerHTML=`<span class="fi">${ic('fel',15)}</span><span class="fbar"><i style="width:${v}%"></i></span><b>${Math.floor(v)}<em>/100</em></b><span class="fd">+${FEL.reward}${ic('cd',13)}</span>`};
-const felHTML=()=>{const v=Math.max(0,Math.min(100,S.fel||0));return `<div class="fel"><div class="fh"><span class="iv">${ic('fel',20)}</span><div class="mmn"><div class="mh"><span>Felicidad de los aldeanos</span><b>${Math.floor(v)}<em> / 100</em></b></div><div class="mbar"><i style="width:${v}%"></i></div></div></div><span class="m fn">Al llegar a 100 se reinicia y recibes +${FEL.reward} <span class="fd">${ic('cd',12)}diamantino</span>.</span></div>`};
+const felUpd=()=>{const e=$('fb');if(!e||!S)return;try{const q=felEta();e.title=q?'Se llena en ~'+q+' min con el ánimo actual ('+Math.round(S.mv==null?50:S.mv)+')':''}catch(x){}const v=Math.max(0,Math.min(100,S.fel||0));e.innerHTML=`<span class="fi">${ic('fel',15)}</span><span class="fbar"><i style="width:${v}%"></i></span><b>${Math.floor(v)}<em>/100</em></b><span class="fd">+${FEL.reward}${ic('cd',13)}</span>`};
+const felHTML=()=>{const v=Math.max(0,Math.min(100,S.fel||0));return `<div class="fel"><div class="fh"><span class="iv">${ic('fel',20)}</span><div class="mmn"><div class="mh"><span>Felicidad de los aldeanos</span><b>${Math.floor(v)}<em> / 100</em></b></div><div class="mbar"><i style="width:${v}%"></i></div></div></div><span class="m fn">Al llegar a 100 se reinicia y recibes +${FEL.reward} <span class="fd">${ic('cd',12)}diamantino</span>.</span><span class="m fn">Ritmo actual: ~${felEta()||'—'} min para llenarse (ánimo ${Math.round(S.mv==null?50:S.mv)}). Subir el ánimo la llena más rápido.</span></div>`};
 function festival(){const n=Date.now();if((S.evt&&S.evt.until>n)||(S.evtcd&&S.evtcd>n)||!pay({solar:120}))return;
- S.evt={n:'Festival local',d:10,until:n+300000};S.evtcd=n+900000;save();draw();notice('Festival local','Los habitantes celebran: +10 de ánimo durante 5 minutos.');poblacion()}
+ S.evt={n:'Festival local',d:10,until:n+300000};S.evtcd=n+900000;S.mv=Math.min(100,(S.mv==null?50:S.mv)+10);save();draw();notice('Festival local','Los habitantes celebran: +10 de ánimo durante 5 minutos.');poblacion()}
 function poblacion(){const mv=S.mv==null?50:S.mv,t=moodCalc(),tot=S.pop+S.heroes.length,cp=popCap(),n=Date.now(),
  dist=[0,0,0,0,0];for(let i=0;i<S.pop;i++){habSync();const x=habMood(S.hab[i]).v;dist[MOODS.findIndex(m=>x<m[0])]++}
  const ef=moodMul(),eft=ef>1?'+'+Math.round((ef-1)*100)+'% de producción y más probabilidad de aldeanos':ef<1?'-'+Math.round((1-ef)*100)+'% de producción':'Producción normal',
@@ -1944,7 +1946,7 @@ function evPlan(){if(!S||S.evp||evAct()||!S.step||S.step<9)return;const n=Date.n
 function evUI(){const p=S.evp;if(!p)return;const e=EVT.find(x=>x.id==p.id);if(!e){S.evp=null;return}
  modal(`<div class="uh"><div class="ib big">${ic('pop',30)}</div><div class="uhi"><h2>${e.n}</h2><span class="m">Decide en <b id="evt">${mmss(p.exp-Date.now())}</b></span></div></div><!--E--><p>${e.d}</p><div class="reqs">${e.o.map((o,i)=>`<div class="ucard"><div class="uct"><b>${o.t}</b></div><span class="m">${o.x}</span>${o.c?`<div class="cost">${chipsCost(o.c)}</div>`:''}<button class="pri" ${o.c&&!can(o.c)?'disabled':''} onclick="evPick(${i})">Elegir</button></div>`).join('')}</div>`);
  clearInterval(window.__evi);window.__evi=setInterval(()=>{const x=$('evt');if(!x||!S||!S.evp){clearInterval(window.__evi);return}x.textContent=mmss(S.evp.exp-Date.now())},500)}
-function evApply(o){const n=Date.now();if(o.e){S.evt={n:o.e.n,d:o.e.d,pm:o.e.pm||1,until:n+o.e.dur};S.mlog=S.mlog||[];S.mlog.unshift('Evento: '+o.e.n+' ('+(o.e.d>0?'+':'')+o.e.d+')');S.mlog.length=Math.min(S.mlog.length,8)}
+function evApply(o){const n=Date.now();if(o.e){S.evt={n:o.e.n,d:o.e.d,pm:o.e.pm||1,until:n+o.e.dur};S.mv=Math.max(0,Math.min(100,(S.mv==null?50:S.mv)+o.e.d));S.mlog=S.mlog||[];S.mlog.unshift('Evento: '+o.e.n+' ('+(o.e.d>0?'+':'')+o.e.d+')');S.mlog.length=Math.min(S.mlog.length,8)}
  S.evp=null;S.evnext=n+600000+Math.floor(Math.random()*300000);save();draw()}
 function evPick(i){const p=S.evp;if(!p)return;const e=EVT.find(x=>x.id==p.id),o=e&&e.o[i];if(!o)return;if(o.c&&!pay(o.c))return;evApply(o);sheetClose()}
 function evTick(){if(!S||$('game').classList.contains('hide'))return;habSync();
@@ -2062,6 +2064,44 @@ setInterval(()=>{try{resTick()}catch(e){}},1000);
 {const _bu=bibUse;bibUse=function(id){_bu(id);try{const h=S.heroes;[...$('ov').querySelectorAll('button')].filter(b=>/^bibLearn/.test((b.getAttribute('onclick')||''))||b.hasAttribute('disabled')&&/ · Nv /.test(b.textContent)).forEach(b=>{const m=/(\d+)\)/.exec(b.getAttribute('onclick')||''),x=m&&h.find(y=>y.id==+m[1]);if(x){const w=learnWhy(id,x);if(w){b.disabled=true;if(!/·\s*(ya|clase|req|falt|est)/.test(b.textContent))b.textContent+=' · '+w}}});
   [...$('ov').querySelectorAll('button[disabled]')].forEach(b=>{if(/ya la conoce/.test(b.textContent)&&!b.getAttribute('onclick'))return})}catch(e){}}
  const _bb=bib;bib=function(tab){_bb(tab);try{const T=resList();const p=$('ov').querySelector('.tmg');if(p&&T.length)p.insertAdjacentHTML('beforebegin',`<div class="note">Investigando: ${T.map(x=>{const h=S.heroes.find(y=>y.id==x.h);return (h?h.n:'?')+' · '+SKL[x.sk].n+' · '+mmss(Math.max(0,x.end-Date.now()))}).join(' | ')}</div>`)}catch(e){}}}
+/* ===== Tomos: categoría, requisitos para aprenderlos y guía del polvo arcano ===== */
+const TKC={dmg:'Daño físico',mag:'Daño mágico',slow:'Control · daño',psn:'Veneno · daño',guard:'Defensa',eva:'Defensa',heal:'Curación',regen:'Curación',bind:'Control',echo:'Potenciador',haste:'Apoyo',phx:'Supervivencia'};
+window.tomeReq=function(id){try{const t=TOMO[id],r=t.r,sk=t.s,k=SKL[sk],cl=(TCL[sk]||'').split(' ').filter(Boolean).map(c=>(CLS[c]||{n:c}).n),sec=Math.round(RDUR[r]/1000),po=RPO[r]|0,hv=S.inv.polvo|0,
+  ch=(b,tx)=>`<i class="${b==null?'':b?'ok':'no'}">${b==null?'':b?'✓ ':'✗ '}${tx}</i>`;
+  return `<div class="tq"><div class="tqc"><i class="cl">${TKC[k.k]||'Habilidad'}</i>${cl.map(c=>`<i class="cl">${c}</i>`).join('')}</div><div class="tql">${ch(RN[r]<=blv(),'Biblioteca nv '+RN[r])}${ch(null,'Héroe nv '+RLV[r]+'+')}${po?ch(hv>=po,po+' polvo (tienes '+hv+')'):ch(null,'Sin polvo')}${ch(null,'Investigar '+(sec>=60?Math.round(sec/60)+' min':sec+' s'))}</div></div>`}catch(e){return ''}};
+const polvoGuide=()=>`<details class="note" style="margin-top:10px"><summary><b>¿Cómo se consigue el polvo arcano?</b></summary><div class="m" style="line-height:1.55;margin-top:6px">• <b>Jefes:</b> la primera vez que vences a cada jefe, +2 polvo.<br>• <b>Botín de monstruos:</b> desde el nivel 4, un 12% de probabilidad en el primer botín de cada enemigo.<br>• <b>Minas:</b> las minas de nivel 5 o más pueden dar +1 de vez en cuando (8% por ciclo).<br>• <b>Encargos del gremio:</b> "Suministros del mercader" da +1, "Contrato del arsenal" +2 y "Gran encargo del gremio" +6.<br><br>El polvo arcano se gasta al investigar tomos raros o mejores (poco común: 1, raro: 2, épico: 4, legendario: 8) y en algunos edificios. También puedes venderlo en el Mercado.</div></details>`;
+{const _b2=bib;bib=function(tab){_b2(tab);try{const m=$('ov').querySelector('.uhi .m');if(m&&!/Polvo arcano/.test(m.textContent))m.textContent+=' · Polvo arcano: '+(S.inv.polvo||0);const g=$('ov').querySelector('.tmg');if(g)g.insertAdjacentHTML('afterend',polvoGuide())}catch(e){}}}
+{const _bu2=bibUse;bibUse=function(id){_bu2(id);try{const h=$('ov').querySelector('.uh');if(h&&window.tomeReq)h.insertAdjacentHTML('afterend','<div class="note" style="margin:8px 0">'+tomeReq(id)+'</div>')}catch(e){}}}
+
+{const st=document.createElement('style');st.id='bib-css';st.textContent=`
+.sheet .panel.pm.bibp{width:min(1040px,96vw)!important;max-height:92%!important}
+.bibp .pmb{padding:16px 24px 20px}
+.bibp .hwa{margin-bottom:14px}
+.bibp .tmg{display:grid!important;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:14px}
+.tm2{display:flex;flex-direction:column;gap:9px;padding:16px;min-width:0;border-radius:16px;background:linear-gradient(165deg,color-mix(in srgb,var(--rc) 16%,var(--s)),var(--s) 72%);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--rc) 45%,transparent)}
+.tm2h{display:flex;align-items:center;gap:11px}
+.tm2i{flex:none;width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;color:var(--rc);background:color-mix(in srgb,var(--rc) 18%,transparent)}
+.tm2t{display:flex;flex-direction:column;min-width:0;flex:1}.tm2t b{font-size:15px;line-height:1.2}
+.tm2r{font-size:11px;font-weight:600;color:var(--rc)}
+.tm2n{font-size:12px;font-weight:700;padding:3px 10px;border-radius:99px;background:color-mix(in srgb,var(--rc) 24%,transparent)}
+.tm2s{display:flex;align-items:baseline;justify-content:space-between;gap:8px;flex-wrap:wrap}.tm2s b{font-size:14px}.tm2c{font-size:11px;color:var(--m)}
+.tm2d{margin:0;font-size:12px;line-height:1.45;opacity:.92}
+.tq{display:flex;flex-direction:column;gap:6px;padding-top:9px;border-top:1px solid var(--l)}
+.tqc,.tql{display:flex;flex-wrap:wrap;gap:5px}
+.tq i{font-style:normal;font-size:11px;padding:3px 9px;border-radius:99px;color:var(--m);box-shadow:inset 0 0 0 1px var(--l)}
+.tq i.cl{color:var(--t)}.tq i.ok{color:var(--b);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--b) 55%,transparent)}.tq i.no{color:var(--r);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--r) 55%,transparent)}
+.tm2a{margin-top:auto;display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding-top:4px}.tm2a .note,.tm2a .cost{flex:1 1 100%;margin:0}.tm2a button{flex:1 1 auto}
+@media(max-width:600px){
+.sheet .panel.pm.bibp{width:100vw!important;max-height:100%!important;height:100%;border-radius:0!important}
+.bibp .pmb{padding:8px 8px 12px}.bibp .hwa{margin-bottom:8px}
+.bibp .tmg{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+.tm2{padding:9px;gap:5px;border-radius:12px}.tm2h{gap:6px}
+.tm2i{width:28px;height:28px;border-radius:8px}.tm2i svg{width:17px;height:17px}
+.tm2t b{font-size:11.5px}.tm2r{font-size:9.5px}.tm2n{font-size:10px;padding:2px 7px}
+.tm2s b{font-size:11px}.tm2c{font-size:9px}.tm2d{font-size:10px;line-height:1.3}
+.tq{gap:4px;padding-top:5px}.tqc,.tql{gap:3px}.tq i{font-size:9px;padding:2px 6px}
+.tm2a{gap:4px}.tm2a button{font-size:10px;padding:5px 6px;min-width:0}.tm2a .note{font-size:9.5px;padding:5px 7px}
+}`;document.head.appendChild(st)}
 /* ===== Caldero: rangos 1–5 para cualquier habilidad aprendida, con efecto real en combate =====
    Rango r: +floor(r/2) a la potencia (si tiene), -1 de recuperación en rangos 3 y 5 (mín. 0), -1 de coste en rango 5 (mín. 1).
    Subir de rango exige héroe de nivel 3×rango actual y los mismos costes que el Golpe. */
@@ -3117,7 +3157,7 @@ function ivAlert(t,x){
 
 /* ===== Fiesta de la victoria: solo tras superar una invasión; dura 3 min con fuegos artificiales y deja a todos contentos ===== */
 const FIESTA={dur:180000,after:300000,gap:7000};
-function fiestaStart(){if(!S)return;const n=Date.now();S.lastIvWin=n;S.fiesta={from:n,until:n+FIESTA.dur,done:false};
+function fiestaStart(){if(!S)return;const n=Date.now();S.lastIvWin=n;S.fiesta={from:n,until:n+FIESTA.dur,done:false};S.mv=Math.min(100,(S.mv==null?50:S.mv)+10);
  S.mlog=S.mlog||[];S.mlog.unshift('Evento: Fiesta de la victoria (+10)');S.mlog.length=Math.min(S.mlog.length,8);save();
  notice('Fiesta de la victoria','La ciudad celebra durante 3 minutos: +10 de ánimo.');window.__fbt=n;setTimeout(()=>fireworks(10),700)}
 function fiestaTick(){if(!S||!S.fiesta||$('game').classList.contains('hide'))return;const f=S.fiesta,n=Date.now();
