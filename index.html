@@ -3409,7 +3409,7 @@ function sim(id,ta,tb,ua,ub){let h=0;for(const c of id)h=(h*31+c.charCodeAt(0))>
   const la=T.a.some(x=>x.c>0),lb=T.b.some(x=>x.c>0);if(!la||!lb)return{ev,w:la?'a':'b',used}}
  const sa=T.a.reduce((t,x)=>t+x.c,0),sb=T.b.reduce((t,x)=>t+x.c,0);return{ev,w:sa>=sb?'a':'b',used}}
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
-addEventListener('cloudbattle',async e=>{const{r,me}=e.detail,mine=me==r.a?'a':'b',oth=mine=='a'?'b':'a',tm=mine=='a'?r.ta:r.tb,to=mine=='a'?r.tb:r.ta,nm=mine=='a'?r.bN:r.aN;
+addEventListener('cloudbattle_auto_desactivado',async e=>{const{r,me}=e.detail,mine=me==r.a?'a':'b',oth=mine=='a'?'b':'a',tm=mine=='a'?r.ta:r.tb,to=mine=='a'?r.tb:r.ta,nm=mine=='a'?r.bN:r.aN;
  busy=false;const po=document.getElementById('pvpov');if(po)po.remove();
  const res=sim(r.id,r.ta,r.tb,r.ua,r.ub),H={a:r.ta.map(x=>({...x,c:x.hp})),b:r.tb.map(x=>({...x,c:x.hp}))};
  const w=document.createElement('div');w.className='scr';w.style.zIndex=150;
@@ -3538,7 +3538,7 @@ Object.assign(window.Cloud,{
  async setColor(c){await setDoc(doc(db,'perfiles',uid),{color:c},{merge:true});window.Cloud.me={...window.Cloud.me,color:c}}
 });
 /* ===== ADMIN, VISTA DE PARTIDA Y BATALLAS ===== */
-const team=()=>{try{return S.eq.map(id=>S.heroes.find(h=>h.id==id)).filter(Boolean).map(h=>({n:h.n,atk:h.atk,hp:h.mhp,lv:h.lv||0}))}catch(e){return[]}};
+const team=()=>{try{return S.eq.map(id=>S.heroes.find(h=>h.id==id)).filter(Boolean).map(h=>{let x={n:h.n,atk:h.atk,hp:h.mhp,lv:h.lv||0};try{const u=sqMk(h),g=GP(h);x={n:h.n,atk:u.atk|0,hp:u.mhp|0,lv:h.lv||0,cls:u.cls||'guerrero',mp:u.mmp|0,sk:((h.sk&&h.sk.l)||[]).filter(id=>SKL[id]),gp:{mp:+g.mp||0,d:+g.d||0,ig:+g.ig||0}}}catch(e){}return x})}catch(e){return[]}};
 let vt=null,searching=false,inB=false,cun=null,qi=null,bun=[];const pend=new Set(),bseen=new Set();
 function viewSoon(){if(!uid)return;clearTimeout(vt);vt=setTimeout(async()=>{try{if(typeof S==='undefined'||!S)return;const e=S.b.find(b=>b.type=='est');
  await setDoc(doc(db,'perfiles',uid),{vista:{city:S.city,pop:S.pop,est:e?(e.lv||1):0,b:S.b.map(b=>[b.type,b.x,b.y,b.lv||1]),h:(S.heroes||[]).map(h=>[h.n,h.lv||0,h.atk,h.mhp])},vt:Date.now()},{merge:true})}catch(e){}},5000)}
@@ -3584,6 +3584,8 @@ onAuthStateChanged(auth,async u=>{
  else{unlisten();musicStop();uid=null;window.Cloud.name=null;window.Cloud.me=null;notify();refresh();window.LD&&LD.done()}});
 /* ===== ARENA en la nube: copia pública del perfil competitivo, clasificación y presencia ===== */
 Object.assign(window.Cloud,{
+ battleWatch:(id,cb)=>onSnapshot(doc(db,'batallas',id),sn=>cb(sn.exists()?{id,...sn.data()}:null),e=>console.warn('duelo',e)),
+ async battleSet(id,p){await updateDoc(doc(db,'batallas',id),p)},
  async arenaPut(p){if(!uid)return;await setDoc(doc(db,'perfiles',uid),{arena:p,seen:Date.now()},{merge:true})},
  async top(f,n){const s=await getDocs(query(collection(db,'perfiles'),orderBy('arena.'+f,'desc'),limit(n||50)));return s.docs.map(d=>({uid:d.id,...d.data()}))}
 });
@@ -3768,8 +3770,8 @@ addEventListener('cloudbattle',e=>{const M=mm;if(!M)return;const r=e.detail.r,ri
  M.e.querySelector('.mm-tm').innerHTML='<b style="font-size:22px;letter-spacing:.14em">'+String(rival||'Jugador').replace(/[&<>"]/g,'')+'</b>';M.e.querySelector('.mm-b').style.opacity=0;M.e.querySelector('.mm-x').style.visibility='hidden';
  setTimeout(()=>{if(mm===M)window.mmHide(false)},1500)});
 /* tutorial al desbloquear Batalla (establecimiento nivel 2) */
-window.pvpTut=()=>{const sl=[['esp','Batalla online','Con el establecimiento en nivel 2 ya puedes enfrentarte a otros jugadores. Tus héroes equipados pelean solos contra los héroes de otro jugador.'],
- ['her','Cómo se juega','1. Equipa al menos un héroe.\n2. Pulsa «Buscar rival»: el servidor busca a otro jugador que también esté buscando y os une.\n3. Mira la pelea. Los botiquines y vendajes se usan solos.'],
+window.pvpTut=()=>{const sl=[['esp','Batalla online','Con el establecimiento en nivel 2 ya puedes enfrentarte a otros jugadores. Tus héroes equipados se enfrentan por turnos a los héroes de otro jugador.'],
+ ['her','Cómo se juega','1. Equipa al menos un héroe.\n2. Pulsa «Buscar rival»: el servidor busca a otro jugador que también esté buscando y os une.\n3. Elige tú cada acción de tus héroes, como en una aventura. Los botiquines y vendajes los usas cuando quieras.'],
  ['rk4','Rangos y puntos','Cada duelo suma o resta puntos de Arena y da prestigio de la temporada. Ganas estrellas y subes por 8 rangos, de Aspirante a Valhárico; cada estrella y cada rango te dan diamantino. Las batallas de amistad no suman puntos.']];
  let k=0;const show=()=>{const s=sl[k],ico=s[0]=='esp'?`<svg viewBox="0 0 24 24" width="46" height="46" fill="currentColor">${SI.esp}</svg>`:ic(s[0],46);
   $('ov').innerHTML=`<div class="sheet"><div class="panel ptut"><div class="pt-i">${ico}</div><h2>${s[1]}</h2><p>${s[2].replace(/\n/g,'<br>')}</p>${k==2?`<div class="pt-r">${window.arenaTutRow?arenaTutRow():''}</div>`:''}<div class="pt-d">${sl.map((_,j)=>`<i class="${j==k?'on':''}"></i>`).join('')}</div><div class="pt-b"><button id="ptn" class="pri">${k<2?'Siguiente':'Ver Batalla'}</button><button id="pts">${k<2?'Omitir':'Después'}</button></div></div></div>`;
@@ -3937,6 +3939,104 @@ addEventListener('cloudchange',()=>{hb();if(fOpen&&!fdet)fLoad()});
 setInterval(()=>{try{const g=$$('game');if(!g||g.classList.contains('hide')||typeof S==='undefined'||!S||S.slot==null)return;
  ensure();push();const nv=$$('nvb');if(nv&&nv.title!='Arena'){nv.title='Arena';nv.setAttribute('aria-label','Arena')}
  const a=S.arena;if(a&&a.fx&&!$$('ov').firstElementChild)seasonFx()}catch(e){}},4000);
+})();
+</script>
+<script>
+/* ===== DUELO POR TURNOS (jugador vs jugador): sin acciones automáticas, mismo estilo que las Aventuras =====
+   Estado compartido en batallas/{id}.bs. Solo el jugador que tiene el turno escribe; el otro lo recibe en tiempo real. */
+(function(){
+'use strict';
+const C=()=>window.Cloud,$$=id=>document.getElementById(id),esc=x=>String(x==null?'':x).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])),wait=ms=>new Promise(r=>setTimeout(r,RM?Math.min(ms,80):ms));
+const OK=['dmg','mag','slow','psn','guard','heal','gheal','taunt','mark','eva','regen','haste']; /* habilidades soportadas en duelo */
+const HEAL={b:10,v:3}; /* botiquín / vendaje */
+let R=null; /* duelo activo */
+const clone=o=>JSON.parse(JSON.stringify(o));
+const mkU=x=>({n:x.n,cls:x.cls||'guerrero',atk:x.atk|0,hp:x.hp|0,mhp:x.hp|0,mp:x.mp|0,mmp:x.mp|0,sk:(x.sk||[]).filter(id=>window.SKL&&SKL[id]&&OK.includes(SKL[id].k)),gp:x.gp||null,g:0,tk:0,eva:0,rg:0,pz:0,mk:0,cd:{}});
+const alive=a=>a.map((u,i)=>u.hp>0?i:-1).filter(i=>i>=0);
+const opp=s=>s=='a'?'b':'a';
+function initState(r){const sp=x=>({v:(x&&x.v)|0,b:(x&&x.b)|0}),u={a:r.ta.map(mkU),b:r.tb.map(mkU)};return{u,sup:{a:sp(r.ua),b:sp(r.ub)},turn:'a',ai:alive(u.a)[0]||0,seq:0,log:['¡Comienza el duelo!'],win:null,ev:null}}
+/* ---------- pantalla ---------- */
+const bar=(c,p)=>`<div class="bar"><i style="width:${p}%;background:${c}"></i></div>`;
+function stTx(u){return(u.tk>0?' · provoca':'')+(u.g>0?' · guardia':'')+(u.eva>0?' · esquiva':'')+(u.rg>0?' · regenera':'')+(u.pz>0?' · envenenado':'')+(u.mk>0?' · marcado':'')}
+function build(){const e=$$('pvb');e.innerHTML=`<div class="sh"><b>Duelo</b><span class="m" id="pvt"></span></div><div class="sb" style="display:flex;flex-direction:column;align-items:center;gap:10px"><div id="pvM" style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center"></div><div id="pvLog" style="flex:1;min-height:40px;width:100%;overflow:auto"></div><div id="pvA" style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center"></div><div id="pvH" style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center"></div></div>`;
+ $$('pvM').innerHTML=R.st.u[R.o].map((u,i)=>`<div class="cd mc" id="pvm${i}" onclick="PVB.tgt(${i})"><div class="fg">${window.MONI?MONI('melee',false,24):''}</div><b>${esc(u.n)}</b><span class="m">Rival: ${esc(R.rn)} · Atq ${u.atk}</span><div id="pvmb${i}"></div><span class="m" id="pvmt${i}"></span></div>`).join('');
+ $$('pvH').innerHTML=R.st.u[R.me].map((u,i)=>`<div class="cd eq" id="pvh${i}" onclick="PVB.ally(${i})"><div class="fg">${ic('her',24)}</div><b>${esc(u.n)}</b><span class="m">${esc((CLS[u.cls]||CLS.guerrero).n)} · Atq ${u.atk}</span><div id="pvhb${i}"></div><div id="pvhm${i}"></div><span class="m" id="pvht${i}"></span></div>`).join('')}
+function upd(){if(!R||!$$('pvM'))return;const st=R.st,mine=st.turn==R.me&&!st.win,U=st.u[R.me],E=st.u[R.o];
+ /* el rival solo muestra lo que está activo: nombre, ataque, vida y efectos */
+ E.forEach((u,i)=>{const e=$$('pvm'+i);if(!e)return;$$('pvmb'+i).innerHTML=bar('var(--r)',100*Math.max(0,u.hp)/u.mhp);$$('pvmt'+i).textContent='HP '+Math.max(0,u.hp)+'/'+u.mhp+stTx(u);e.classList.toggle('dead',u.hp<=0);e.classList.toggle('sel',R.t==i&&u.hp>0)});
+ U.forEach((u,i)=>{const e=$$('pvh'+i);if(!e)return;$$('pvhb'+i).innerHTML=bar('var(--r)',100*Math.max(0,u.hp)/u.mhp);$$('pvhm'+i).innerHTML=bar('var(--b)',u.mmp?100*u.mp/u.mmp:0);$$('pvht'+i).textContent=`HP ${Math.max(0,u.hp)}/${u.mhp} · Maná ${u.mp}/${u.mmp}`+stTx(u);e.classList.toggle('dead',u.hp<=0);e.classList.toggle('sel',mine&&i==st.ai&&u.hp>0);e.style.outline=(i==R.a&&u.hp>0)?'1px dashed var(--b)':''});
+ if(!E[R.t]||E[R.t].hp<=0){const k=alive(E)[0];if(k!=null)R.t=k}
+ $$('pvt').textContent=st.win?'':(mine?'Tu turno':'Turno de '+R.rn);
+ $$('pvLog').innerHTML=st.log.slice(-14).reverse().map(l=>`<div class="m">${esc(l)}</div>`).join('');
+ const u=U[st.ai],off=!mine||R.busy||!u||u.hp<=0;
+ if(st.win){$$('pvA').innerHTML=R.res||'<span class="m">Calculando resultado…</span>';return}
+ let h=`<div class="m" style="width:100%;text-align:center">${mine?`Turno de <b>${esc(u&&u.n||'')}</b> (toca un rival para elegir objetivo; toca un aliado para curar)`:`Esperando la jugada de <b>${esc(R.rn)}</b>…`}</div>`;
+ if(u&&mine){const gp=u.gp;h+=`<button ${off?'disabled':''} onclick="PVB.act('atk')">Atacar</button>`+(gp&&gp.mp?`<button ${off||u.mp<gp.mp?'disabled':''} onclick="PVB.act('gp')">Golpe (${gp.mp} maná)</button>`:'')+`<button ${off?'disabled':''} onclick="PVB.act('def')">Defender</button>`+u.sk.map(id=>{const k=SKL[id],c=u.cd[id]|0;return `<button ${off||u.mp<k.mp||c>0?'disabled':''} onclick="PVB.act('${id}')">${esc(k.n)} (${k.mp})${c>0?' · '+c:''}</button>`}).join('')+`<button ${off||!st.sup[R.me].b?'disabled':''} onclick="PVB.act('sb')">Botiquín (${st.sup[R.me].b})</button><button ${off||!st.sup[R.me].v?'disabled':''} onclick="PVB.act('sv')">Vendaje (${st.sup[R.me].v})</button>`}
+ h+=`<button class="sm" onclick="PVB.quit()">Rendirse</button>`;
+ if(!mine&&R.stale)h+=`<button class="pri" style="width:100%" onclick="PVB.claim()">El rival no responde: reclamar victoria</button>`;
+ $$('pvA').innerHTML=h}
+/* ---------- acciones (solo el jugador con el turno) ---------- */
+function hit(t,d){if(t.eva>0){t.eva--;return 0}if(t.g>0){d=Math.max(1,d-t.g);t.g=0}if(t.mk>0&&d>0){d++;t.mk--}return Math.max(1,d)}
+function upkeep(list){list.forEach(u=>{if(u.hp<=0)return;if(u.pz>0){u.hp=Math.max(1,u.hp-1);u.pz--}if(u.rg>0){u.hp=Math.min(u.mhp,u.hp+1);u.rg--}if(u.tk>0)u.tk--;u.mp=Math.min(u.mmp,u.mp+1);for(const k in u.cd)u.cd[k]=Math.max(0,u.cd[k]-1)})}
+async function act(a){const st=R.st;if(R.busy||st.win||st.turn!=R.me)return;const ns=clone(st),U=ns.u[R.me],E=ns.u[R.o],u=U[ns.ai];if(!u||u.hp<=0)return;
+ const k=window.SKL&&SKL[a],kind=k?k.k:null,needT=a=='atk'||a=='gp'||['dmg','mag','slow','psn','mark'].includes(kind);
+ let j=R.t;const tk=alive(E).filter(i=>E[i].tk>0);if(tk.length&&!tk.includes(j))j=tk[0];if(needT&&(!E[j]||E[j].hp<=0))return;
+ if(k&&(u.mp<k.mp||(u.cd[a]|0)>0||!u.sk.includes(a)))return;if(a=='gp'&&(!u.gp||u.mp<u.gp.mp))return;
+ let ally=U[R.a]&&U[R.a].hp>0?R.a:alive(U).sort((x,y)=>U[x].hp/U[x].mhp-U[y].hp/U[y].mhp)[0];
+ if((a=='sb'||a=='sv')){const al=U[ally];if(!ns.sup[R.me][a=='sb'?'b':'v']||!al||al.mhp-al.hp<=0){R.nt='Ese aliado no necesita curación.';notice('Sin efecto','Ese aliado ya tiene la vida completa.');return}}
+ R.busy=true;upd();let free=0,ev={s:R.me,i:ns.ai,o:R.o,j:needT?j:null,d:0,x:''},ln=[];const t=E[j];
+ if(a=='atk'||a=='gp'){let d=u.atk,x=0;if(a=='gp'){u.mp-=u.gp.mp;d=u.gp.d||u.atk+1;if(u.cls=='guerrero')d++}if(u.cls=='arquero'&&Math.random()<.2){d++;ln.push('¡Disparo certero!')}x=hit(t,d);t.hp=Math.max(0,t.hp-x);ev.d=x;ln.push(x?`${u.n} ataca a ${t.n}: -${x} HP.`:`${t.n} esquiva el ataque de ${u.n}.`)}
+ else if(a=='def'){u.g=Math.max(u.g,1);u.mp=Math.min(u.mmp,u.mp+1);ev.x='Guardia';ln.push(`${u.n} se defiende (reduce 1 el próximo golpe y recupera 1 de maná).`)}
+ else if(a=='sb'||a=='sv'){const al=U[ally],g=Math.min(HEAL[a=='sb'?'b':'v'],al.mhp-al.hp);al.hp+=g;ns.sup[R.me][a=='sb'?'b':'v']--;ev.x='+'+g;ev.j=ally;ev.o=R.me;ln.push(`${u.n} usa ${a=='sb'?'un botiquín':'un vendaje'} sobre ${al.n}: +${g} HP.`);try{if(S&&S.sup){const f=a=='sb'?'botiquin':'vendaje';S.sup[f]=Math.max(0,(S.sup[f]|0)-1);save()}}catch(e){}}
+ else{u.mp-=k.mp;u.cd[a]=k.cd||0;ln.push(`${u.n} usa ${k.n}.`);
+  if(['dmg','mag','slow','psn'].includes(kind)){const d=Math.max(1,hit(t,k.v)||1);t.hp=Math.max(0,t.hp-d);if(kind=='slow')t.slw=2;if(kind=='psn'){t.pz=3;t.hp=Math.max(1,t.hp)}ev.d=d;ln.push(`${t.n} recibe ${d} de daño.`)}
+  else if(kind=='guard'){u.g=Math.max(u.g,k.v);ev.x='Guardia '+k.v}
+  else if(kind=='heal'){const al=U[ally],g=Math.min(k.v,al.mhp-al.hp);al.hp+=g;ev.x='+'+g;ev.j=ally;ev.o=R.me;ln.push(`${al.n} recupera ${g} HP.`)}
+  else if(kind=='gheal'){alive(U).forEach(i=>{U[i].hp=Math.min(U[i].mhp,U[i].hp+k.v)});ev.x='+'+k.v;ln.push('La curación grupal alcanza a todo el grupo.')}
+  else if(kind=='taunt'){u.tk=k.v;ev.x='¡Provoca!';ln.push(`${u.n} provoca a los rivales durante ${k.v} turnos.`)}
+  else if(kind=='mark'){t.mk=k.v;ev.x='Marca';ln.push(`${t.n} queda marcado.`)}
+  else if(kind=='eva'){u.eva=2;ev.x='Esquiva';ln.push(`${u.n} se prepara para esquivar.`)}
+  else if(kind=='regen'){u.rg=3;ev.x='Regenera';ln.push(`${u.n} se regenera durante 3 turnos.`)}
+  else if(kind=='haste'){u.mp=Math.min(u.mmp,u.mp+k.v);free=1;ln.push(`${u.n} recupera maná y puede actuar de nuevo.`)}}
+ if(t&&t.hp<=0&&needT)ln.push(`${t.n} cae.`);
+ /* siguiente héroe, o pasa el turno al rival */
+ if(!alive(E).length){ns.win=R.me}
+ else if(!free){const nx=alive(U).find(i=>i>ns.ai);if(nx!=null)ns.ai=nx;else{ns.turn=R.o;upkeep(E);ns.ai=alive(E)[0]||0;ln.push(`— Turno de ${R.rn} —`)}}
+ ns.log=ns.log.concat(ln).slice(-30);ns.seq=st.seq+1;ns.ev=ev;
+ await play(ev,R.st);R.st=ns;upd();
+ try{await C().battleSet(R.id,{bs:clone(ns),estado:ns.win?'fin':'activa',t:Date.now()})}catch(e){notice('Sin conexión','No se pudo enviar tu jugada: '+(e.message||'error'))}
+ R.busy=false;R.seqAt=Date.now();upd();if(ns.win)finish()}
+/* animación de una jugada (propia o recibida) */
+async function play(ev,before){if(!ev||!$$('pvM'))return;const id=(s,i)=>$$((s==R.me?'pvh':'pvm')+i),A=id(ev.s,ev.i),B=ev.j!=null?id(ev.o,ev.j):null;
+ try{if(A&&B&&ev.d>0){const an=lunge(A,B,RM?200:1000);await wait(450);slash(B);impact(B,'-'+ev.d);await wait(350);await an.finished}
+  else if(A&&B&&ev.x){fl(ev.x,B,'var(--b)');await wait(500)}
+  else if(A&&ev.x){fl(ev.x,A,'var(--b)');await wait(500)}
+  else if(A&&B){await wait(300)}}catch(e){}}
+/* ---------- fin del duelo ---------- */
+async function finish(){if(!R||R.fin)return;R.fin=1;const won=R.st.win==R.me;let rk=null;
+ try{if(R.tipo!='amistad')rk=await window.arenaDuel({won,id:R.id,oppUid:R.ou,oppName:R.rn})}catch(e){}
+ R.res=`<div style="width:100%;text-align:center"><b>${won?'¡Victoria!':'Derrota'}</b>${rk?`<br><span class="m">${rk.gain>0?'+':''}${rk.gain} pts de Arena · +${rk.pr} prestigio${rk.star?(rk.up?' · ¡subes de rango!':' · ¡nueva estrella!'):''}</span>`:''}</div><button class="pri" style="width:100%" onclick="PVB.close()">Continuar</button>`;R.rk=rk;upd();if(rk&&window.arenaFx)setTimeout(()=>arenaFx(rk),250)}
+function close(){if(!R)return;const r=R;R=null;clearInterval(r.iv);try{r.un&&r.un()}catch(e){}const e=$$('pvb');if(e)e.remove();try{C().endBattle(r.id)}catch(e){}}
+window.PVB={
+ tgt:i=>{if(R&&R.st.u[R.o][i].hp>0){R.t=i;upd()}},
+ ally:i=>{if(R&&R.st.u[R.me][i].hp>0){R.a=i;upd()}},
+ act,
+ close,
+ quit:async()=>{if(!R||R.st.win)return;if(!confirm('¿Rendirte? Contará como derrota.'))return;const ns=clone(R.st);ns.win=R.o;ns.seq++;ns.log.push(`${esc(C().name||'Un jugador')} se rinde.`);ns.ev=null;R.st=ns;try{await C().battleSet(R.id,{bs:clone(ns),estado:'fin',t:Date.now()})}catch(e){}upd();finish()},
+ claim:async()=>{if(!R||R.st.win)return;const ns=clone(R.st);ns.win=R.me;ns.seq++;ns.log.push(`${R.rn} no responde: victoria por abandono.`);ns.ev=null;R.st=ns;try{await C().battleSet(R.id,{bs:clone(ns),estado:'fin',t:Date.now()})}catch(e){}upd();finish()}
+};
+/* ---------- inicio: llega el evento del emparejamiento / reto ---------- */
+addEventListener('cloudbattle',e=>{const{r,me}=e.detail;if(R||r.tipo=='x')return;const s=me==r.a?'a':'b',o=opp(s);
+ if(!Array.isArray(r.ta)||!Array.isArray(r.tb)||!r.ta.length||!r.tb.length){notice('Duelo cancelado','No se recibieron los datos del rival.');try{C().endBattle(r.id)}catch(e){};return}
+ const po=$$('pvpov');if(po)po.remove();const w=document.createElement('div');w.id='pvb';w.className='scr';w.style.zIndex=150;document.body.appendChild(w);
+ R={id:r.id,me:s,o,ou:s=='a'?r.b:r.a,rn:(s=='a'?r.bN:r.aN)||'Rival',st:r.bs&&r.bs.u?r.bs:initState(r),t:0,a:0,busy:false,fin:0,seqAt:Date.now(),stale:false,tipo:r.tipo};
+ R.st.log=R.st.log||[];R.st.sup=R.st.sup||{a:{v:0,b:0},b:{v:0,b:0}};
+ build();upd();
+ R.un=C().battleWatch(r.id,async d=>{if(!R)return;
+  if(!d){if(!R.st.win&&!R.fin){const ns=clone(R.st);ns.win=R.me;ns.log.push(`${R.rn} abandonó el duelo.`);R.st=ns;upd();finish()}return}
+  if(d.bs&&d.bs.u&&d.bs.seq>R.st.seq){const prev=R.st,ns=d.bs;R.seqAt=Date.now();R.stale=false;R.busy=true;await play(ns.ev,prev);R.st=ns;R.busy=false;upd();if(ns.win)finish()}});
+ R.iv=setInterval(()=>{if(!R||R.st.win)return;const s=R.st.turn!=R.me&&Date.now()-R.seqAt>100000;if(s!==R.stale){R.stale=s;upd()}},3000)});
+/* arena.js ya no usa el sim automático; evita que el viejo listener (si existe) abra otra pantalla */
 })();
 </script>
 </body></html>
