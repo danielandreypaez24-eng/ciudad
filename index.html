@@ -829,7 +829,7 @@ const used=()=>rest()+work();
 let SCR=null;
 const count=t=>S.b.filter(b=>b.type==t).length;
 const E=()=>{const e=S.b.find(b=>b.type=='est');return e?(e.lv||1):1};
-const maxLv=()=>Math.min(5,E()+1);
+const maxLv=()=>E()+1; /* sin tope fijo: el máximo real de cada edificio lo marca cuántos niveles tenga en LV */
 const lvCap=b=>b.type=='alr'?(E()>=5?3:E()>=4?2:1):maxLv();
 const DECO=['rdt','rdp','lnt','bsr','bsm','bsa','bsd'],UNL={alr:4,lnt:3,bsr:2,bsm:2,bsa:2,bsd:2,rdt:1,rdp:1};
 const DECL={alr:()=>E()>=4?1:0,rdt:()=>10,rdp:()=>10,lnt:()=>E()>=3?3:0,bsr:()=>E()>=2?3:0,bsm:()=>E()>=2?3:0,bsa:()=>E()>=2?3:0,bsd:()=>E()>=2?10:0};
@@ -1038,8 +1038,8 @@ const pc=v=>String(v).replace('.',',')+'%',mmss=ms=>{const t=Math.ceil(Math.max(
 function notice(t,x){const e=document.createElement('div');e.className='ntc';e.innerHTML=`<div class="nti">${ic('pop',24)}</div><div><b>${t}</b><span class="m">${x}</span></div>`;e.onclick=()=>e.remove();document.body.appendChild(e);sparks(innerWidth/2,70,16,'var(--a)');setTimeout(()=>{e.classList.add('out');setTimeout(()=>e.remove(),350)},5200)}
 function camp(id){const b=S.b.find(x=>x.id==id),sl=LV.cam[L(b)-1].slots,r=Math.min(b.rest||0,sl),free=S.pop-used();let h='';
  for(let i=0;i<sl;i++)h+=i<r?`<button class="cslot" onclick="cr(${id},-1)" aria-label="Quitar">${ic('pop',26)}</button>`:`<button class="cslot" ${free>0?'':'disabled'} onclick="cr(${id},1)" aria-label="Añadir">+</button>`;
- const pr=PCFG.p[r]||0,tot=S.pop+S.heroes.length,cp=popCap(),full=tot>=cp;
- const tbl=Array.from({length:sl},(_,i)=>i+1).map(k=>`<span class="chip${k==r?' a':''}">${k} → ${pc(PCFG.p[k])}</span>`).join('');
+ const cb=(LV.cam[L(b)-1]||{}).bonus||0,pr=(PCFG.p[r]||0)+r*cb,tot=S.pop+S.heroes.length,cp=popCap(),full=tot>=cp;
+ const tbl=Array.from({length:sl},(_,i)=>i+1).map(k=>`<span class="chip${k==r?' a':''}">${k} → ${pc(PCFG.p[k]+k*cb)}</span>`).join('');
  const vil=`<div class="sx">Nuevo aldeano</div><div class="vil"><div class="vlh"><span class="vlp${pr?'':' z'}">${pc(pr)}</span><div><b>Probabilidad por tirada</b><span class="m">Cada ${PCFG.cycle/60000} min. Suma 2% por cada aldeano descansando.</span></div></div><div class="vlb"><span class="m">Próxima tirada</span><b id="cpn" data-id="${id}">${mmss(b.pn==null?PCFG.cycle:b.pn)}</b></div><div class="chips">${tbl}</div>${r<1?'<p class="m">Necesitas al menos 1 aldeano descansando para tener probabilidad.</p>':''}${full?`<p class="m warnt">Población al máximo (${tot}/${cp}): no pueden llegar más aldeanos.</p>`:''}</div>`;
  modal(head(b,`Descansando ${r}/${sl} - Libres ${free}`)+`<div class="sx">Espacios</div><div class="slg">${h}</div><p class="m hint">Toca un espacio libre para enviar un habitante a descansar. Toca uno ocupado para sacarlo.</p>`+vil+upBlock(b));
  clearInterval(window.__cpi);window.__cpi=setInterval(()=>{const e=$('cpn'),bb=e&&S.b.find(x=>x.id==e.dataset.id);if(!e||!bb){clearInterval(window.__cpi);return}e.textContent=mmss(bb.pn==null?PCFG.cycle:bb.pn)},500)}
@@ -1052,11 +1052,11 @@ function est(b){if(S.step==2)S.step=3;
  if(S.step>=10){const l=L(b),nx=LV.est[l];
   if(!nx)up='<div class="sx">Mejora</div><div class="note ok">Nivel máximo alcanzado</div>';
   else{const rq=estReq(l+1),ok=rq.every(r=>r[1])&&can(nx.cost);
-   up=`<div class="sx">Mejorar a nivel ${l+1}</div><div class="reqs">${rq.map(r=>reqRow(r[0],r[1])).join('')}</div>${l+1==3||l+1==5?'<div class="note ok">Al subir a nivel '+(l+1)+': +'+(l+1==5?20:15)+' de muro en la defensa de la ciudad.</div>':''}${l+1==2?'<div class="note">Al subir a nivel 2 se desbloquean: Aventuras y Batalla online (la Arena, con 8 rangos y temporadas).</div>':''}<div class="uc"><div><span class="m">Costo</span><div class="cost">${chipsCost(nx.cost)}</div></div><div><span class="m">Construcción</span><b>${ft(nx.bt)}</b></div></div><button class="pri" ${ok?'':'disabled'} onclick="upg(${b.id})">Mejorar a nivel ${l+1}</button>`}}
+   up=`<div class="sx">Mejorar a nivel ${l+1}</div><div class="reqs">${rq.map(r=>reqRow(r[0],r[1])).join('')}</div>${l+1>=3&&l+1<=5?'<div class="note ok">Al subir a nivel '+(l+1)+': +'+(l+1==5?20:l+1==4?10:15)+' de muro en la defensa de la ciudad.</div>':''}${l+1==2?'<div class="note">Al subir a nivel 2 se desbloquean: Aventuras y Batalla online (la Arena, con 8 rangos y temporadas).</div>':''}<div class="uc"><div><span class="m">Costo</span><div class="cost">${chipsCost(nx.cost)}</div></div><div><span class="m">Construcción</span><b>${ft(nx.bt)}</b></div></div><button class="pri" ${ok?'':'disabled'} onclick="upg(${b.id})">Mejorar a nivel ${l+1}</button>`}}
  $('ov').innerHTML=`<div class="sheet" onclick="if(event.target==this)sheetClose()"><div class="panel pm" style="margin:auto;max-height:90%">${head(b,'Estadísticas').replace('<!--E-->','')}<div class="pmb">${E()>=2?'<div class="note ok">Aventuras y Batalla online desbloqueadas</div>':''}<div class="sx">Estructuras</div><div class="mgrid">${tiles}</div><div class="mxl"><span class="m">Nivel máximo de mejora</span><b>${maxLv()}</b></div>${up}</div><div class="pmf two"><button onclick="shop()">Tienda</button><button onclick="sheetClose()">Cerrar</button></div></div></div>`}
 function mineral(id){const b=S.b.find(x=>x.id==id),sl=LV.min[L(b)-1].slots,w=Math.min(b.w||0,sl),free=S.pop-used();let h='';
  for(let i=0;i<sl;i++)h+=i<w?`<button class="cslot" onclick="wk(${id},-1)" aria-label="Quitar">${ic('pop',26)}</button>`:`<button class="cslot" ${free>0?'':'disabled'} onclick="wk(${id},1)" aria-label="Añadir">+</button>`;
- modal(head(b,w?`1 recurso cada ${minCy(b)/1000} s`:'Detenida: sin trabajadores')+`<div class="sx">Espacios</div><div class="slg">${h}</div><p class="m hint">Producción según nivel y trabajadores (ver mejora). Habitantes libres: ${free}. Toca un espacio para asignar o quitar.</p>`+upBlock(b))}
+ modal(head(b,w?`${minPr(b)} recurso${minPr(b)>1?'s':''} cada ${minCy(b)/1000} s`:'Detenida: sin trabajadores')+`<div class="sx">Espacios</div><div class="slg">${h}</div><p class="m hint">Producción según nivel y trabajadores (ver mejora). Habitantes libres: ${free}. Toca un espacio para asignar o quitar.</p>`+upBlock(b))}
 function wk(id,d){const b=S.b.find(x=>x.id==id),w=b.w||0;if(d>0&&(w>=LV.min[L(b)-1].slots||S.pop-used()<1))return;if(d<0&&w<1)return;b.w=w+d;b.last=Date.now();save();draw();mineral(id)}
 function wall(b){modal(head(b,'Vida '+LV.mur[0].hp+'/'+LV.mur[0].hp)+upBlock(b))}
 function centro(){const n=S.cards,fr=S.pop-used(),nx=n<CARDS.max?CARDS.cost[n-1]:null;let h='';
@@ -1113,7 +1113,7 @@ function uneqId(id){const i=S.eq.indexOf(id);if(i>=0){S.eq[i]=null;save()}heroes
 function train(){SCR=null;RCOL=null;
  $('ov').innerHTML=`<div class="sheet"><div class="panel" style="margin:auto;width:340px;max-width:92vw"><h2>Nombre del héroe</h2>${hpal()}<input id="hn" maxlength="20" placeholder="Nombre"><p></p><button id="hk">Entrenar</button></div></div>`;
  $('hk').onclick=()=>{const n=$('hn').value.trim();if(!n)return;
-  S.pop--;const h={id:S.id++,n,lv:0,atk:1,hp:5,mhp:5,mp:3,mmp:3};if(RCOL)h.color=RCOL;RCOL=null;S.heroes.push(h);const i=S.eq.indexOf(null);if(i>=0)S.eq[i]=h.id;S.step=7;save();heroes();tut();setTimeout(()=>startBattle(null),1800)}}
+  const fst=S.step<=7;S.pop--;const h={id:S.id++,n,lv:0,atk:1,hp:5,mhp:5,mp:3,mmp:3};if(RCOL)h.color=RCOL;RCOL=null;S.heroes.push(h);const i=S.eq.indexOf(null);if(i>=0)S.eq[i]=h.id;if(!fst){h.lv=1;h.mhp=6;h.hp=6}if(S.step<7)S.step=7;save();heroes();tut();if(fst)setTimeout(()=>startBattle(null),1800)}}
 /* ===== Datos de niveles (separados del combate): [nombre, ataque, vida]. Añadir más filas = más niveles ===== */
 const MN=[['Babosa del bosque',1,2],['Rata salvaje',1,3],['Murciélago joven',1,3],['Araña pequeña',1,4],['Babosa colosal',1,8],['Goblin explorador',1,5],['Lobo gris',2,5],['Escarabajo acorazado',1,7],['Cuervo sombrío',2,6],['Goblin saqueador',2,12],['Esqueleto errante',2,8],['Serpiente venenosa',2,8],['Murciélago carmesí',2,9],['Hongo tóxico',2,11],['Araña reina',2,18],['Ladrón de cristales',2,11],['Lobo de guerra',2,13],['Gólem de piedra',2,18],['Hechicero caído',3,13],['Caballero maldito',3,25],['Sanguijuela abisal',3,15],['Orco devastador',3,18],['Espectro del bosque',3,16],['Escorpión de obsidiana',3,20],['Ogro rompefortalezas',4,32],['Gólem de cristal',3,22],['Bruja de las cenizas',4,20],['Wyvern joven',4,25],['Guardián de la grieta',4,28],['Dragón de la grieta',5,40]];
 const LVS=MN.map((m,i)=>({id:i+1,b:(i+1)%5==0,m:i?[i-1,i]:[0]}));
@@ -1182,11 +1182,11 @@ function zFrame(){zRaf=0;if(!zPend)return;const g=$('grid'),v=$('view'),w=$('zw'
  const vr=v.getBoundingClientRect(),wr=w.getBoundingClientRect();
  v.scrollLeft=wr.left-vr.left+v.scrollLeft+p.ux*s-p.ox;v.scrollTop=wr.top-vr.top+v.scrollTop+p.uy*s-p.oy}
 function zPreview(target,mx,my){
- if(zPend===null){const g=$('grid'),v=$('view'),w=$('zw'),b=BASE();if(b!=zBase){zBase=b;g.style.setProperty('--cs',b+'px');if(Z>1){w.style.width=g.offsetWidth*Z+'px';w.style.height=g.offsetHeight*Z+'px'}}
+ if(zPend===null){document.documentElement.classList.add('zing');const g=$('grid'),v=$('view'),w=$('zw'),b=BASE();if(b!=zBase){zBase=b;g.style.setProperty('--cs',b+'px');if(Z>1){w.style.width=g.offsetWidth*Z+'px';w.style.height=g.offsetHeight*Z+'px'}}
   const vr=v.getBoundingClientRect(),wr=w.getBoundingClientRect(),ox=mx-vr.left,oy=my-vr.top;
   zPend={z0:Z,ox,oy,ux:(ox-(wr.left-vr.left))/Z,uy:(oy-(wr.top-vr.top))/Z}}
  zTarget=zClamp(target);if(!zRaf)zRaf=requestAnimationFrame(zFrame)}
-function zCommit(){if(zPend===null)return;if(zRaf){cancelAnimationFrame(zRaf);zFrame()}Z=zTarget;zPend=null}
+function zCommit(){if(zPend===null)return;if(zRaf){cancelAnimationFrame(zRaf);zFrame()}Z=zTarget;zPend=null;document.documentElement.classList.remove('zing')}
 const t2=e=>Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY),
  m2=e=>[(e.touches[0].clientX+e.touches[1].clientX)/2,(e.touches[0].clientY+e.touches[1].clientY)/2];
 $('view').addEventListener('touchstart',e=>{if(e.touches.length==2){zCommit();pd=t2(e);pz=Z}},{passive:true});
@@ -1281,17 +1281,17 @@ async function hit(k){if(busy||B.over)return;const H=B.h,t=B.m[B.t],e=$('m'+B.t)
  d=hDmg(t,d,ig);t.hp-=d;B.log.push(`${H.n} ataca a ${t.n}: -${d} HP.`);if(t.hp<=0)drops(e,t);slash(e);impact(e,'-'+d);cnt(t,H);bupd();await an.finished;
  if(B.m.every(m=>m.hp<=0)&&B.waves&&B.wi<B.waves.length-1){await waveNext();return}if(B.m.every(m=>m.hp<=0)){B.over=true;if(B.adv){S.done[B.adv.lv?'L'+B.adv.lv:'c'+ADV.indexOf(B.adv)]=1;save()}bossTome();banner('VICTORIA');B.log.push(B.tut?'Victoria. La aldea está a salvo.':'Aventura completada.');busy=false;bupd();$('bf').classList.remove('hide');return}
  if(t.hp<=0)B.t=B.m.findIndex(x=>x.hp>0);await mturn()}
-function fin(){const H=B.h;if(B.tut){H.lv=1;H.mhp=6;H.hp=6;H.mp=H.mmp;S.step=9}else if(!H.dead){H.hp=H.mhp;H.mp=H.mmp}
+function fin(){const H=B.h;if(B.tut){H.lv=1;H.mhp=6;H.hp=6;H.mp=H.mmp;if(S.step<9)S.step=9}else if(!H.dead){H.hp=H.mhp;H.mp=H.mmp}
  const adv=!B.tut;save();sheetClose();draw();tut();if(adv)aventuras()}
 setInterval(()=>{if(!S||$('game').classList.contains('hide'))return;
  const n=Date.now();let ch=false;const dt=lt?Math.min(1000,n-lt):0;lt=n;
  S.b.forEach(b=>{if(n<b.end)return;
   if(b.nl){b.lv=b.nl;delete b.nl;fl('Nivel '+b.lv,G[b.y*15+b.x],'var(--a)');ch=true}
   if(b.type=='est'){if(!b.ok){b.ok=1;S.coins.solar=100;S.coins.filar=100;if(S.step==1)S.step=2;ch=true}return}
-  if(b.type=='cam'){b.pn=Math.min(PCFG.cycle,b.pn==null?PCFG.cycle:b.pn)-dt;if(b.pn<=0){b.pn+=PCFG.cycle;const r=Math.min(b.rest||0,LV.cam[L(b)-1].slots),pr=PCFG.p[r]||0;
+  if(b.type=='cam'){b.pn=Math.min(PCFG.cycle,b.pn==null?PCFG.cycle:b.pn)-dt;if(b.pn<=0){b.pn+=PCFG.cycle;const r=Math.min(b.rest||0,LV.cam[L(b)-1].slots),pr=(PCFG.p[r]||0)+r*(LV.cam[L(b)-1].bonus||0);
    if(Math.random()*100<pr*(moodMul()>1?1.25:moodMul()<1?.6:1)&&S.pop+S.heroes.length<popCap()){S.pop++;fl('+1 habitante',G[b.y*15+b.x],'var(--a)');notice('¡Aldeano nuevo!','Has conseguido un aldeano con éxito. Habitantes: '+S.pop);ch=true}if($('cpn')&&$('cpn').dataset.id==b.id)camp(b.id)}return}
   if(b.type=='min'){if(!b.w){b.last=n;return}const cy=Math.round(minCy(b)/moodMul());
-   while(n-b.last>=cy){b.last+=cy;const g=Math.min(1,cap('recursos')-S.coins.recursos);if(g>0){S.coins.recursos+=g;fl('+1',G[b.y*15+b.x],'var(--k-recursos)');ch=true}if(L(b)>=5&&Math.random()<.08){S.inv.polvo=(S.inv.polvo||0)+1;fl('+1 polvo arcano',G[b.y*15+b.x],'var(--a)');ch=true}}return}
+   while(n-b.last>=cy){b.last+=cy;const g=Math.min(minPr(b),cap('recursos')-S.coins.recursos);if(g>0){S.coins.recursos+=g;fl('+'+g,G[b.y*15+b.x],'var(--k-recursos)');ch=true}if(L(b)>=5&&Math.random()<.08){S.inv.polvo=(S.inv.polvo||0)+1;fl('+1 polvo arcano',G[b.y*15+b.x],'var(--a)');ch=true}}return}
   if(b.type!='sol'&&b.type!='fil')return;
   const p=PRm(b);while(n-b.last>=p.t){b.last+=p.t;const c=cap(p.c),g=Math.min(p.a,c-S.coins[p.c]);
    if(g>0){S.coins[p.c]+=g;fl('+'+g,G[b.y*15+b.x],`var(--k-${p.c})`);ch=true}}
@@ -1475,6 +1475,7 @@ const blv=()=>{const b=S&&S.b.find(x=>x.type=='bib'&&Date.now()>=x.end);return b
 Object.defineProperty(CARDS,'max',{get(){return LV.chr[chrLv()-1].cm},configurable:true});
 CARDS.cost.push({solar:480,filar:320},{solar:720,filar:480},{solar:960,filar:640},{solar:1200,filar:800});
 const RN={c:1,u:2,r:3,e:4,l:5};
+const minPr=b=>{const d=LV.min[L(b)-1];return (d&&d.pr)||1};
 const minCy=b=>{const d=LV.min[L(b)-1],w=b.w||0;return Math.round((w>=2?d.c2:d.c1)*1000*(w>=4?.85:1))};
 function estReq(t=2){const n=Date.now(),f=x=>S.b.filter(y=>y.type==x&&n>=y.end);
  if(t<=2)return [['Torre solar',f('sol').length>=1],['Almacén solar',f('als').length>=1],['2 campamentos',f('cam').length>=2],['Torre solar nivel 2',f('sol').some(x=>L(x)>=2)],['Almacén solar nivel 2',f('als').some(x=>L(x)>=2)]];
@@ -1495,6 +1496,7 @@ const xpNeed=l=>Math.round(10+6*l+.9*l*l),HMAX=150; /* nivel máximo de héroe: 
 function gainXP(){const a=B&&B.adv;if(!a||!a.lv||!B.h)return;S.xpd=S.xpd||{};const k='L'+a.lv,first=!S.xpd[k];S.xpd[k]=1;const H=B.h,g=Math.min(Math.round((8+a.lv*2)*(first?2:.15)*(a.lv%5==0?1.5:1)),Math.ceil(xpNeed(H.lv)*.6));H.xp=(H.xp||0)+g;let up=0;
  while(H.lv<HMAX&&H.xp>=xpNeed(H.lv)){H.xp-=xpNeed(H.lv);H.lv++;up++;const gc=CLS[H.cls||"guerrero"].g;H.mhp+=gc.hp;H.hp=Math.min(H.mhp,H.hp+gc.hp);if(H.lv%gc.a==0)H.atk++;if(H.lv%gc.m==0){H.mmp++;H.mp=Math.min(H.mmp,H.mp+1)}}
  B.log.push(`${H.n} gana ${g} de experiencia${up?' y sube a nivel '+H.lv:''}.`);save()}
+function giveHeroXP(H,g){H.xp=(H.xp||0)+g;while(H.lv<HMAX&&H.xp>=xpNeed(H.lv)){H.xp-=xpNeed(H.lv);H.lv++;const gc=CLS[H.cls||"guerrero"].g;H.mhp+=gc.hp;H.hp=Math.min(H.mhp,H.hp+gc.hp);if(H.lv%gc.a==0)H.atk++;if(H.lv%gc.m==0){H.mmp++;H.mp=Math.min(H.mmp,H.mp+1)}}}
 function bossRewards(){const a=B.adv;if(!a||!a.lv||a.lv<35||a.lv%5)return;S.inv.nucleo=S.inv.nucleo||0;const k='R'+a.lv;
  if(!S.done[k]){S.done[k]=1;S.inv.nucleo++;S.inv.cristal+=3;S.inv.polvo=(S.inv.polvo||0)+2;B.log.push('Recompensa de jefe: +1 núcleo de jefe, +3 cristales mágicos, +2 polvo arcano.')}
  else if(Math.random()<.1){S.inv.nucleo++;B.log.push('Botín: +1 núcleo de jefe.')}save()}
@@ -1590,7 +1592,7 @@ function poblacion(){const mv=S.mv==null?50:S.mv,t=moodCalc(),tot=S.pop+S.heroes
 
 /* ===== ETAPA 3: espacios de héroes por establecimiento y habilidades de clase ===== */
 const HSLOTS=[3,3,4,5,6]; /* por nivel del establecimiento; el equipo de aventura sigue siendo de hasta 3 */
-const heroSlots=()=>HSLOTS[Math.min(5,E())-1];
+const heroSlots=()=>HSLOTS[Math.min(HSLOTS.length,E())-1]; /* si hay más niveles que filas, usa la última */
 Object.defineProperty(CARDS,'max',{get(){return Math.min(LV.chr[chrLv()-1].cm,heroSlots())},configurable:true});
 {const _c=centro;centro=function(){_c();const p=$('ov').querySelector('.pmb');if(!p)return;
  p.insertAdjacentHTML('afterbegin',`<div class="note${E()<5?'':' ok'}">Espacios de héroes: ${heroSlots()}. ${E()<5?'Suben con el establecimiento (nv 3 → 4, nv 4 → 5, nv 5 → 6).':'Máximo alcanzado.'} El equipo de aventura es de hasta 3.</div>`)}}
@@ -1614,9 +1616,9 @@ function syncSk(h){h.sk=h.sk||{};h.sk.l=h.sk.l||[];if(window.eqNorm)eqNorm(h);re
 const IVC={first:600000,gap:[1200000,1800000],warn:120000,boostMax:3,boostCost:50,boostVal:10,wall:2,wallMax:40};
 const ivOn=()=>!!S&&(dnL()>=5||E()>=2);
 /* Bonus de muro del establecimiento central: nivel 3-4 = +15, nivel 5 = +20 (no se acumulan; se suma sobre los muros construidos) */
-const estWall=()=>{const e=E();return e>=5?20:e>=3?15:0};
+const estWall=()=>{const e=E();return e>=5?20:e==4?10:e>=3?15:0};
 const decoDef=()=>S.b.filter(b=>b.type=='bsd'&&Date.now()>=b.end).length;
-const ivWalls=()=>Math.min(IVC.wallMax,S.b.filter(b=>b.type=='mur'&&Date.now()>=b.end).length*IVC.wall)+estWall()+decoDef();
+const ivWalls=()=>Math.min(IVC.wallMax,S.b.filter(b=>b.type=='mur'&&Date.now()>=b.end).reduce((a,b)=>a+((LV.mur[L(b)-1]||{}).df||IVC.wall),0))+estWall()+decoDef();
 const ivHeroes=()=>eqH().filter(h=>!hd(h));
 const ivHeroPow=h=>h.atk*2+h.lv+Math.floor(h.mhp/4);
 const ivMilitia=()=>Math.min(6,Math.max(0,S.pop-used()));
@@ -1649,7 +1651,7 @@ function ivUI(){const iv=S.iv;if(!iv)return;const d=ivDef(iv),a=ivAtk(iv),left=i
  modal(`<div class="uh"><div class="ib big">${ic('mur',30)}</div><div class="uhi"><h2>Invasión inminente</h2><span class="m">Llegada en <b id="ivt">${mmss(left)}</b></span></div></div><!--E-->
  <div class="mst"><div><b>${iv.n}</b><span class="m">Enemigos</span></div><div><b>${iv.lv}</b><span class="m">Nivel</span></div><div><b>${a}</b><span class="m">Fuerza</span></div></div>
  <div class="sx">Defensa actual: ${d.t} / ${a}</div><div class="pb"><i style="width:${Math.min(100,100*d.t/a)}%"></i></div>
- <div class="reqs">${reqRow('Muros ('+S.b.filter(b=>b.type=='mur'&&Date.now()>=b.end).length+' × '+IVC.wall+(estWall()?' + establecimiento '+estWall():'')+(decoDef()?' + arbustos '+decoDef():'')+')',d.w>0,'+'+d.w)}${reqRow('Milicia (habitantes libres, máx. 6)',d.m>0,'+'+d.m)}${reqRow('Héroes del equipo',iv.hero&&d.hs>0,iv.hero?'+'+d.hs:'no asignados')}${reqRow('Campo Heroico (defensores entrenados)',(d.c||0)>0,'+'+(d.c||0))}${reqRow('Refuerzos ('+(iv.boost||0)+'/'+IVC.boostMax+')',(iv.boost||0)>0,'+'+d.bo)}</div>
+ <div class="reqs">${reqRow('Muros ('+S.b.filter(b=>b.type=='mur'&&Date.now()>=b.end).length+' construidos'+(estWall()?' + establecimiento '+estWall():'')+(decoDef()?' + arbustos '+decoDef():'')+')',d.w>0,'+'+d.w)}${reqRow('Milicia (habitantes libres, máx. 6)',d.m>0,'+'+d.m)}${reqRow('Héroes del equipo',iv.hero&&d.hs>0,iv.hero?'+'+d.hs:'no asignados')}${reqRow('Campo Heroico (defensores entrenados)',(d.c||0)>0,'+'+(d.c||0))}${reqRow('Refuerzos ('+(iv.boost||0)+'/'+IVC.boostMax+')',(iv.boost||0)>0,'+'+d.bo)}</div>
  <p class="m hint">${d.t>=a?'Con esta defensa la ciudad resistiría.':'Con esta defensa la ciudad perdería parte de sus reservas (sin destruir nada).'}</p>
  <div class="pmf two"><button class="pri" ${bm||left<=0||!can({solar:IVC.boostCost})?'disabled':''} onclick="ivBoost()">Reforzar (${IVC.boostCost} solares, +${IVC.boostVal})</button><button ${left<=0?'disabled':''} onclick="ivHeroTog()">${iv.hero?'Retirar héroes':'Asignar héroes'}</button></div>`);
  clearInterval(window.__ivi);window.__ivi=setInterval(()=>{const e=$('ivt');if(!e||!S||!S.iv){clearInterval(window.__ivi);return}e.textContent=mmss(S.iv.at-Date.now())},500)}
@@ -1830,13 +1832,13 @@ const CT=[{id:'g1',lv:1,n:'Suministros del mercader',need:{recursos:10},get:{pol
  {id:'g3',lv:3,n:'Escolta de caravana',need:{recursos:60,solar:200},get:{cristal:3},cd:900000},
  {id:'g4',lv:4,n:'Contrato del arsenal',need:{solar:500,filar:200,recursos:60},get:{cristal:5,polvo:2,esencia:1},cd:1200000},
  {id:'g5',lv:5,n:'Gran encargo del gremio',need:{solar:1200,filar:500,recursos:150},get:{cristal:12,polvo:6},cd:1800000}];
-const getTxt=g=>Object.entries(g).map(([k,v])=>'+'+v+' '+(k=='cristal'?'cristal'+(v>1?'es':'')+' mágico'+(v>1?'s':''):k=='esencia'?'esencia'+(v>1?'s':'')+' monstruosa'+(v>1?'s':''):'polvo arcano')).join(', ');
+const getTxt=g=>Object.entries(g).map(([k,v])=>'+'+v+' '+(k=='exp'?'exp a cada héroe equipado':k=='diamantino'?'diamantino'+(v>1?'s':''):k=='cristal'?'cristal'+(v>1?'es':'')+' mágico'+(v>1?'s':''):k=='esencia'?'esencia'+(v>1?'s':'')+' monstruosa'+(v>1?'s':''):'polvo arcano')).join(', ');
 function grem(b){b=b||S.b.find(x=>x.type=='grm'&&Date.now()>=x.end);if(!b)return;S.gm=S.gm||{};const lv=L(b),n=Date.now();
  const rows=CT.map(c=>{const lock=c.lv>lv,cd=(S.gm[c.id]||0)-n,ok=!lock&&cd<=0&&can(c.need);
   return `<div class="ucard"><div class="uct"><b>${c.n}</b><span class="m">${lock?'Gremio nv '+c.lv:cd>0?'Disponible en '+mmss(cd):'Disponible'}</span></div><div class="cost">${chipsCost(c.need)}</div><span class="m">Recompensa: ${getTxt(c.get)}</span><button class="pri" ${ok?'':'disabled'} onclick="gremDo('${c.id}')">Aceptar contrato</button></div>`}).join('');
  modal(head(b,'Contratos hasta nivel '+lv)+rows+upBlock(b))}
 function gremDo(id){const c=CT.find(x=>x.id==id),b=S.b.find(x=>x.type=='grm'&&Date.now()>=x.end);if(!c||!b||c.lv>L(b))return;S.gm=S.gm||{};const n=Date.now();
- if((S.gm[id]||0)>n||!can(c.need))return;spend(c.need);for(const k in c.get)S.inv[k]=(S.inv[k]||0)+c.get[k];S.gm[id]=n+c.cd;save();draw();notice('Contrato cumplido',getTxt(c.get));grem(b)}
+ if((S.gm[id]||0)>n||!can(c.need))return;spend(c.need);for(const k in c.get){if(k=='diamantino')S.coins.diamantino=(S.coins.diamantino||0)+c.get[k];else if(k=='exp')eqH().forEach(h=>giveHeroXP(h,c.get[k]));else S.inv[k]=(S.inv[k]||0)+c.get[k]}S.gm[id]=n+c.cd;save();draw();notice('Contrato cumplido',getTxt(c.get));grem(b)}
 {const _go=go;go=function(n,f){_go(n,f);if(S){S.gm=S.gm||{};S.heroes.forEach(h=>{if(!h.gear)h.gear={w:0,a:0}});S.ver=6;save()}}}
 
 
@@ -3321,7 +3323,7 @@ function rsFx(t){const e=$('rs');if(!e)return;const win=t=='VICTORIA';
  if(RM)return;
  const an=(el,k,o)=>el&&el.animate(k,Object.assign({easing:'cubic-bezier(.2,.8,.2,1)',fill:'both'},o)),mk=c=>{const d=document.createElement('div');d.className=c;e.appendChild(d);return d};
  const rst=e.querySelector('.rst');
- an(rst,[{transform:'scale(1.35)',letterSpacing:'.7em'},{transform:'scale(1)',letterSpacing:'.26em'}],{duration:1100,delay:380});
+ an(rst,MOB()?[{transform:'scale(1.35)',opacity:.2},{transform:'scale(1)',opacity:1}]:[{transform:'scale(1.35)',letterSpacing:'.7em'},{transform:'scale(1)',letterSpacing:'.26em'}],{duration:MOB()?800:1100,delay:380});
  const f=mk('rsf'),w=mk('rsw'),D=win?1000:1250;
  an(f,[{opacity:0},{opacity:win?.85:.55,offset:.12},{opacity:0}],{duration:win?900:1100,delay:D,easing:'ease-out'});
  an(w,[{opacity:1,transform:'scale(.3)'},{opacity:0,transform:'scale(14)'}],{duration:1100,delay:D,easing:'cubic-bezier(.1,.7,.2,1)'});
@@ -3340,7 +3342,7 @@ function rsGo(a){const o=window.__rso||{};rsClose();
 /* ---- Fuegos v2: más grandes, multicolor, con cambio de color y más tipos ---- */
 FW.sk=null;
 function fwAdd(x,y,n,R,h,s,li,o){o=o||{};const dr=o.dr||.955,dec=o.dec||.012,g=o.g==null?.04:o.g;
- for(let i=0;i<n;i++){if(FW.ps.length>(MOB()?650:1600))return;const an=o.ring?i/n*6.2832:Math.random()*6.2832,
+ for(let i=0;i<n;i++){if(FW.ps.length>(MOB()?320:1600))return;const an=o.ring?i/n*6.2832:Math.random()*6.2832,
   v=(o.ring?1:(Math.random()<.25?.2+Math.random()*.6:.8+Math.random()*.2))*R*(1-dr);
   FW.ps.push({x,y,vx:Math.cos(an)*v,vy:Math.sin(an)*v,l:1,dec:dec*(.8+Math.random()*.4),dr,g,h:h+(Math.random()*14-7),h2:o.h2==null?null:o.h2,s,li:li||64,w:o.w||2,tw:o.tw?1:0,tl:o.tl||6,cr:o.cr?1:0})}}
 function fwBurst(x,y,R,h){
@@ -5062,6 +5064,99 @@ setInterval(layers,1000);
 {const od=window.decoDel;window.decoDel=function(){od.apply(this,arguments);layers()}}
 {const ot=tut;tut=function(){ot.apply(this,arguments);
   if(place&&DECO.includes(place)){const h='<span class="k">Colocación</span><br>Toca casillas para seguir colocando. Pulsa Cancelar para terminar.';const t=$('tt');if(t._h!==h){t._h=h;t.innerHTML=h}}}}
+})();
+</script>
+<script id="patch-tut-fix">
+/* ===== TUTORIAL: el progreso nunca retrocede y se corrige si la partida ya estaba avanzada ===== */
+(function(){
+const ADVT=['als','alf','cam','min','mur','chr','bib','tal','cmp','hrr','grm','alr'];
+function heal(onLoad){
+ try{
+  if(typeof S==='undefined'||!S||typeof S!='object'||!Array.isArray(S.b))return;
+  let s=+S.step;if(!isFinite(s))s=0;const o=s;
+  if(onLoad&&s==7&&S.heroes&&S.heroes.length){s=9;const h=S.heroes[0];if(h&&!(h.lv>=1)){h.lv=1;h.mhp=6;h.hp=6;h.mp=h.mmp}}
+  if(s<10){let adv=S.b.some(b=>ADVT.includes(b.type));try{if(!adv&&typeof E==='function'&&E()>=2)adv=true}catch(e){}if(adv)s=10}
+  if(S.ms!=null&&S.ms>s)s=S.ms;
+  if(s>(S.ms||0))S.ms=s;
+  if(s!==S.step){S.step=s;try{save();draw();tut()}catch(e){}}
+ }catch(e){}
+}
+{const _g=go;go=function(n,f){_g(n,f);heal(true)}}
+setInterval(()=>heal(false),700);
+})();
+</script>
+<style id="mobile-perf">
+/* ===== Rendimiento en celular (sin quitar animaciones ni sombras) ===== */
+/* durante el gesto de zoom (dura décimas de segundo) se congela todo y se sube el tablero a su propia capa de GPU */
+html.zing #grid{will-change:transform;pointer-events:none}
+html.zing #grid *{animation:none!important;transition:none!important}
+html.zing .c svg{filter:none!important}
+html.zing #grid{box-shadow:none!important}
+/* el humo se anima en su propia capa (solo opacity/transform) */
+.smk{will-change:transform,opacity}
+@media(max-width:700px),(pointer:coarse){
+ /* única excepción: la Torre solar mantiene su sol girando; la sombra de ESE edificio se omite porque
+    repetir el filtro de sombra en cada cuadro de giro es lo que más trababa; el resto de edificios conserva su sombra */
+ .c svg:has(.sun){filter:none!important}
+ .rs.win .rst{text-shadow:0 0 14px color-mix(in srgb,var(--k-solar) 55%,transparent)}
+ .rsf{inset:0;width:auto;height:auto;margin:0;border-radius:0;transform:none;will-change:opacity}
+ .rsg{will-change:auto}
+}
+</style>
+
+<script id="patch-pdf-values">
+/* ===== VALORES DE CIUDAD (tomados de tu PDF) =====
+   Una sola tabla: cada edificio es una lista de niveles. Para agregar niveles solo añade filas al final
+   (c = costo, bt = tiempo en segundos, y los efectos). No hay un "último nivel" definido aquí:
+   el máximo de cada edificio es simplemente cuántas filas tenga, y el tope general es nivel del establecimiento + 1. */
+(function(){
+const S_=1000;
+const V={
+ est:{2:{bt:60},3:{bt:180},4:{bt:300},5:{bt:360}},
+ sol:[{c:{filar:50},bt:5},{c:{filar:100},bt:15,t:5,a:2,cap:5},{c:{filar:130},bt:30,t:4,a:3,cap:5},{c:{filar:180,recursos:25},bt:42,t:4,a:4,cap:8},{c:{filar:240,recursos:50},bt:67,t:3,a:5,cap:10}],
+ fil:[{c:{solar:100},bt:15},{c:{solar:150},bt:30,t:9,a:2,cap:2},{c:{solar:200},bt:60,t:8,a:2,cap:2},{c:{solar:330,recursos:30},bt:90,t:9,a:3,cap:3},{c:{solar:420,recursos:80},bt:120,t:8,a:3,cap:4}],
+ als:[{c:{filar:50},bt:25},{c:{filar:100},bt:50,cap:100},{c:{filar:180},bt:70,cap:125},{c:{filar:240,recursos:100},bt:110,cap:170},{c:{filar:280,recursos:150},bt:160,cap:230}],
+ alf:[{c:{solar:100},bt:25},{c:{solar:180},bt:60,cap:30},{c:{solar:260},bt:90,cap:50},{c:{solar:400,recursos:50},bt:168,cap:70},{c:{solar:450,recursos:150},bt:270,cap:100}],
+ alr:[{c:{solar:200,filar:100},bt:60},{c:{solar:300,filar:150,cristal:2},bt:90,cap:50},{c:{solar:450,filar:280,cristal:4},bt:150,cap:100}],
+ cam:[{c:{solar:100},bt:25,slots:4,bonus:0},{c:{solar:300},bt:90,slots:5,bonus:0},{c:{solar:385,recursos:15},bt:230,slots:5,bonus:.25},{c:{solar:450,recursos:55},bt:252,slots:5,bonus:.5},{c:{solar:500,recursos:100},bt:405,slots:6,bonus:.5}],
+ min:[{c:{filar:100},bt:90,slots:2,c1:15,c2:10,pr:1},{c:{filar:200,recursos:50},bt:120,slots:2,c1:13,c2:9,pr:2},{c:{filar:240,recursos:100},bt:150,slots:3,c1:12,c2:8,pr:2},{c:{filar:300,recursos:125},bt:204,slots:4,c1:10,c2:7,pr:3},{c:{filar:305,recursos:180},bt:255,slots:5,c1:9,c2:6,pr:3}],
+ mur:[{c:{solar:15},bt:1,hp:10,df:2},{c:{solar:30},bt:4,hp:18,df:3},{c:{solar:54},bt:6,hp:30,df:2},{c:{solar:96,filar:10},bt:11,hp:45,df:4},{c:{solar:165,filar:30},bt:18,hp:65,df:4}],
+ chr:[{c:{solar:150},bt:60,cm:2},{c:{solar:305,filar:100},bt:90,cm:3},{c:{solar:385,filar:180,recursos:30},bt:153,cm:3},{c:{solar:450,filar:240,recursos:80,cristal:4},bt:252,cm:4},{c:{solar:490,filar:260,recursos:145,cristal:12},bt:405,cm:4}],
+ bib:[{c:{solar:200,filar:120},bt:60},{c:{solar:300,filar:180},bt:60},{c:{solar:385,filar:204,recursos:50},bt:102},{c:{solar:450,filar:240,recursos:100,cristal:3},bt:168},{c:{solar:490,filar:260,recursos:150,cristal:10,nucleo:1},bt:270}],
+ tal:[{c:{solar:120,filar:60},bt:45,vc:5,bc:1,vx:0,bx:0},{c:{solar:180,filar:80},bt:45,vc:10,bc:2,vx:0,bx:0},{c:{solar:256,filar:108,recursos:25},bt:76,vc:15,bc:3,vx:0,bx:0},{c:{solar:384,filar:192,recursos:80,cristal:3},bt:126,vc:18,bc:4,vx:0,bx:2},{c:{solar:660,filar:330,recursos:100,cristal:8},bt:202,vc:19,bc:4,vx:1,bx:3}],
+ cmp:[{c:{solar:250,recursos:15},bt:60,df:3},{c:{solar:200},bt:50,df:6},{c:{solar:360,recursos:20},bt:85,df:15},{c:{solar:450,recursos:50,cristal:3},bt:140,df:25},{c:{solar:490,recursos:85,cristal:8},bt:225,df:32}],
+ hrr:[{c:{solar:300,filar:80,recursos:20},bt:90},{c:{solar:200,filar:60},bt:60},{c:{solar:360,filar:108,recursos:25},bt:102},{c:{solar:450,filar:192,recursos:60,cristal:4},bt:168},{c:{solar:490,filar:260,recursos:85,cristal:12},bt:270}],
+ grm:[{c:{solar:350,filar:100},bt:90},{c:{solar:300,filar:100},bt:70},{c:{solar:385,filar:180,recursos:30},bt:119},{c:{solar:450,filar:240,recursos:70,cristal:5},bt:196},{c:{solar:490,filar:260,recursos:85,cristal:12},bt:315}]
+};
+/* espacios de héroes por nivel de establecimiento (la lista puede crecer) */
+const HS=[2,3,3,4,4];
+const CTV={g1:{need:{recursos:150}},g3:{need:{recursos:120,solar:200}},g4:{get:{diamantino:5}},g5:{get:{exp:50}}};
+try{
+ /* est: solo cambian los tiempos */
+ for(const n in V.est)LV.est[n-1].bt=V.est[n].bt*S_;
+ for(const k of Object.keys(V)){if(k=='est')continue;
+  V[k].forEach((d,i)=>{
+   if(!LV[k][i])LV[k][i]={};const L_=LV[k][i];
+   if(i>0){L_.cost={...d.c};L_.bt=d.bt*S_}
+   for(const f in d){if(f=='c'||f=='bt')continue;L_[f]=(f=='t')?d[f]*S_:d[f]}
+  });
+  /* nivel 1: costo/tiempo vienen del catálogo SH */
+  if(SH[k]){SH[k].cost={...V[k][0].c};SH[k].t=V[k][0].bt*S_}
+ }
+ /* los costos de este nivel ya son los finales: no deben volver a recortarse */
+ HSLOTS.length=0;HS.forEach(x=>HSLOTS.push(x));
+ CT.forEach(c=>{const o=CTV[c.id];if(o){if(o.need)c.need=o.need;if(o.get)c.get=o.get}});
+ SH.min.e='Extrae recursos con trabajadores';
+ /* Taller: curación extra acumulada por nivel (vx = vendaje, bx = botiquín) */
+ const tt=()=>{try{const t=S.b.filter(b=>b.type=='tal'&&Date.now()>=b.end).map(L);return LV.tal[Math.max(1,...t)-1]||LV.tal[0]}catch(e){return LV.tal[0]}};
+ const bh=(o,base,key)=>{Object.defineProperty(o,'heal',{get:()=>base+(tt()[key]||0),configurable:true});Object.defineProperty(o,'eff',{get:()=>'Recupera '+(base+(tt()[key]||0))+' HP al héroe elegido.',configurable:true})};
+ bh(SUP.vendaje,3,'vx');bh(SUP.botiquin,10,'bx');
+ /* filas de la ficha de mejora */
+ const _r=rowsOf;rowsOf=function(t,c,n){
+  if(t=='min')return [['Trabajadores',c.slots,n.slots],['Ciclo, 1 trabajador',c.c1+' s',n.c1+' s'],['Ciclo, 2+ trabajadores',c.c2+' s',n.c2+' s'],['Producción por ciclo','+'+c.pr,'+'+n.pr]];
+  if(t=='mur')return [['Resistencia',c.hp,n.hp],['Defensa en invasiones','+'+c.df,'+'+n.df]];
+  return _r(t,c,n)};
+}catch(e){console.error('patch-pdf-values',e)}
 })();
 </script>
 </body></html>
