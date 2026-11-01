@@ -4111,7 +4111,7 @@ function chatPaint(){const l=$$('chl');if(!l)return;const near=l.scrollHeight-l.
  const first=!cseen.size,ids=new Set(cmsgs.map(m=>m.id));
  const fresh=cmsgs.filter(m=>!cseen.has(m.id)),show=first?fresh.slice(-10):fresh.slice(-6);
  const dl=new Map();show.forEach((m,i)=>dl.set(m.id,i*(first?55:70)));
- l.innerHTML=cmsgs.map(m=>{const an=dl.has(m.id)&&!RM;return `<div class="cmg${m.nombre===my?' me':''}${an?' cin':''}"${an?` style="animation-delay:${dl.get(m.id)}ms"`:''}>${av(m.color||colorOf(m.nombre),m.nombre,26)}<div class="cb"><b>${esc(m.nombre)}</b><span>${esc(m.txt)}</span></div></div>`}).join('');
+ l.innerHTML=cmsgs.map(m=>{const an=dl.has(m.id);return `<div class="cmg${m.nombre===my?' me':''}${an?' cin':''}"${an?` style="animation-delay:${dl.get(m.id)}ms"`:''}>${av(m.color||colorOf(m.nombre),m.nombre,26)}<div class="cb"><b>${esc(m.nombre)}</b><span>${esc(m.txt)}</span></div></div>`}).join('');
  cseen=ids;
  if(near||first)l.scrollTop=l.scrollHeight}
 let ctyp=[],ctun=null,ctiv=null;
@@ -5255,6 +5255,7 @@ try{
 @keyframes ctf{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
 .chi input{transition:border-color .25s,box-shadow .25s}.chi input:focus{outline:0;box-shadow:0 0 0 3px color-mix(in srgb,var(--a) 18%,transparent)}
 .chi button{transition:transform .15s,opacity .2s}.chi button:active{transform:scale(.95)}
-@media (prefers-reduced-motion:reduce){.cmg.cin,.cmg.cin .cb,.cty:not(:empty){animation:none;opacity:1}.chl{scroll-behavior:auto}}
+@media (prefers-reduced-motion:reduce){.cmg.cin{animation-name:cfade;animation-duration:.5s}.cmg.cin .cb{animation:none}.chl{scroll-behavior:auto}}
+@keyframes cfade{from{opacity:0}to{opacity:1}}
 </style>
 </body></html>
