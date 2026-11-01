@@ -651,9 +651,9 @@ body.onscr #game *{animation:none!important}
 </style>
 <style id="hud-css">
 /* ===== Barra superior ordenada: fila 1 = menú · ciudad · amigos; fila 2 = monedas y diamantino ===== */
-header{grid-template-columns:auto minmax(0,1fr) auto auto!important;align-items:center}
+header{grid-template-columns:auto auto minmax(0,1fr) auto!important;align-items:center}
 header #mb{grid-column:1;grid-row:1}
-header .city{grid-column:2;grid-row:1;min-width:0;padding-right:0!important}
+header .city{grid-column:3;grid-row:1;min-width:0;padding-right:0!important}
 header .frb{position:static!important;transform:none!important;top:auto!important;right:auto!important;grid-column:4;grid-row:1;justify-self:end;margin:0;width:34px;height:34px}
 header .coins{grid-column:1/-1!important;grid-row:2}
 /* ===== Avisos de invasión y evento: fichas compactas en la esquina, sin empujar el encabezado ===== */
@@ -3761,6 +3761,9 @@ Object.assign(window.Cloud,{
   if(!uid||!window.Cloud.me)throw new Error('Necesitas una cuenta.');
   const n=Date.now();if(n-(window.Cloud._ct||0)<1200)throw new Error('Espera un momento antes de enviar otro mensaje.');window.Cloud._ct=n;
   await setDoc(doc(collection(db,'chat')),{uid,nombre:window.Cloud.me.nombre||window.Cloud.name,color:window.Cloud.me.color||'',txt,t:n})},
+ typingListen(cb){return onSnapshot(collection(db,'chat_typing'),sn=>cb(sn.docs.filter(d=>d.id!==uid).map(d=>d.data())),e=>console.warn('typing',e))},
+ async typingSet(on){if(!uid)return;const n=Date.now();if(on&&n-(window.Cloud._tt||0)<2000)return;window.Cloud._tt=on?n:0;
+  try{await setDoc(doc(db,'chat_typing',uid),{nombre:(window.Cloud.me&&window.Cloud.me.nombre)||window.Cloud.name,t:on?n:0})}catch(e){}},
  async suggest(){if(!uid)return [];const r=await getDocs(query(collection(db,'perfiles'),limit(80)));
   const a=r.docs.filter(d=>d.id!==uid&&d.data().nombre&&d.data().pid&&window.Cloud.relation(d.id)==null).map(d=>({uid:d.id,nombre:d.data().nombre,pid:d.data().pid,color:d.data().color||colorOf(d.data().nombre)}));
   for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}
@@ -3902,11 +3905,16 @@ header{position:relative}header .city{padding-right:42px}
 .frbk{position:fixed;inset:0;z-index:97;background:rgba(0,0,0,.28)}
 .frp{position:fixed;top:0;right:0;bottom:0;width:min(330px,92vw);z-index:98;background:var(--s);border-left:1px solid var(--l);box-shadow:-10px 0 40px rgba(0,0,0,.35);display:flex;flex-direction:column;padding:calc(12px + env(safe-area-inset-top,0px)) 12px calc(12px + env(safe-area-inset-bottom,0px));animation:frin .22s ease}
 .frb2{flex:1;overflow:auto}
-header .chb{position:relative;grid-column:3;grid-row:1;justify-self:end;margin:0 6px 0 0;width:34px;height:34px;min-width:0;padding:0;border-radius:9px;display:flex;align-items:center;justify-content:center;line-height:0;color:var(--t);border:1px solid var(--l)}
+header .chb{position:relative;grid-column:2;grid-row:1;justify-self:start;margin:0 0 0 6px;width:34px;height:34px;min-width:0;padding:0;border-radius:9px;display:flex;align-items:center;justify-content:center;line-height:0;color:var(--t);border:1px solid var(--l)}
 header .chb svg{width:20px;height:20px}header .chb:hover:not(:disabled){background:color-mix(in srgb,var(--a) 18%,var(--s));color:var(--t)}
 header .chb b{position:absolute;top:-6px;right:-6px;min-width:16px;height:16px;padding:0 4px;box-sizing:border-box;border-radius:99px;background:var(--r);color:#fff;font-size:10px;line-height:16px;text-align:center;animation:chpop .5s ease}
 header .chb.nw{border-color:var(--a);color:var(--a)}
 @keyframes chpop{0%{transform:scale(.4)}60%{transform:scale(1.25)}100%{transform:scale(1)}}
+.frp.lft{right:auto;left:0;border-left:0;border-right:1px solid var(--l);box-shadow:10px 0 40px rgba(0,0,0,.35);animation-name:frinL}
+@keyframes frinL{from{transform:translateX(-100%)}to{transform:none}}
+.cty{min-height:18px;font-size:11px;color:var(--m);display:flex;align-items:center;gap:6px;padding:2px 4px}
+.cty i{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--a);animation:ctd 1.1s infinite ease-in-out}.cty i:nth-child(2){animation-delay:.18s}.cty i:nth-child(3){animation-delay:.36s}
+@keyframes ctd{0%,70%,100%{opacity:.25;transform:translateY(0)}35%{opacity:1;transform:translateY(-3px)}}
 .chl{flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:8px;padding:4px 2px 8px}
 .cmg{display:flex;gap:8px;align-items:flex-start}.cmg .cb{min-width:0;max-width:calc(100% - 36px);background:color-mix(in srgb,var(--t) 7%,transparent);border-radius:12px;padding:6px 10px}
 .cmg.me .cb{background:color-mix(in srgb,var(--a) 16%,transparent)}.cmg .cb b{display:block;font-size:11px;color:var(--a)}.cmg .cb span{font-size:13px;line-height:1.35;word-break:break-word;overflow-wrap:anywhere}
@@ -4090,17 +4098,21 @@ window.pvpMenu=()=>AR.open('duelo'); /* el botón Batalla del menú abre la Aren
 let fOpen=false,fl=[],fsel=null,fdet=null,fload=false,ft=null;
 let fchat=false,cmsgs=[],cerr=null,cunsub=null,fsug=[],fsugLoad=false;
 const sugNo=()=>{try{return JSON.parse(localStorage.getItem('ciudad-sugno')||'[]')}catch(e){return[]}};
-function chatStop(){if(cunsub){try{cunsub()}catch(e){}cunsub=null}}
+function chatStop(){if(cunsub){try{cunsub()}catch(e){}cunsub=null}if(ctun){try{ctun()}catch(e){}ctun=null}clearInterval(ctiv);ctyp=[];try{C()&&C().typingSet&&C().typingSet(false)}catch(e){}}
 function chatPaint(){const l=$$('chl');if(!l)return;const near=l.scrollHeight-l.scrollTop-l.clientHeight<80,my=C()&&C().name;
  l.innerHTML=cerr?'<p class="nt er">No se pudo abrir el chat. Revisa que las reglas de Firestore permitan leer y escribir la colección «chat».</p>':cmsgs.length?cmsgs.map(m=>`<div class="cmg${m.nombre===my?' me':''}">${av(m.color||colorOf(m.nombre),m.nombre,26)}<div class="cb"><b>${esc(m.nombre)}</b><span>${esc(m.txt)}</span></div></div>`).join(''):'<p class="m">Nadie ha escrito todavía. ¡Sé el primero!</p>';
  if(near)l.scrollTop=l.scrollHeight}
-const chatShell=()=>`<div id="chl" class="chl"></div><div class="chi"><input id="chi" maxlength="300" placeholder="Escribe un mensaje…" autocomplete="off" onkeydown="if(event.key=='Enter')FR.send()"><button onclick="FR.send()">Enviar</button></div>`;
+let ctyp=[],ctun=null,ctiv=null;
+function typPaint(){const e=$$('cty');if(!e)return;const n=Date.now(),L=ctyp.filter(x=>x&&x.t>0&&n-x.t<6000).map(x=>x.nombre).filter(Boolean);
+ e.innerHTML=L.length?`<i></i><i></i><i></i><span>${esc(L.length>2?L.slice(0,2).join(', ')+' y otros':L.join(' y '))} ${L.length>1?'están escribiendo':'está escribiendo'}</span>`:''}
+const chatShell=()=>`<div id="chl" class="chl"></div><div id="cty" class="cty"></div><div class="chi"><input id="chi" maxlength="300" placeholder="Escribe un mensaje…" autocomplete="off" oninput="FR.typ()" onkeydown="if(event.key=='Enter')FR.send()"><button onclick="FR.send()">Enviar</button></div>`;
 const sugHtml=()=>{const L=fsug.filter(p=>!(C()&&C().relation&&C().relation(p.uid)));return `<div class="subh" style="margin-top:14px">Sugerencias de amigos</div>`+(fsugLoad&&!L.length?'<p class="m">Buscando jugadores…</p>':L.length?L.map(p=>`<div class="fr">${av(p.color,p.nombre,34)}<div class="gr"><b>${esc(p.nombre)}</b><br><span class="m">ID ${esc(p.pid||'—')}</span></div><div class="bt"><button class="sm" onclick="FR.inv('${esc(p.uid)}')">Invitar</button><button class="sm" onclick="FR.noinv('${esc(p.uid)}')">No invitar</button></div></div>`).join(''):'<p class="m">No hay más sugerencias por ahora.</p>')};
 async function sLoad(){if(!C()||!C().name||!C().suggest)return;fsugLoad=true;try{const no=sugNo();fsug=(await C().suggest()).filter(p=>!no.includes(p.uid))}catch(e){fsug=[]}fsugLoad=false;if(fOpen&&!fdet&&!fchat)fDraw()}
 function fDraw(){let o=$$('frp');if(!fOpen){if(o)o.remove();const k=$$('frbk');if(k)k.remove();return}
- if(!o){const k=document.createElement('div');k.id='frbk';k.className='frbk';k.onclick=()=>FR.close();document.body.appendChild(k);o=document.createElement('div');o.id='frp';o.className='frp';document.body.appendChild(o)}
+ if(!o){const k=document.createElement('div');k.id='frbk';k.className='frbk';k.onclick=()=>FR.close();document.body.appendChild(k);o=document.createElement('div');o.id='frp';document.body.appendChild(o)}
+ o.className='frp'+(fchat?' lft':'')
  let h=`<div class="accx"><h2 style="margin:0">${fchat?'Chat global':fdet?'Jugador':'Amigos'}</h2><button class="sm" onclick="FR.close()">Cerrar</button></div><div class="frb2"${fchat?' style="display:flex;flex-direction:column;min-height:0"':''}>`;
-  if(fchat)h+=chatShell();
+  if(fchat)h+=(C()&&C().name&&C().chatListen)?chatShell():'<p class="m">Necesitas iniciar sesión con una cuenta para usar el chat global.</p>';
  else if(fdet)h+=`<button class="sm" style="margin:0 0 10px" onclick="FR.back()">← Volver</button><div class="tabs" style="margin-top:0"><button class="${fdet.m=='p'?'on':''}" onclick="FR.mode('p')">Perfil</button><button class="${fdet.m=='s'?'on':''}" onclick="FR.mode('s')">Estadísticas</button><button class="${fdet.m=='g'?'on':''}" onclick="FR.mode('g')">Juego</button></div>`+(fdet.m=='g'?game(fdet.d):profile(fdet.d,fdet.m));
  else if(!C()||!C().name)h+='<p class="m">Necesitas una cuenta para tener amigos.</p>';
  else if(fload&&!fl.length)h+='<p class="m">Cargando…</p>';
@@ -4114,9 +4126,10 @@ window.FR={
  toggle:()=>fOpen?FR.close():FR.open(),
  open:()=>{fOpen=true;fchat=false;fsel=null;fdet=null;fDraw();fLoad();clearInterval(ft);ft=setInterval(()=>{if(fOpen&&!fdet&&!fchat)fLoad()},45000)},
  close:()=>{fOpen=false;fchat=false;chatStop();clearInterval(ft);fDraw()},
- chat:()=>{if(!C()||!C().chatListen)return;if(fOpen&&fchat){FR.close();return}fOpen=true;fchat=true;fsel=null;fdet=null;cerr=null;cmsgs=[];clearInterval(ft);try{localStorage.setItem('ciudad-chatseen',String(Date.now()))}catch(e){}cbHb();fDraw();chatStop();cunsub=C().chatListen((m,e)=>{cmsgs=m;cerr=e||null;chatPaint()})},
+ chat:()=>{if(fOpen&&fchat){FR.close();return}if(!C()||!C().name||!C().chatListen){fOpen=true;fchat=true;fdet=null;clearInterval(ft);fDraw();return}fOpen=true;fchat=true;fsel=null;fdet=null;cerr=null;cmsgs=[];clearInterval(ft);try{localStorage.setItem('ciudad-chatseen',String(Date.now()))}catch(e){}cbHb();fDraw();chatStop();cunsub=C().chatListen((m,e)=>{cmsgs=m;cerr=e||null;chatPaint()});if(C().typingListen){ctun=C().typingListen(l=>{ctyp=l;typPaint()});ctiv=setInterval(typPaint,1500)}},
+ typ:()=>{try{C().typingSet&&C().typingSet(true)}catch(e){}},
  chatBack:()=>{FR.close()},
- send:async()=>{const i=$$('chi');if(!i)return;const v=i.value.trim();if(!v)return;try{await C().chatSend(v);i.value='';i.focus()}catch(e){notice('Chat',e.message||'No se pudo enviar')}},
+ send:async()=>{const i=$$('chi');if(!i)return;const v=i.value.trim();if(!v)return;try{await C().chatSend(v);i.value='';i.focus();C().typingSet&&C().typingSet(false)}catch(e){notice('Chat',e.message||'No se pudo enviar')}},
  inv:async u=>{const p=fsug.find(x=>x.uid==u);if(!p)return;try{await C().request(p);fsug=fsug.filter(x=>x.uid!=u);notice('Solicitud enviada','Le llegará una notificación a '+p.nombre+'.')}catch(e){notice('No se pudo invitar',e.message||'Error')}if(fOpen)fDraw()},
  noinv:u=>{try{const a=sugNo();a.push(u);localStorage.setItem('ciudad-sugno',JSON.stringify(a.slice(-300)))}catch(e){}fsug=fsug.filter(x=>x.uid!=u);fDraw()},
  sel:u=>{fsel=fsel==u?null:u;fDraw()},
@@ -4145,7 +4158,7 @@ const HEART='<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"
 const CHATI='<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5.5h16a1.5 1.5 0 0 1 1.500 1.500v8.500a1.500 1.500 0 0 1-1.500 1.500H11l-4.500 3.500V17H4a1.500 1.500 0 0 1-1.500-1.500V7A1.500 1.500 0 0 1 4 5.500z"/><path d="M7.500 10h9M7.500 13h5.500"/></svg>';
 let bgun=null,bgm=[];
 const chSeen=()=>{try{return +localStorage.getItem('ciudad-chatseen')||0}catch(e){return 0}};
-function cbHb(){const b=$$('chb');if(!b)return;const my=C()&&C().name;b.style.display=my?'':'none';
+function cbHb(){const b=$$('chb');if(!b)return;const my=C()&&C().name;b.style.display='';
  const n=my?bgm.filter(m=>m.t>chSeen()&&m.nombre!==my).length:0;b.classList.toggle('nw',n>0);b.title=n?n+' mensaje(s) nuevo(s) en el chat global':'Chat global';
  b.innerHTML=CHATI+(n?`<b>${n>9?'9+':n}</b>`:'')}
 function bgSync(){const my=C()&&C().name;
@@ -4155,7 +4168,7 @@ function bgSync(){const my=C()&&C().name;
  cbHb()}
 function hb(){const b=$$('frb');if(!b)return;const n=C()&&C().incoming?C().incoming().length:0;b.innerHTML=HEART+(n?`<b>${n}</b>`:'')}
 {const h=document.querySelector('header');if(h&&!$$('frb')){const b=document.createElement('button');b.id='frb';b.className='frb';b.title='Amigos y jugadores';b.setAttribute('aria-label','Amigos');b.onclick=()=>FR.toggle();const c=$$('cc');h.insertBefore(b,c);hb()}
- if(h&&!$$('chb')){const k=document.createElement('button');k.id='chb';k.className='chb';k.title='Chat global';k.setAttribute('aria-label','Chat global');k.style.display='none';k.onclick=()=>FR.chat();h.insertBefore(k,$$('frb'));cbHb()}}
+ if(h&&!$$('chb')){const k=document.createElement('button');k.id='chb';k.className='chb';k.title='Chat global';k.setAttribute('aria-label','Chat global');k.onclick=()=>FR.chat();h.insertBefore(k,$$('frb'));cbHb()}}
 addEventListener('cloudchange',()=>{hb();bgSync();if(fOpen&&!fdet&&!fchat)fLoad()});
 setInterval(()=>{try{const g=$$('game');if(!g||g.classList.contains('hide')||typeof S==='undefined'||!S||S.slot==null)return;
  ensure();push();const nv=$$('nvb');if(nv&&nv.title!='Arena'){nv.title='Arena';nv.setAttribute('aria-label','Arena')}
