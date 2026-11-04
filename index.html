@@ -3601,7 +3601,8 @@ window.cuentaSalir=async()=>{try{localStorage.removeItem('ciudad-pw')}catch(e){}
 function bar(){const u=C()&&C().name;
  if(!u)return `<div id="accbar" class="accbar"><span class="m">Sin cuenta: tu progreso solo está en este dispositivo</span><button onclick="cuentaDlg()">Entrar / Crear cuenta</button></div>`;
  const m=C().me,n=C().incoming().length;
- return `<div id="accbar" class="accbar"><button class="accb" onclick="accOpen()">${av(m&&m.color||colorOf(u),u,42)}<span><b>${esc(u)}</b><br><span class="m">${m?'ID '+esc(m.pid):'Guardado en la nube'}</span></span><svg class="ic accg" width="16" height="16" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button><button class="bell" onclick="ntfOpen()" aria-label="Notificaciones" title="Notificaciones">${bell}${n?`<i class="bdg">${n}</i>`:''}</button></div>`}
+ const fn=C().nFriends?C().nFriends():0,HE='<svg class="ic" width="18" height="18" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.6-3.6 3.200-5.500 6.500-5.500s5.900 1.900 6.500 5.500M16 5a3.200 3.200 0 010 6M18 14.700c2 .6 3.200 2.400 3.500 5.300"/></svg>';
+ return `<div id="accbar" class="accbar acc2"><button class="accb" onclick="accOpen()">${av(m&&m.color||colorOf(u),u,46)}<span><b>${esc(u)}</b><br><span class="m">${m?'Mi cuenta · ID '+esc(m.pid):'Guardado en la nube'}</span></span><svg class="ic accg" width="16" height="16" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button><div class="acc2r"><button class="acc2b" onclick="FR.open()">${HE}<span>Amigos</span><em>${fn}</em></button><button class="acc2b" onclick="ntfOpen()" aria-label="Notificaciones">${bell}<span>Notificaciones</span>${n?`<i class="bdg">${n}</i>`:''}</button></div></div>`}
 const _s=slots;slots=function(){_s();try{const ca=C()&&C().canAdmin&&C().canAdmin();if(!ca){ADM=false;const ab=document.getElementById('adm');if(ab)ab.parentElement.remove()}}catch(e){}try{document.getElementById('slots').insertAdjacentHTML('afterbegin',bar())}catch(e){}};
 function toast(t,fn){let e=document.getElementById('acct');if(e)e.remove();e=document.createElement('div');e.id='acct';e.textContent=t;e.onclick=()=>{e.remove();fn&&fn()};document.body.appendChild(e);setTimeout(()=>{if(e.isConnected)e.remove()},6000)}
 async function loadFriends(){try{full=await C().friends()}catch(e){}if(isOpen&&tab=='amigos')render()}
@@ -3615,17 +3616,7 @@ function render(){const ov=document.getElementById('accov');if(!ov)return;const 
 <tr><td class="m">ID</td><td>${m?esc(m.pid)+'<button class="sm" onclick="accCopy()">Copiar</button>':'—'}</td></tr>
 <tr><td class="m">Contraseña</td><td>${pw?(showPw?esc(pw):'•'.repeat(Math.min(pw.length,12)))+'<button class="sm" onclick="accPw()">'+(showPw?'Ocultar':'Ver')+'</button>':'<span class="m">No guardada en este dispositivo</span>'}</td></tr></table>`;
  if(!m)h+=`<p class="nt er">No se pudo cargar tu perfil (ID y amigos). Revisa que las reglas de Firestore estén actualizadas.</p>`;
- else{
- h+=`<div class="tabs"><button class="${tab=='amigos'?'on':''}" onclick="accTab('amigos')">Amigos (${C().nFriends()})</button><button class="${tab=='solicitudes'?'on':''}" onclick="accTab('solicitudes')">Solicitudes${inc.length?` <i class="bdg">${inc.length}</i>`:''}</button><button class="${tab=='agregar'?'on':''}" onclick="accTab('agregar')">Agregar</button></div>`;
- if(tab=='amigos'){h+=full.length?full.map(f=>row(f,`<button class="sm" onclick="accDel('${esc(f.id)}','¿Quitar a ${esc(f.nombre)} de tus amigos?')">Quitar</button>`)).join(''):'<p class="m">Aún no tienes amigos. Ve a «Agregar».</p>'}
- else if(tab=='solicitudes'){
-  h+=`<div class="subh">Recibidas</div>`+(inc.length?inc.map(r=>row({nombre:r.deN,pid:r.deP,color:r.deC},`<button class="sm" onclick="accAccept('${esc(r.id)}')">Aceptar</button><button class="sm" onclick="accDel('${esc(r.id)}')">Rechazar</button>`)).join(''):'<p class="m">No tienes solicitudes nuevas.</p>');
-  if(out.length)h+=`<div class="subh">Enviadas (pendientes)</div>`+out.map(r=>row({nombre:r.paN,pid:r.paP,color:r.paC},`<button class="sm" onclick="accDel('${esc(r.id)}')">Cancelar</button>`)).join('')}
- else{h+=`<div class="srch"><input id="accq" value="${esc(q)}" placeholder="Nombre o ID de 8 dígitos" autocapitalize="none" autocomplete="off" oninput="accQ(this.value)" onkeydown="if(event.key=='Enter')accSearch()"><button onclick="accSearch()">Buscar</button></div><div class="nt${noteErr?' er':''}">${esc(note)}</div>`;
-  if(res){const rel=C().relation(res.uid);
-   const bt=rel=='yo'?'<span class="m">Eres tú</span>':rel=='amigo'?'<span class="m">Ya son amigos</span>':rel=='enviada'?'<span class="m">Solicitud enviada</span>':`<button onclick="accSend()">${rel=='recibida'?'Aceptar solicitud':'Agregar'}</button>`;
-   h+=row(res,bt)}}}
- h+=`<div style="margin-top:16px;text-align:right"><button onclick="cuentaSalir()">Cerrar sesión</button></div></div>`;
+h+=`<div style="margin-top:16px;text-align:right"><button onclick="cuentaSalir()">Cerrar sesión</button></div></div>`;
  const keep=document.getElementById('accq')===document.activeElement;ov.innerHTML=h;if(keep){const i=document.getElementById('accq');if(i){i.focus();i.setSelectionRange(i.value.length,i.value.length)}}}
 window.accOpen=t=>{if(!C()||!C().name)return;if(t)tab=t;isOpen=true;showPw=false;let o=document.getElementById('accov');if(!o){o=document.createElement('div');o.id='accov';o.onclick=e=>{if(e.target===o)accClose()};document.body.appendChild(o)}render();loadFriends()};
 window.accClose=()=>{isOpen=false;const o=document.getElementById('accov');if(o)o.remove()};
@@ -3641,8 +3632,8 @@ window.accDel=async(id,msg)=>{if(msg&&!confirm(msg))return;try{await C().remove(
 function upd(){const b=document.getElementById('accbar');if(b){const t=document.createElement('div');t.innerHTML=bar();b.replaceWith(t.firstElementChild)}if(isOpen){render();loadFriends()}}
 addEventListener('cloudchange',upd);
 addEventListener('cloudevt',e=>{const d=e.detail||{},r=d.r||{};
- if(d.type=='nueva')toast((r.deN||'Alguien')+' te envió una solicitud de amistad',()=>accOpen('solicitudes'));
- else if(d.type=='aceptada')toast((r.paN||'Alguien')+' aceptó tu solicitud de amistad',()=>accOpen('amigos'))});
+ if(d.type=='nueva')toast((r.deN||'Alguien')+' te envió una solicitud de amistad',()=>FR.open('req'));
+ else if(d.type=='aceptada')toast((r.paN||'Alguien')+' aceptó tu solicitud de amistad',()=>FR.open())});
 })();
 </script>
 <script>
@@ -4249,6 +4240,7 @@ window.pvpMenu=()=>AR.open('duelo'); /* el botón Batalla del menú abre la Aren
 /* ---------- panel lateral de amistades (corazón) ---------- */
 let fOpen=false,fl=[],fsel=null,fdet=null,fload=false,ft=null;
 let fchat=false,cmsgs=[],cerr=null,cunsub=null,fsug=[],fsugLoad=false;
+let fmode='list',faq='',fares=null,fanote='',faerr=false;
 const sugNo=()=>{try{return JSON.parse(localStorage.getItem('ciudad-sugno')||'[]')}catch(e){return[]}};
 function chatStop(){if(cunsub){try{cunsub()}catch(e){}cunsub=null}if(ctun){try{ctun()}catch(e){}ctun=null}clearInterval(ctiv);ctyp=[];try{C()&&C().typingSet&&C().typingSet(false)}catch(e){}}
 function chatPaint(){const l=$$('chl');if(!l)return;const near=l.scrollHeight-l.scrollTop-l.clientHeight<80,my=C()&&C().name;
@@ -4271,23 +4263,33 @@ const chatShell=()=>`<div id="chl" class="chl"></div><div id="cty" class="cty"><
 window.chCnt=i=>{const c=document.getElementById('chc');if(c){const n=i.value.length;c.textContent=n>220?(300-n):''}};
 const sugHtml=()=>{const L=fsug.filter(p=>!(C()&&C().relation&&C().relation(p.uid)));return `<div class="subh" style="margin-top:14px">Sugerencias de amigos</div>`+(fsugLoad&&!L.length?'<p class="m">Buscando jugadores…</p>':L.length?L.map(p=>`<div class="fr">${av(p.color,p.nombre,34)}<div class="gr"><b>${esc(p.nombre)}</b><br><span class="m">ID ${esc(p.pid||'—')}</span></div><div class="bt"><button class="sm" onclick="FR.inv('${esc(p.uid)}')">Invitar</button><button class="sm" onclick="FR.noinv('${esc(p.uid)}')">No invitar</button></div></div>`).join(''):'<p class="m">No hay más sugerencias por ahora.</p>')};
 async function sLoad(){if(!C()||!C().name||!C().suggest)return;fsugLoad=true;try{const no=sugNo();fsug=(await C().suggest()).filter(p=>!no.includes(p.uid))}catch(e){fsug=[]}fsugLoad=false;if(fOpen&&!fdet&&!fchat)fDraw()}
+const frRow=(p,btns)=>`<div class="fr">${av(p.color,p.nombre,38)}<div class="gr"><b>${esc(p.nombre)}</b><br><span class="m">ID ${esc(p.pid||'—')}</span></div><div class="bt">${btns||''}</div></div>`;
+const CHV='<svg class="ic frchv" width="16" height="16" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>';
+function fTabs(){const n=C().incoming?C().incoming().length:0;return `<div class="tabs fr-tabs"><button class="${fmode=='list'?'on':''}" onclick="FR.tab('list')">Amigos${fl.length?' ('+fl.length+')':''}</button><button class="${fmode=='req'?'on':''}" onclick="FR.tab('req')">Solicitudes${n?` <i class="bdg">${n}</i>`:''}</button><button class="${fmode=='add'?'on':''}" onclick="FR.tab('add')">Agregar</button></div>`}
+function fList(){if(fload&&!fl.length)return '<p class="m">Cargando…</p>';
+ if(!fl.length)return '<div class="fr-empty"><b>Aún no tienes amigos</b><span class="m">Búscalos por nombre o ID en la pestaña Agregar.</span><button class="pri" onclick="FR.tab(\'add\')">Agregar amigos</button></div>';
+ return fl.map(d=>{const L=d.arena&&LV[d.arena.lv],on=online(d),s=fsel==d.uid;
+  return `<div class="frw2${s?' on':''}"><button class="frh2" onclick="FR.sel('${esc(d.uid)}')"><span class="frav">${av(d.color,d.nombre,40)}${on==null?'':`<i class="dot ${on?'on':''}"></i>`}</span><span class="gr"><b>${esc(d.nombre)}</b><span class="m">${on==null?'':on?'En línea':'Sin conexión'}${L?` · <span style="color:${L.c}">${L.name}</span>`:''}</span></span>${CHV}</button>${s?`<div class="fra2"><button class="pri" onclick="FR.go('${esc(d.uid)}','p')">Ver perfil</button><button class="pri" onclick="FR.map('${esc(d.uid)}')">Ver mapa</button><button class="frret" onclick="FR.ret('${esc(d.uid)}')">Retar a un duelo</button><button class="frret frdel" onclick="FR.del('${esc(d.uid)}')">Quitar de amigos</button></div>`:''}</div>`}).join('')}
+function fReq(){const inc=C().incoming(),out=C().outgoing();
+ let h=`<div class="subh">Recibidas</div>`+(inc.length?inc.map(r=>frRow({nombre:r.deN,pid:r.deP,color:r.deC},`<button class="sm pri" onclick="FR.acc('${esc(r.id)}')">Aceptar</button><button class="sm" onclick="FR.rm('${esc(r.id)}')">Rechazar</button>`)).join(''):'<p class="m">No tienes solicitudes nuevas.</p>');
+ if(out.length)h+=`<div class="subh">Enviadas</div>`+out.map(r=>frRow({nombre:r.paN,pid:r.paP,color:r.paC},`<button class="sm" onclick="FR.rm('${esc(r.id)}')">Cancelar</button>`)).join('');return h}
+function fAdd(){let h=`<div class="srch"><input id="faq" value="${esc(faq)}" placeholder="Nombre o ID de 8 dígitos" autocapitalize="none" autocomplete="off" oninput="FR.q(this.value)" onkeydown="if(event.key=='Enter')FR.search()"><button onclick="FR.search()">Buscar</button></div><div class="nt${faerr?' er':''}">${esc(fanote)}</div>`;
+ if(fares){const rel=C().relation(fares.uid);const bt=rel=='yo'?'<span class="m">Eres tú</span>':rel=='amigo'?'<span class="m">Ya son amigos</span>':rel=='enviada'?'<span class="m">Solicitud enviada</span>':`<button class="sm pri" onclick="FR.send2()">${rel=='recibida'?'Aceptar':'Agregar'}</button>`;h+=frRow(fares,bt)}
+ return h+sugHtml()}
 function fDraw(){let o=$$('frp');if(!fOpen){if(o)o.remove();const k=$$('frbk');if(k)k.remove();return}
  if(!o){const k=document.createElement('div');k.id='frbk';k.className='frbk';k.onclick=()=>FR.close();document.body.appendChild(k);o=document.createElement('div');o.id='frp';document.body.appendChild(o)}
  o.className='frp'+(fchat?' lft':'')+(fdet?' pfw':'')
- let h=`<div class="accx">${fchat?'<div class="chh"><h2>Chat global</h2><span class="m">Conversación abierta con todos los jugadores</span></div>':'<h2 style="margin:0">'+(fdet?'Perfil':'Amigos')+'</h2>'}<button class="sm" onclick="FR.close()">Cerrar</button></div><div class="frb2"${fchat?' style="display:flex;flex-direction:column;min-height:0"':''}>`;
+ let h=`<div class="accx">${fchat?'<div class="chh"><h2>Chat global</h2><span class="m">Conversación abierta con todos los jugadores</span></div>':'<h2 style="margin:0">'+(fdet?'Perfil':'Amigos')+'</h2>'}<div class="fr-top">'+(!fchat&&C()&&C().name?'<button class="sm fr-bell" aria-label="Notificaciones" title="Notificaciones" onclick="ntfOpen()"><svg class="ic" width="16" height="16" viewBox="0 0 24 24"><path d="M6 17v-6a6 6 0 0112 0v6l2 2H4zM10 21h4"/></svg>'+(C().incoming&&C().incoming().length?'<i class="bdg">'+C().incoming().length+'</i>':'')+'</button>':'')+'<button class="sm" onclick="FR.close()">Cerrar</button></div></div><div class="frb2"${fchat?' style="display:flex;flex-direction:column;min-height:0"':''}>`;
   if(fchat)h+=(C()&&C().name&&C().chatListen)?chatShell():'<p class="m">Necesitas iniciar sesión con una cuenta para usar el chat global.</p>';
- else if(fdet)h+=`<button class="sm" style="margin:0 0 10px" onclick="FR.back()">← Volver</button>`+PF.hero(fdet.d)+`<div class="pf-tabs"><button class="${fdet.m=='p'?'on':''}" onclick="FR.mode('p')">Resumen</button><button class="${fdet.m=='s'?'on':''}" onclick="FR.mode('s')">Estadísticas</button><button class="${fdet.m=='g'?'on':''}" onclick="FR.mode('g')">Ciudad</button></div>`+(fdet.m=='g'?game(fdet.d):profile(fdet.d,fdet.m,1))+(fl.some(x=>x.uid==fdet.d.uid)?`<button class="pri pf-ret" onclick="FR.ret('${esc(fdet.d.uid)}')">Retar a un duelo amistoso</button>`:'');
+ else if(fdet)h+=`<button class="sm" style="margin:0 0 10px" onclick="FR.back()">← Volver</button>`+PF.hero(fdet.d)+`<div class="pf-tabs"><button class="${fdet.m=='p'?'on':''}" onclick="FR.mode('p')">Resumen</button><button class="${fdet.m=='s'?'on':''}" onclick="FR.mode('s')">Estadísticas</button></div>`+profile(fdet.d,fdet.m,1)+`<div class="fr-acts"><button class="pri" onclick="FR.map('${esc(fdet.d.uid)}')">Ver mapa</button>`+(fl.some(x=>x.uid==fdet.d.uid)?`<button onclick="FR.ret('${esc(fdet.d.uid)}')">Retar a un duelo</button>`:'')+`</div>`;
  else if(!C()||!C().name)h+='<p class="m">Necesitas una cuenta para tener amigos.</p>';
- else if(fload&&!fl.length)h+='<p class="m">Cargando…</p>';
- else if(!fl.length)h+='<p class="m">Aún no tienes amigos. Agrégalos desde tu cuenta.</p>';
- else h+=fl.map(d=>{const L=d.arena&&LV[d.arena.lv],on=online(d),s=fsel==d.uid;return `<div class="frw ${s?'on':''}"><div class="frh" onclick="FR.sel('${esc(d.uid)}')">${av(d.color,d.nombre,34)}<div class="gr"><b>${esc(d.nombre)}</b><div class="m">${on==null?'':`<i class="dot ${on?'on':''}"></i>${on?'En línea':'Sin conexión'}`}${L?` · <span style="color:${L.c}">${L.name}</span>`:''}</div></div></div>${s?`<div class="fra"><button class="frl" onclick="FR.go('${esc(d.uid)}','p')">Ver perfil</button><button class="frl" onclick="FR.go('${esc(d.uid)}','s')">Ver estadísticas</button><button class="frl" onclick="FR.go('${esc(d.uid)}','g')">Ver juego</button><button class="frl" onclick="FR.ret('${esc(d.uid)}')">Retar</button></div>`:''}</div>`}).join('');
- if(!fchat&&!fdet&&C()&&C().name)h+=sugHtml();
- h+='</div>'+(!fdet&&!fchat&&C()&&C().name?'<button class="sm" style="margin:10px 0 0;width:100%;padding:8px" onclick="FR.close();window.accOpen&&accOpen(\'solicitudes\')">Añadir amigos y solicitudes</button>':'');
- o.innerHTML=h;if(fchat){chatPaint();const l=$$('chl');if(l)l.scrollTop=l.scrollHeight}}
+ else h+=fTabs()+(fmode=='req'?fReq():fmode=='add'?fAdd():fList());
+  h+='</div>';
+  o.innerHTML=h;if(fchat){chatPaint();const l=$$('chl');if(l)l.scrollTop=l.scrollHeight}}
 async function fLoad(){if(!C()||!C().name){fDraw();return}fload=true;try{fl=await C().friends();fl.sort((x,y)=>(online(y)?1:0)-(online(x)?1:0)||String(x.nombre).localeCompare(String(y.nombre)))}catch(e){}fload=false;if(fOpen&&!fchat)fDraw();sLoad()}
 window.FR={
  toggle:()=>fOpen?FR.close():FR.open(),
- open:()=>{fOpen=true;fchat=false;fsel=null;fdet=null;fDraw();fLoad();clearInterval(ft);ft=setInterval(()=>{if(fOpen&&!fdet&&!fchat)fLoad()},45000)},
+ open:t=>{fOpen=true;fchat=false;fsel=null;fdet=null;fmode=(t=='req'||t=='add')?t:'list';fDraw();fLoad();clearInterval(ft);ft=setInterval(()=>{if(fOpen&&!fdet&&!fchat)fLoad()},45000)},
  close:()=>{fOpen=false;fchat=false;chatStop();clearInterval(ft);fDraw()},
  chat:()=>{if(fOpen&&fchat){FR.close();return}if(!C()||!C().name||!C().chatListen){fOpen=true;fchat=true;fdet=null;clearInterval(ft);fDraw();return}fOpen=true;fchat=true;fsel=null;fdet=null;cerr=null;cmsgs=[];clearInterval(ft);try{localStorage.setItem('ciudad-chatseen',String(Date.now()))}catch(e){}cbHb();fDraw();chatStop();cunsub=C().chatListen((m,e)=>{cmsgs=m;cerr=e||null;chatPaint()});if(C().typingListen){ctun=C().typingListen(l=>{ctyp=l;typPaint()});ctiv=setInterval(typPaint,1500)}},
  typ:()=>{try{C().typingSet&&C().typingSet(true)}catch(e){}},
@@ -4300,6 +4302,17 @@ window.FR={
  show:(d,m)=>{fOpen=true;fdet={d,m};fDraw()},
  mode:m=>{if(fdet){fdet.m=m;fDraw()}},
  back:()=>{fdet=null;fDraw()},
+ tab:t=>{fmode=t;fsel=null;fanote='';faerr=false;fares=null;fDraw();if(t=='list')fLoad()},
+ q:v=>{faq=v},
+ search:async()=>{fanote='Buscando…';faerr=false;fares=null;fDraw();try{fares=await C().search(faq);fanote=fares?'':'No se encontró ningún jugador con ese nombre o ID.';faerr=!fares}catch(e){fanote='No se pudo buscar: '+e.message;faerr=true}fDraw();const i=$$('faq');if(i){i.focus();i.setSelectionRange(i.value.length,i.value.length)}},
+ send2:async()=>{try{const r=await C().request(fares);fanote=r=='aceptada'?'¡Ahora son amigos!':'Solicitud enviada a '+fares.nombre+'.';faerr=false;if(r=='aceptada')fLoad()}catch(e){fanote=e.message;faerr=true}fDraw()},
+ acc:async id=>{try{await C().accept(id);fLoad()}catch(e){notice('No se pudo aceptar',e.message||'Error')}fDraw()},
+ rm:async id=>{try{await C().remove(id)}catch(e){}fDraw()},
+ del:async u=>{const d=fl.find(x=>x.uid==u);if(!d||!confirm('¿Quitar a '+d.nombre+' de tus amigos?'))return;try{await C().remove(d.id);fl=fl.filter(x=>x.uid!=u);fsel=null}catch(e){notice('No se pudo quitar',e.message||'Error')}fDraw()},
+ map:u=>{const d=fl.find(x=>x.uid==u)||(fdet&&fdet.d&&fdet.d.uid==u?fdet.d:null);if(!d)return;const v=d.vista,A=d.arena;
+  if(A&&A.pv===false){notice('Mapa no disponible',d.nombre+' no permite que sus amigos vean su ciudad.');return}
+  if(!v){notice('Mapa no disponible',d.nombre+' todavía no tiene una ciudad para mostrar.');return}
+  window.__cvd={v,n:d.nombre};cityView()},
  ret:async u=>{const d=fl.find(x=>x.uid==u);if(!d)return;try{await C().challenge({uid:u,nombre:d.nombre});notice('Reto enviado','Esperando respuesta de '+d.nombre+'. Las batallas de amistad no dan puntos.')}catch(e){notice('No se pudo retar',e.message||'Error')}}
 };
 /* ---------- animaciones ---------- */
@@ -5662,14 +5675,14 @@ function setCs(n,keep){const v=q('cvv'),g=q('cvg');if(!v||!g)return;n=Math.max(Z
 function build(b){const m={};(b||[]).forEach(t=>{m[t[1]+','+t[2]]=t});const WS0=WS;let h='';
  try{WS=new Set((b||[]).filter(t=>t[0]=='mur').map(t=>t[1]+','+t[2]));
   for(let i=0;i<225;i++){const x=i%15,y=(i/15)|0,t=m[x+','+y];let c='';
-   if(t){try{const lv=t[3]||1;c=(t[0]=='mur'?wallSVG(wallMask(x,y),lv):icL(t[0],lv))+(lv>1?`<i class="lv">${lv}</i>`:'')}catch(e){}}
-   h+=`<div class="c">${c}</div>`}}
+   if(t){try{const lv=t[3]||1;c=(t[0]=='mur'?wallSVG(wallMask(x,y),lv):icL(t[0],lv))+`<i class="lv">${lv}</i>`}catch(e){}}
+   h+=t?`<div class="c k2" data-t="${t[0]}" data-l="${t[3]||1}">${c}</div>`:`<div class="c">${c}</div>`}}
  finally{WS=WS0}
  return h}
 window.cityView=function(){const d=window.__cvd;if(!d||!d.v)return;D=d;cityViewClose();
  const o=document.createElement('div');o.id='cvov';
  const esc=t=>String(t==null?'':t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
- o.innerHTML=`<div class="cvh"><button onclick="cityViewClose()">Cerrar</button><div class="cvt"><b>${esc(d.v.city)}</b><span>Ciudad de ${esc(d.n)} · población ${d.v.pop||0}</span></div><span class="cvro"><svg class="ic" width="14" height="14" viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>Solo lectura</span></div><div id="cvv"><div id="cvg">${build(d.v.b)}</div></div><div class="cvz"><button onclick="cityViewZoom(1.25)" aria-label="Acercar">+</button><button onclick="cityViewZoom(.8)" aria-label="Alejar">&minus;</button><button onclick="cityViewFit()" aria-label="Ajustar" style="font-size:12px">Ver todo</button></div>`;
+ o.innerHTML=`<div class="cvh"><button onclick="cityViewClose()">Cerrar</button><div class="cvt"><b>${esc(d.v.city)}</b><span>Ciudad de ${esc(d.n)} · población ${d.v.pop||0}</span></div><span class="cvro"><svg class="ic" width="14" height="14" viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>Solo vista</span></div><div id="cvv"><div id="cvg">${build(d.v.b)}</div></div><div id="cvi" class="cvi"><span class="m">Toca una estructura para ver su nivel. Arrastra para moverte y usa + / − para acercar.</span></div><div class="cvz"><button onclick="cityViewZoom(1.25)" aria-label="Acercar">+</button><button onclick="cityViewZoom(.8)" aria-label="Alejar">&minus;</button><button onclick="cityViewFit()" aria-label="Ajustar" style="font-size:12px">Ver todo</button></div>`;
  document.body.appendChild(o);cityViewFit();
  const v=q('cvv');
  v.addEventListener('wheel',e=>{if(e.ctrlKey||e.metaKey){e.preventDefault();setCs(cs*(e.deltaY<0?1.12:.89),1)}},{passive:false});
@@ -5681,7 +5694,13 @@ window.cityView=function(){const d=window.__cvd;if(!d||!d.v)return;D=d;cityViewC
  v.addEventListener('touchstart',e=>{if(e.touches.length==2)pt={d:dist(e),c:cs}},{passive:true});
  v.addEventListener('touchmove',e=>{if(pt&&e.touches.length==2){e.preventDefault();setCs(pt.c*dist(e)/pt.d,1)}},{passive:false});
  v.addEventListener('touchend',e=>{if(e.touches.length<2)pt=null},{passive:true});
- document.addEventListener('keydown',esc2)};
+ document.addEventListener('keydown',esc2);
+ let dn=null;v.addEventListener('pointerdown',e=>{dn={x:e.clientX,y:e.clientY}},true);
+ v.addEventListener('click',e=>{if(dn&&Math.hypot(e.clientX-dn.x,e.clientY-dn.y)>6)return;const el=document.elementFromPoint(e.clientX,e.clientY),c=el&&el.closest&&el.closest('.k2'),bar=q('cvi');if(!bar)return;
+  v.querySelectorAll('.k2.sel2').forEach(x=>x.classList.remove('sel2'));
+  if(!c){bar.innerHTML='<span class="m">Toca una estructura para ver su nivel. Arrastra para moverte y usa + / − para acercar.</span>';return}
+  c.classList.add('sel2');const t=c.dataset.t,nm=(typeof NM!='undefined'&&NM[t])||t,ds=(typeof SH!='undefined'&&SH[t]&&SH[t].d)||'';
+  bar.innerHTML='<b>'+esc(nm)+'</b><span class="cvl">Nivel '+c.dataset.l+'</span>'+(ds?'<span class="m">'+esc(ds)+'</span>':'')})};
 function esc2(e){if(e.key=='Escape')cityViewClose()}
 window.cityViewClose=function(){const o=q('cvov');if(o)o.remove();document.removeEventListener('keydown',esc2)};
 window.cityViewZoom=f=>setCs(cs*f,1);
@@ -5732,4 +5751,37 @@ window.cityViewFit=function(){const v=q('cvv');if(!v)return;const w=Math.min(v.c
  const _lg=lunge;lunge=function(el,to,ms){if(!vis(el)||!vis(to))return el&&el.animate?el.animate([{opacity:1},{opacity:1}],{duration:ms||1}):{finished:Promise.resolve(),cancel(){}};return _lg.apply(this,arguments)};
 })();
 </script>
+
+<style id="patch-social-css">
+/* inicio: cuenta, amigos y notificaciones por separado */
+.accbar.acc2{flex-direction:column;align-items:stretch;gap:8px;padding:10px}
+.accbar.acc2 .accb{width:100%;flex:none;padding:8px 12px}
+.acc2r{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.acc2b{position:relative;display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:12px;border:0;background:transparent;box-shadow:inset 0 0 0 1px var(--l);color:var(--t);font-size:12.5px;letter-spacing:0}
+.acc2b:hover:not(:disabled){background:color-mix(in srgb,var(--t) 7%,transparent);color:var(--t)}
+.acc2b span{flex:1;text-align:left}.acc2b em{font-style:normal;font-size:11px;color:var(--m)}
+.acc2b .bdg{position:static}
+/* panel de amigos */
+.fr-top{display:flex;gap:6px;align-items:center}.fr-bell{position:relative;display:flex;align-items:center;justify-content:center;width:34px;height:30px;padding:0}.fr-bell .bdg{position:absolute;top:-6px;right:-6px}
+.fr-tabs{margin:4px 0 12px}.fr-tabs button{font-size:12px}.fr-tabs .bdg{margin-left:2px}
+.frw2{border-radius:14px;margin-bottom:6px;box-shadow:inset 0 0 0 1px var(--l);overflow:hidden;transition:background .15s}
+.frw2.on{background:color-mix(in srgb,var(--a) 9%,transparent);box-shadow:inset 0 0 0 1px var(--a)}
+.frh2{display:flex;align-items:center;gap:12px;width:100%;padding:10px 12px;border:0;background:transparent;text-align:left;color:var(--t);letter-spacing:0;border-radius:0}
+.frh2:hover:not(:disabled){background:color-mix(in srgb,var(--t) 5%,transparent);color:var(--t)}
+.frh2 .gr{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}.frh2 .gr b{font-size:13.5px;word-break:break-all;line-height:1.15}.frh2 .gr .m{font-size:11px}
+.frav{position:relative;flex:none;display:flex}.frav .dot{position:absolute;right:-1px;bottom:-1px;width:11px;height:11px;border:2px solid var(--s);margin:0;background:#7b7b86}.frav .dot.on{background:#3fae6a}
+.frchv{flex:none;color:var(--m);transition:transform .18s}.frw2.on .frchv{transform:rotate(90deg)}
+.fra2{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:2px 12px 12px}
+.fra2 .pri{padding:10px 6px;border-radius:11px;font-size:12.5px}
+.frret{grid-column:1/-1;padding:9px;border-radius:11px;font-size:12px;background:transparent;box-shadow:inset 0 0 0 1px var(--l);color:var(--t)}
+.frdel{color:var(--m);font-size:11px;box-shadow:none}
+.fr-empty{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;padding:30px 10px}.fr-empty b{font-size:14px}
+.fr-acts{display:grid;grid-template-columns:1fr;gap:8px;margin-top:14px}.fr-acts button{padding:11px;border-radius:12px}
+/* mapa de un amigo: solo vista */
+.cvi{display:flex;align-items:center;gap:10px;flex-wrap:wrap;min-height:48px;padding:9px 14px calc(9px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--l);background:var(--s);font-size:12px}
+.cvi b{font-size:14px}.cvi .cvl{padding:2px 10px;border-radius:99px;background:var(--a);color:#1A1836;font-weight:700;font-size:11px}
+#cvg .c.k2{cursor:pointer}#cvg .c.sel2{background:color-mix(in srgb,var(--a) 22%,transparent);box-shadow:inset 0 0 0 2px var(--a)}
+#cvov .cvz{bottom:calc(64px + env(safe-area-inset-bottom,0px))}
+#cvg .c .lv{display:block}
+</style>
 </body></html>
