@@ -6461,4 +6461,37 @@ header .chb{justify-self:start}
 body:has(#cfgf[style*="flex"]) .qlgb:not([style*="left"]){right:50px}
 body:has(#cfgf[style*="flex"]) .qlgd{top:calc(52px + env(safe-area-inset-top,0px))}
 </style>
+
+<style id="patch-recenter-css">
+/* enemigos caídos: ya no dejan hueco; los demás se acomodan y se centran con animación */
+#sqM>.cd.gone{display:none!important}
+/* Historial como ícono, junto al engranaje */
+.qlgb[data-ic]{width:34px;height:34px;min-width:0;padding:0!important;border-radius:50%;display:flex;align-items:center;justify-content:center;top:calc(8px + env(safe-area-inset-top,0px));right:8px;background:var(--s);opacity:.9;box-shadow:0 4px 12px rgba(0,0,0,.4);color:var(--t)}
+.qlgb[data-ic] svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+</style>
+<script id="patch-recenter-js">
+(function(){
+'use strict';
+const RMq=matchMedia('(prefers-reduced-motion: reduce)');
+let M=null,last=new Map(),mo=null;
+const tr=e=>{const t=getComputedStyle(e).translate;if(!t||t==='none')return[0,0];const a=t.split(' ').map(parseFloat);return[a[0]||0,a[1]||0]};
+function snap(){const mr=M.getBoundingClientRect(),m=new Map();
+ M.querySelectorAll(':scope>.cd').forEach(e=>{if(getComputedStyle(e).display==='none')return;const r=e.getBoundingClientRect(),t=tr(e);m.set(e,{x:r.left-mr.left-t[0],y:r.top-mr.top-t[1],t})});return m}
+function flip(){if(!M||!M.isConnected)return;const now=snap();
+ if(!RMq.matches)now.forEach((p,e)=>{const o=last.get(e);if(!o)return;
+  const dx=o.x-p.x+p.t[0],dy=o.y-p.y+p.t[1];if(Math.abs(dx)<1&&Math.abs(dy)<1)return;
+  e.animate([{translate:dx+'px '+dy+'px'},{translate:'0px 0px'}],{duration:520,easing:'cubic-bezier(.25,.8,.25,1)'})});
+ last=now}
+function attach(){const m=document.getElementById('sqM');if(m===M)return;
+ if(mo){mo.disconnect();mo=null}M=m;last=new Map();if(!M)return;
+ requestAnimationFrame(()=>{try{last=snap()}catch(e){}});
+ mo=new MutationObserver(()=>{try{flip()}catch(e){console.error(e)}});
+ mo.observe(M,{attributes:true,attributeFilter:['class'],childList:true,subtree:true})}
+const IC='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></svg>';
+function icons(){document.querySelectorAll('.qlgb:not([data-ic])').forEach(b=>{if(b.textContent.trim()!=='Historial')return;
+ b.dataset.ic='1';b.innerHTML=IC;b.title='Historial';b.setAttribute('aria-label','Historial')})}
+let q=0;
+new MutationObserver(()=>{if(q)return;q=requestAnimationFrame(()=>{q=0;try{attach();icons()}catch(e){}})}).observe(document.body,{childList:true,subtree:true});
+})();
+</script>
 </body></html>
