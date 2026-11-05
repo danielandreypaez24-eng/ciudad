@@ -4,9 +4,20 @@
   Nunca le pongas numeración (index-5.html, index (2).html, etc.).
   Si el nombre trae un número, quítalo antes de subirlo a GitHub; si no, GitHub Pages no lo muestra.
 -->
+<!--
+  VERSIÓN: 4.23.14   (se muestra en el juego, en la consola y en la configuración)
+  Formato  A.B.C
+    A (primer número)  = contenido nuevo o contenido anterior renovado.
+    B (segundo número) = cambios de dificultad, remodelaciones o estructuras nuevas (algo que no existía).
+    C (tercer número)  = bugs, errores y ajustes.
+  Al actualizar: cambia APP_VERSION (abajo, en el script con id app-version) y esta línea. Si sube A, B y C vuelven a 0; si sube B, C vuelve a 0.
+-->
 <html lang="es"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Ciudad</title>
+<meta name="app-version" content="4.23.14">
+<script id="app-version">window.APP_VERSION="4.23.14";console.log("%cCiudad · versión "+window.APP_VERSION,"font-weight:bold");document.addEventListener("DOMContentLoaded",function(){var v=document.createElement("div");v.id="appver";v.textContent="v"+window.APP_VERSION;document.body.appendChild(v)});</script>
+<style>#appver{position:fixed;left:6px;bottom:calc(3px + env(safe-area-inset-bottom,0px));z-index:1;font:600 9px/1 Inter,system-ui,sans-serif;letter-spacing:.06em;color:var(--m);opacity:.55;pointer-events:none;user-select:none}.cfg-ver{margin:0 0 8px;font-size:11px;letter-spacing:.06em}</style>
 <style>
 :root{--bg:#f6f5f2;--s:#fff;--t:#1c1c1c;--m:#77746d;--l:#dcd9d2;--a:#7a6236;--r:#a33a3a;--b:#3a5a8a;--k-solar:#d4a017;--k-filar:#5b2a86;--k-recursos:#5f7f7a;--k-diamantino:#c9772a;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 @media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#161615;--s:#201f1e;--t:#ecebe7;--m:#9a978f;--l:#34332f;--a:#c9a566;--r:#d06a6a;--b:#7ea0d0;--k-solar:#e8bd3a;--k-filar:#a77bd6;--k-recursos:#8fb0aa;--k-diamantino:#e59a52}}
@@ -6120,6 +6131,7 @@ function render(){
  const fxOn=typeof SND!=='undefined'?SND.on:true,fxV=typeof SND!=='undefined'?Math.round(SND.vol*100):50,mm=Math.round((window.cfgMaster?window.cfgMaster():.6)*100);
  w.innerHTML=`<div class="cfg-p" role="dialog" aria-label="Configuración">
  <div class="cfg-h"><h1>Configuración</h1><button class="cfg-x" onclick="CFGU.close()" aria-label="Cerrar">✕</button></div>
+ <div class="m cfg-ver">Versión ${window.APP_VERSION}</div>
  <span class="m">Se guarda en este dispositivo y vale para todas tus partidas.</span>
  <div class="cfg-s">Música</div>
  <div class="cfg-r"><div class="cfg-t"><b>Volumen general</b></div><div class="cfg-v"><input type="range" min="0" max="100" value="${mm}" oninput="CFGU.master(this.value)" aria-label="Volumen general de la música"><span id="cfgv-m">${mm}%</span></div></div>
@@ -6375,14 +6387,16 @@ function same(a,b){return a.length==b.length&&a.every((x,i)=>x===b[i])}
 function reflow(){
  const M=document.getElementById('sqM'),H=document.getElementById('sqH');if(!M||!H||typeof SQ==='undefined'||!SQ||!SQ.m||!SQ.hs)return;
  M.querySelectorAll('.sqrl').forEach(x=>x.remove());H.querySelectorAll('.sqrl').forEach(x=>x.remove());
- /* monstruos: primera línea al centro, retaguardia a los lados */
- const items=SQ.m.map((m,i)=>{const e=document.getElementById('sqm'+i);return e&&{e,back:e.classList.contains('sq-bk')}}).filter(Boolean),n=items.length;
+ /* monstruos: Yloka arriba; delante sus invocaciones. Primera línea al centro, retaguardia a los lados (solo los visibles) */
+ const all=SQ.m.map((m,i)=>{const e=document.getElementById('sqm'+i);return e&&{e,back:e.classList.contains('sq-bk'),gone:e.classList.contains('gone'),top:m.n=='Yloka'}}).filter(Boolean);
+ const tops=all.filter(x=>x.top&&!x.gone),items=all.filter(x=>!x.top&&!x.gone),rest=all.filter(x=>x.gone),n=items.length;
  const order=[...items.filter(x=>!x.back),...items.filter(x=>x.back)],idx=centerOrder(n),slots=new Array(n);
  order.forEach((x,k)=>slots[idx[k]]=x);
- const want=slots.map(x=>x.e),have=Array.from(M.children);
+ const want=[...tops.map(x=>x.e),...slots.map(x=>x.e),...rest.map(x=>x.e)],have=Array.from(M.children);
  if(!same(want,have))want.forEach(e=>M.appendChild(e));
- slots.forEach(x=>x.e.classList.toggle('sq-fw',!x.back));
- M.style.setProperty('--n',n);M.classList.toggle('r1',n<=MAXROW);
+ all.forEach(x=>{x.e.classList.toggle('sq-top',!!x.top);x.e.classList.toggle('sq-fw',!x.top&&!x.back)});
+ M.style.setProperty('--n',n);M.style.setProperty('--cols',n<=MAXROW?Math.max(n,3):Math.ceil(n/2));
+ M.classList.toggle('has-top',tops.length>0);M.classList.toggle('r1',n<=MAXROW);
  /* héroes: en el orden de la escuadra; la retaguardia se retrasa */
  const hs=SQ.hs.map((u,i)=>{const e=document.getElementById('sqh'+i);return e&&{e,u}}).filter(Boolean);
  const hw=hs.map(x=>x.e),hh=Array.from(H.children);
@@ -6494,4 +6508,22 @@ let q=0;
 new MutationObserver(()=>{if(q)return;q=requestAnimationFrame(()=>{q=0;try{attach();icons()}catch(e){}})}).observe(document.body,{childList:true,subtree:true});
 })();
 </script>
+
+<style id="patch-cards-css">
+/* ===== tarjetas enemigas: proporción de tarjeta (5/7), tamaño según cuántas hay ===== */
+#sqM#sqM{container-type:inline-size;--w:min(calc(100cqw / var(--cols,3) - 4px),170px);--wy:min(calc(100cqw / 3 - 4px),170px);display:flex!important;flex-wrap:wrap!important;justify-content:center!important;align-items:flex-start!important;gap:6px 4px!important}
+#sqM#sqM>.cd{container-type:inline-size;flex:0 0 auto!important;width:var(--w)!important;max-width:none!important;min-width:0!important;height:calc(var(--w) * 1.4)!important;aspect-ratio:auto!important;order:1;padding:13px 3px 4px!important;gap:2px!important;overflow:hidden;justify-content:flex-start!important;align-items:center!important}
+#sqM#sqM>.cd.sq-top{order:-1;width:var(--wy)!important;height:calc(var(--wy) * 1.4)!important}
+#sqM.has-top::after{content:"";order:0;flex:0 0 100%;height:0}
+#sqM>.cd .qnm{font-size:clamp(8px,11cqw,13px)!important;height:auto!important;line-height:1.15;max-width:100%}
+#sqM>.cd .qpt{flex:1 1 0!important;min-height:0!important;height:auto!important;width:100%;overflow:hidden}
+#sqM>.cd .qpt svg{width:min(62cqw,48px)!important;height:min(62cqw,48px)!important}
+#sqM>.cd .qlv{font-size:clamp(7px,8.5cqw,11px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+#sqM>.cd .qchs{height:auto!important;max-width:100%}
+#sqM>.cd .qchs .chip{font-size:clamp(6px,7.5cqw,9px)!important;padding:1px 4px!important}
+#sqM>.cd .qbq{height:clamp(9px,10cqw,15px)!important}
+#sqM>.cd .qbq span{font:600 clamp(6px,7.5cqw,9px)/clamp(9px,10cqw,15px) Inter,system-ui,sans-serif!important}
+@container (max-width:84px){#sqM>.cd .qchs{display:none!important}}
+@container (max-width:68px){#sqM>.cd .qlv{display:none!important}}
+</style>
 </body></html>
