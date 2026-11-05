@@ -5878,11 +5878,17 @@ function sqDead(){if(!hasSQ())return;SQ.m.forEach((m,i)=>{if(m.hp>0)return;const
  if(m.lootTaken){if(!e.querySelector('.sq-lt'))e.classList.add('gone');return}
  if(!e.dataset.dd)sqDeadFx(e,i)})}
 
+let popN=0;
 function lootPop(e,got){if(!e)return;const r=e.getBoundingClientRect(),d=document.createElement('div');d.className='sq-pop';
- d.innerHTML=(got.length?got.map(([k,g])=>g>0?'<div><i style="background:'+icol(k)+'"></i>'+itx(k,g)+'</div>':'<div class="no"><i style="background:'+icol(k)+'"></i>'+(NMI[k]||[k])[1]+': almacén lleno</div>').join(''):'<div class="no"><i></i>Sin botín material</div>');
- d.style.left=(r.left+r.width/2)+'px';d.style.top=(r.top+r.height*.35)+'px';document.body.appendChild(d);
- if(RM){setTimeout(()=>d.remove(),1800);return}
- d.animate([{opacity:0,transform:'translate(-50%,6px) scale(.9)'},{opacity:1,transform:'translate(-50%,-8px) scale(1)',offset:.18},{opacity:1,transform:'translate(-50%,-22px)',offset:.78},{opacity:0,transform:'translate(-50%,-40px)'}],{duration:LOW?1700:2100,easing:'ease-out'}).finished.then(()=>d.remove(),()=>d.remove())}
+ d.innerHTML=(got.length?got.map(([k,g])=>g>0?'<div>'+lootIco(k)+'<span>'+itx(k,g)+'</span></div>':'<div class="no">'+lootIco(k)+'<span>'+(NMI[k]||[k])[1]+': almacén lleno</span></div>').join(''):'<div class="no"><span>Sin botín material</span></div>');
+ d.style.visibility='hidden';document.body.appendChild(d);
+ /* se mide y se centra sobre la tarjeta sin salirse nunca de la pantalla */
+ const w=d.offsetWidth,h=d.offsetHeight,m=10,vw=innerWidth,vh=innerHeight,k=popN++%4;
+ const cx=Math.max(w/2+m,Math.min(vw-w/2-m,r.left+r.width/2)),cy=Math.max(h/2+m+60,Math.min(vh-h/2-m-40,r.top+r.height*.3))-k*(h+6);
+ d.style.left=cx+'px';d.style.top=cy+'px';d.style.visibility='visible';
+ const end=()=>{d.remove();popN=Math.max(0,popN-1)};
+ if(RM){setTimeout(end,1800);return}
+ d.animate([{opacity:0,transform:'translate(-50%,-50%) translateY(14px) scale(.85)'},{opacity:1,transform:'translate(-50%,-50%) translateY(0) scale(1)',offset:.22,easing:'ease-out'},{opacity:1,transform:'translate(-50%,-50%) translateY(-14px) scale(1)',offset:.78},{opacity:0,transform:'translate(-50%,-50%) translateY(-34px) scale(.96)'}],{duration:LOW?1900:2300,easing:'cubic-bezier(.3,.6,.4,1)'}).finished.then(end,end)}
 
 /* ---------- experiencia: bolitas que viajan hacia los héroes ---------- */
 function xpCfg(){if(SQ.xp)return SQ.xp;const a=SQ.adv,n=a.waves?a.waves.reduce((t,w)=>t+w.length,0):(a.m||[]).length,first=!!a.lv&&!(S.xpd&&S.xpd['L'+a.lv]);
@@ -5909,7 +5915,7 @@ window.sqLoot=function(i){if(!hasSQ())return;const m=SQ.m[i];if(!m||m.hp>0||!m.l
  if(e){const lt=e.querySelector('.sq-lt');
   if(!RM&&lt){const r=lt.getBoundingClientRect(),n=LOW?10:18;
    for(let k=0;k<n;k++){const d=document.createElement('i'),sz=7+Math.random()*12,x=r.left+r.width*(.2+Math.random()*.6),y=r.top+r.height*(.4+Math.random()*.4);
-    d.style.cssText='position:fixed;left:0;top:0;z-index:62;pointer-events:none;border-radius:50%;width:'+sz+'px;height:'+sz+'px;background:radial-gradient(circle,rgba(240,205,140,.9),rgba(233,152,86,0) 70%)';document.body.appendChild(d);
+    d.style.cssText='position:fixed;left:0;top:0;z-index:62;pointer-events:none;border-radius:50%;width:'+sz+'px;height:'+sz+'px;background:radial-gradient(circle,rgba(205,195,180,.85),rgba(160,150,140,0) 70%)';document.body.appendChild(d);
     d.animate([{transform:'translate('+x+'px,'+y+'px) scale(.6)',opacity:0},{transform:'translate('+(x+(Math.random()-.5)*30)+'px,'+(y-14)+'px) scale(1.3)',opacity:.9,offset:.3},{transform:'translate('+(x+(Math.random()-.5)*70)+'px,'+(y-60-Math.random()*40)+'px) scale(2)',opacity:0}],{duration:800+Math.random()*500,easing:'ease-out',fill:'both'}).finished.then(()=>d.remove(),()=>d.remove())}
    lt.animate([{opacity:1,transform:'none',filter:'none'},{opacity:.9,transform:'scale(1.08)',filter:'blur(1px)',offset:.35},{opacity:0,transform:'translateY(-18px) scale(.7)',filter:'blur(4px)'}],{duration:LOW?520:700,easing:'ease-in',fill:'forwards'}).finished.then(()=>{lt.remove();e.classList.add('gone')},()=>{lt.remove();e.classList.add('gone')})}
   else{if(lt)lt.remove();e.classList.add('gone')}}
@@ -6443,5 +6449,16 @@ new MutationObserver(()=>{if(q)return;q=requestAnimationFrame(()=>{q=0;try{proc(
 header #cfgb{justify-self:start;margin:0}
 header:has(.chb) #cfgb{margin-left:46px}
 header .chb{justify-self:start}
+
+/* Parte 5b: sin fondo al recoger, aviso sin caja */
+.sq-lt,.sq-lt:hover:not(:disabled),.sq-lt:active,.sq-lt:focus,.sq-lt:focus-visible{background:none!important;border:0!important;box-shadow:none!important;outline:0!important;-webkit-tap-highlight-color:transparent}
+#sqM>.cd.sq-dead.sq-gh{border:0!important;outline:0!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+.sq-pop{background:none!important;border:0!important;box-shadow:none!important;padding:0!important;transform:none!important;align-items:center;gap:4px;font-size:15px;font-weight:700;color:var(--t);text-shadow:0 1px 3px #000,0 0 10px rgba(0,0,0,.85)}
+.sq-pop div{display:flex;align-items:center;gap:6px}
+.sq-pop i.sq-li{width:auto;height:auto;border-radius:0;background:none;animation:none}
+.sq-pop .no{color:var(--m);font-weight:500;font-size:13px}
+/* configuración flotante en celular: el botón Historial se corre para no taparse */
+body:has(#cfgf[style*="flex"]) .qlgb:not([style*="left"]){right:50px}
+body:has(#cfgf[style*="flex"]) .qlgd{top:calc(52px + env(safe-area-inset-top,0px))}
 </style>
 </body></html>
