@@ -3602,7 +3602,7 @@ function bar(){const u=C()&&C().name;
  if(!u)return `<div id="accbar" class="accbar"><span class="m">Sin cuenta: tu progreso solo está en este dispositivo</span><button onclick="cuentaDlg()">Entrar / Crear cuenta</button></div>`;
  const m=C().me,n=C().incoming().length;
  const fn=C().nFriends?C().nFriends():0,HE='<svg class="ic" width="18" height="18" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.6-3.6 3.200-5.500 6.500-5.500s5.900 1.900 6.500 5.500M16 5a3.200 3.200 0 010 6M18 14.700c2 .6 3.200 2.400 3.500 5.300"/></svg>';
- return `<div id="accbar" class="accbar acc2"><button class="accb" onclick="accOpen()">${av(m&&m.color||colorOf(u),u,46)}<span><b>${esc(u)}</b><br><span class="m">${m?'Mi cuenta · ID '+esc(m.pid):'Guardado en la nube'}</span></span><svg class="ic accg" width="16" height="16" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button><div class="acc2r"><button class="acc2b" onclick="FR.open()">${HE}<span>Amigos</span><em>${fn}</em></button><button class="acc2b" onclick="ntfOpen()" aria-label="Notificaciones">${bell}<span>Notificaciones</span>${n?`<i class="bdg">${n}</i>`:''}</button></div></div>`}
+ return `<div id="accbar" class="accbar acc2"><button class="accb" onclick="accOpen()">${av(m&&m.color||colorOf(u),u,46)}<span><b>${admTag(C().myUid&&C().myUid(),1)}${esc(u)}</b><br><span class="m">${m?'Mi cuenta · ID '+esc(m.pid):'Guardado en la nube'}</span></span><svg class="ic accg" width="16" height="16" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button><div class="acc2r"><button class="acc2b" onclick="FR.open()">${HE}<span>Amigos</span><em>${fn}</em></button><button class="acc2b" onclick="ntfOpen()" aria-label="Notificaciones">${bell}<span>Notificaciones</span>${n?`<i class="bdg">${n}</i>`:''}</button></div></div>`}
 const _s=slots;slots=function(){_s();try{const ca=C()&&C().canAdmin&&C().canAdmin();if(!ca){ADM=false;const ab=document.getElementById('adm');if(ab)ab.parentElement.remove()}}catch(e){}try{document.getElementById('slots').insertAdjacentHTML('afterbegin',bar())}catch(e){}};
 function toast(t,fn){let e=document.getElementById('acct');if(e)e.remove();e=document.createElement('div');e.id='acct';e.textContent=t;e.onclick=()=>{e.remove();fn&&fn()};document.body.appendChild(e);setTimeout(()=>{if(e.isConnected)e.remove()},6000)}
 async function loadFriends(){try{full=await C().friends()}catch(e){}if(isOpen&&tab=='amigos')render()}
@@ -3610,7 +3610,7 @@ function row(p,btns){return `<div class="fr">${av(p.color||colorOf(p.nombre),p.n
 function render(){const ov=document.getElementById('accov');if(!ov)return;const u=C()&&C().name;if(!u){accClose();return}
  const m=C().me,col=m&&m.color||colorOf(u),pw=getPw(u),inc=C().incoming(),out=C().outgoing();
  let h=`<div class="panel accp"><div class="accx"><h2 style="margin:0">Tu cuenta</h2><button onclick="accClose()">Cerrar</button></div>
-<div class="accid">${av(col,u,64)}<div style="min-width:0"><div class="accn">${esc(u)}</div><div class="m">${m?'ID '+esc(m.pid):''}</div></div></div>
+<div class="accid">${av(col,u,64)}<div style="min-width:0"><div class="accn">${admTag(C().myUid&&C().myUid(),1)}${esc(u)}</div><div class="m">${m?'ID '+esc(m.pid):''}</div></div></div>
 <div class="m" style="margin:12px 0 6px">Color de perfil</div><div class="sw">${COL.map((c,i)=>`<button class="swb${c===col?' on':''}" style="background:${c}" onclick="accColor(${i})" aria-label="Color ${i+1}"></button>`).join('')}</div>
 <table class="accT"><tr><td class="m">Nombre</td><td>${esc(u)}</td></tr>
 <tr><td class="m">ID</td><td>${m?esc(m.pid)+'<button class="sm" onclick="accCopy()">Copiar</button>':'—'}</td></tr>
@@ -3687,7 +3687,7 @@ function draw(){const o=ov(),T=(C()&&C().team&&C().team())||[];let h='<div class
   else h+=fl.length?fl.map(f=>`<div class="fr">${window.av?'':''}<div class="gr"><b>${esc(f.nombre)}</b><br><span class="m">ID ${esc(f.pid||'—')}</span></div><div class="bt"><button class="sm" onclick="pvpView('${esc(f.uid)}')">Ver</button><button class="sm" onclick="pvpRet('${esc(f.uid)}','${esc(f.nombre)}')">Batalla de amistad</button></div></div>`).join(''):'<p class="m">Aún no tienes amigos. Agrégalos desde tu cuenta.</p>';
   h+=`<div class="nt">${esc(msg)}</div>`}
  o.innerHTML=h+'</div>'}
-function viewH(){const v=vw.vista;if(!v)return `<p class="m">${esc(vw.nombre)} todavía no tiene una partida para mostrar.</p><button onclick="pvpMenu('amigos')">Volver</button>`;
+function viewH(){const v=window.vNorm(vw.vista);if(!v)return `<p class="m">${esc(vw.nombre)} todavía no tiene una partida para mostrar.</p><button onclick="pvpMenu('amigos')">Volver</button>`;
  const g={};v.b.forEach(b=>g[b[1]+','+b[2]]=b[0]);let c='';for(let y=0;y<15;y++)for(let x=0;x<15;x++){const t=g[x+','+y];c+=`<i>${t&&I[t]?ic(t,14):''}</i>`}
  return `<div class="accn">${esc(vw.nombre)}</div><div class="m">${esc(v.city)} · población ${v.pop} · establecimiento nv. ${v.est}</div><div class="mgm">${c}</div><div class="subh">Héroes</div>`+(v.h.length?v.h.map(x=>`<div class="fr"><div class="gr"><b>${esc(x[0])}</b> <span class="m">nv ${x[1]} · ATQ ${x[2]} · HP ${x[3]}</span></div></div>`).join(''):'<p class="m">Sin héroes.</p>')+'<p class="m">Solo lectura.</p><button onclick="pvpMenu(\'amigos\')">Volver</button>'}
 window.pvpView=async u=>{msg='';vw={nombre:'…',vista:null};draw();try{const p=await C().viewOf(u);vw=p?{nombre:p.nombre,vista:p.vista}:{nombre:'Jugador',vista:null}}catch(e){vw={nombre:'Jugador',vista:null}}draw()};
@@ -3840,7 +3840,7 @@ Object.assign(window.Cloud,{
 const team=()=>{try{return S.eq.map(id=>S.heroes.find(h=>h.id==id)).filter(Boolean).map(h=>{let x={n:h.n,atk:h.atk,hp:h.mhp,lv:h.lv||0,col:h.color||''};try{const u=sqMk(h),g=GP(h);x={n:h.n,atk:u.atk|0,hp:u.mhp|0,lv:h.lv||0,col:h.color||'',cls:u.cls||'guerrero',mp:u.mmp|0,sk:((h.sk&&h.sk.l)||[]).filter(id=>SKL[id]),gp:{mp:+g.mp||0,d:+g.d||0,ig:+g.ig||0}}}catch(e){}return x})}catch(e){return[]}};
 let vt=null,searching=false,inB=false,cun=null,qi=null,bun=[];const pend=new Set(),bseen=new Set();
 function viewSoon(){if(!uid)return;clearTimeout(vt);vt=setTimeout(async()=>{try{if(typeof S==='undefined'||!S)return;const e=S.b.find(b=>b.type=='est');
- await setDoc(doc(db,'perfiles',uid),{vista:{city:S.city,pop:S.pop,est:e?(e.lv||1):0,b:S.b.map(b=>[b.type,b.x,b.y,b.lv||1]),h:(S.heroes||[]).map(h=>[h.n,h.lv||0,h.atk,h.mhp])},vt:Date.now()},{merge:true})}catch(e){}},5000)}
+ await setDoc(doc(db,'perfiles',uid),{vista:{city:S.city,pop:S.pop,est:e?(e.lv||1):0,b:S.b.map(b=>b.type+','+b.x+','+b.y+','+(b.lv||1)),h:(S.heroes||[]).map(h=>({n:h.n,l:h.lv||0,a:h.atk,m:h.mhp}))},vt:Date.now()},{merge:true})}catch(e){}},5000)}
 async function tryMatch(sn){if(!searching||!uid)return;
  for(const d of sn.docs){const o=d.data();if(o.uid===uid||uid>o.uid||Date.now()-(o.t||0)>45000)continue;
   const id=uid+'_'+o.uid;if(pend.has(id))continue;pend.add(id);
@@ -3857,6 +3857,7 @@ function listenB(){bun.forEach(f=>{try{f()}catch(e){}});const q=f=>query(collect
  bun=[onSnapshot(q('a'),onB('a'),e=>console.warn('bat',e)),onSnapshot(q('b'),onB('b'),e=>console.warn('bat',e))]}
 Object.assign(window.Cloud,{
  admUid:null,admLoaded:false,
+ isAdm:u=>!!u&&window.Cloud.admUid===u,myUid:()=>uid,
  canAdmin:()=>!!uid&&(!window.Cloud.admLoaded||!window.Cloud.admUid||window.Cloud.admUid===uid),
  async linkAdmin(){if(!uid||window.Cloud.admUid)return;window.Cloud.admUid=uid;try{await setDoc(doc(db,'config','admin'),{uid})}catch(e){window.Cloud.admUid=null}},
  async viewOf(u){const s=await getDoc(doc(db,'perfiles',u));return s.exists()?s.data():null},
@@ -4194,7 +4195,7 @@ const PF={
  tile:(v,t,c)=>`<div class="pf-t"${c?` style="--tc:${c}"`:''}><b>${v}</b><span>${t}</span></div>`,
  sec:(t,h,open)=>`<details class="pf-d"${open?' open':''}><summary>${t}</summary>${h}</details>`,
  hero:d=>{const A=d.arena,L=A&&LV[A.lv],on=online(d),g=A?A.w+A.l:0,wr=g?Math.round(100*A.w/g):0,c=esc(d.color||'#3a5a8a');
-  return `<div class="pf-h" style="--pc:${c}"><div class="pf-bn"></div><div class="pf-top">${av(d.color,d.nombre,64)}<div class="pf-n"><b>${esc(d.nombre)}</b><span>${on==null?'':`<i class="dot ${on?'on':''}"></i>${on?'En línea':'Sin conexión'}`}${d.pid?`${on==null?'':' · '}ID ${esc(d.pid)}`:''}</span></div></div>`
+  return `<div class="pf-h" style="--pc:${c}"><div class="pf-bn"></div><div class="pf-top">${av(d.color,d.nombre,64)}<div class="pf-n"><b>${admTag(d.uid||(C()&&d.nombre===C().name&&C().myUid?C().myUid():null),1)}${esc(d.nombre)}</b><span>${on==null?'':`<i class="dot ${on?'on':''}"></i>${on?'En línea':'Sin conexión'}`}${d.pid?`${on==null?'':' · '}ID ${esc(d.pid)}`:''}</span></div></div>`
   +(L?`<div class="pf-rk" style="--rc:${L.c}">${badge(L.t,26)}<b>${L.name}</b><span class="sts">${stars(A.lv)}</span></div><div class="pf-q">${PF.tile(A.p,'Puntos')}${PF.tile(A.w,'Victorias','#3fae6a')}${PF.tile(wr+'%','Victorias %')}</div>`:'<p class="m" style="margin:10px 0 0">Todavía no ha jugado en la Arena.</p>')+`</div>`}
 };
 function profile(d,mode,nohero){const A=d.arena;const hero=nohero?'':PF.hero(d);
@@ -4205,7 +4206,7 @@ function profile(d,mode,nohero){const A=d.arena;const hero=nohero?'':PF.hero(d);
    +PF.sec('Partidas recientes',histRows(A))+PF.sec('Temporadas anteriores',seasonHist(A));}
  return hero+card(A.lv,A.p)+`<div class="pf-s">Forma reciente</div>`+PF.form(A)+`<div class="pf-s">Temporada</div>`+seasonBox(A)+PF.sec('Partidas recientes',histRows(A))}
 const online=d=>d&&d.seen?Date.now()-d.seen<150000:null;
-function game(d){const v=d.vista,A=d.arena;if(A&&A.pv===false)return '<div class="pf-em">Este jugador no permite ver su ciudad.</div>';if(!v)return '<div class="pf-em">Este jugador todavía no tiene una ciudad para mostrar.</div>';
+function game(d){const v=window.vNorm(d.vista),A=d.arena;if(A&&A.pv===false)return '<div class="pf-em">Este jugador no permite ver su ciudad.</div>';if(!v)return '<div class="pf-em">Este jugador todavía no tiene una ciudad para mostrar.</div>';
  const H=v.h||[];
  return `${(window.__cvd={v,n:d.nombre},'')}<div class="pf-city"><b>${esc(v.city)}</b><div class="pf-q pf-q2">${PF.tile(v.pop,'Población')}${PF.tile(v.est,'Establecimiento')}${PF.tile((v.b||[]).length,'Edificios')}${PF.tile(H.length,'Héroes')}</div></div>${PF.mini(v)}<button class="pri pf-ret" style="margin:0 0 4px" onclick="cityView()">Ver ciudad</button><div class="pf-s">Héroes</div>`+(H.length?H.map(x=>`<div class="pf-hr"><b>${esc(x[0])}</b><span>Nv ${x[1]}</span><span>ATQ ${x[2]}</span><span>HP ${x[3]}</span></div>`).join(''):'<div class="pf-em">Sin héroes.</div>')+'<p class="m" style="margin:12px 0 0;font-size:11px">Solo lectura.</p>'}
 /* ---------- panel ARENA ---------- */
@@ -4253,7 +4254,7 @@ function chatPaint(){const l=$$('chl');if(!l)return;const near=l.scrollHeight-l.
  else if(!cmsgs.length)h='<div class="che"><b>Aún no hay mensajes</b><span>Escribe el primero para empezar la conversación.</span></div>';
  else cmsgs.forEach((m,i)=>{const p=cmsgs[i-1],n=cmsgs[i+1],first=!same(p,m),last=!same(m,n),mine=m.nombre===my;
   if(!p||dk(p.t)!=dk(m.t))h+=`<div class="chd">${m.t?dl(m.t):''}</div>`;
-  h+=`<div class="cmg${mine?' me':''}${first?'':' g'}">${mine?'':last?av(m.color||colorOf(m.nombre),m.nombre,28):'<span class="avs"></span>'}<div class="cb">${first&&!mine?`<b>${esc(m.nombre)}</b>`:''}<span>${esc(m.txt)}</span>${last&&m.t?`<time>${fmt(m.t)}</time>`:''}</div></div>`});
+  h+=`<div class="cmg${mine?' me':''}${first?'':' g'}">${mine?'':last?av(m.color||colorOf(m.nombre),m.nombre,28):'<span class="avs"></span>'}<div class="cb">${first&&!mine?`<b>${admTag(m.uid)}${esc(m.nombre)}</b>`:''}<span>${esc(m.txt)}</span>${last&&m.t?`<time>${fmt(m.t)}</time>`:''}</div></div>`});
  l.innerHTML=h;
  if(near)l.scrollTop=l.scrollHeight}
 let ctyp=[],ctun=null,ctiv=null;
@@ -4263,13 +4264,13 @@ const chatShell=()=>`<div id="chl" class="chl"></div><div id="cty" class="cty"><
 window.chCnt=i=>{const c=document.getElementById('chc');if(c){const n=i.value.length;c.textContent=n>220?(300-n):''}};
 const sugHtml=()=>{const L=fsug.filter(p=>!(C()&&C().relation&&C().relation(p.uid)));return `<div class="subh" style="margin-top:14px">Sugerencias de amigos</div>`+(fsugLoad&&!L.length?'<p class="m">Buscando jugadores…</p>':L.length?L.map(p=>`<div class="fr">${av(p.color,p.nombre,34)}<div class="gr"><b>${esc(p.nombre)}</b><br><span class="m">ID ${esc(p.pid||'—')}</span></div><div class="bt"><button class="sm" onclick="FR.inv('${esc(p.uid)}')">Invitar</button><button class="sm" onclick="FR.noinv('${esc(p.uid)}')">No invitar</button></div></div>`).join(''):'<p class="m">No hay más sugerencias por ahora.</p>')};
 async function sLoad(){if(!C()||!C().name||!C().suggest)return;fsugLoad=true;try{const no=sugNo();fsug=(await C().suggest()).filter(p=>!no.includes(p.uid))}catch(e){fsug=[]}fsugLoad=false;if(fOpen&&!fdet&&!fchat)fDraw()}
-const frRow=(p,btns)=>`<div class="fr">${av(p.color,p.nombre,38)}<div class="gr"><b>${esc(p.nombre)}</b><br><span class="m">ID ${esc(p.pid||'—')}</span></div><div class="bt">${btns||''}</div></div>`;
+const frRow=(p,btns)=>`<div class="fr">${av(p.color,p.nombre,38)}<div class="gr"><b>${admTag(p.uid)}${esc(p.nombre)}</b><br><span class="m">ID ${esc(p.pid||'—')}</span></div><div class="bt">${btns||''}</div></div>`;
 const CHV='<svg class="ic frchv" width="16" height="16" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>';
 function fTabs(){const n=C().incoming?C().incoming().length:0;return `<div class="tabs fr-tabs"><button class="${fmode=='list'?'on':''}" onclick="FR.tab('list')">Amigos${fl.length?' ('+fl.length+')':''}</button><button class="${fmode=='req'?'on':''}" onclick="FR.tab('req')">Solicitudes${n?` <i class="bdg">${n}</i>`:''}</button><button class="${fmode=='add'?'on':''}" onclick="FR.tab('add')">Agregar</button></div>`}
 function fList(){if(fload&&!fl.length)return '<p class="m">Cargando…</p>';
  if(!fl.length)return '<div class="fr-empty"><b>Aún no tienes amigos</b><span class="m">Búscalos por nombre o ID en la pestaña Agregar.</span><button class="pri" onclick="FR.tab(\'add\')">Agregar amigos</button></div>';
  return fl.map(d=>{const L=d.arena&&LV[d.arena.lv],on=online(d),s=fsel==d.uid;
-  return `<div class="frw2${s?' on':''}"><button class="frh2" onclick="FR.sel('${esc(d.uid)}')"><span class="frav">${av(d.color,d.nombre,40)}${on==null?'':`<i class="dot ${on?'on':''}"></i>`}</span><span class="gr"><b>${esc(d.nombre)}</b><span class="m">${on==null?'':on?'En línea':'Sin conexión'}${L?` · <span style="color:${L.c}">${L.name}</span>`:''}</span></span>${CHV}</button>${s?`<div class="fra2"><button class="pri" onclick="FR.go('${esc(d.uid)}','p')">Ver perfil</button><button class="pri" onclick="FR.map('${esc(d.uid)}')">Ver mapa</button><button class="frret" onclick="FR.ret('${esc(d.uid)}')">Retar a un duelo</button><button class="frret frdel" onclick="FR.del('${esc(d.uid)}')">Quitar de amigos</button></div>`:''}</div>`}).join('')}
+  return `<div class="frw2${s?' on':''}"><button class="frh2" onclick="FR.sel('${esc(d.uid)}')"><span class="frav">${av(d.color,d.nombre,40)}${on==null?'':`<i class="dot ${on?'on':''}"></i>`}</span><span class="gr"><b>${admTag(d.uid)}${esc(d.nombre)}</b><span class="m">${on==null?'':on?'En línea':'Sin conexión'}${L?` · <span style="color:${L.c}">${L.name}</span>`:''}</span></span>${CHV}</button>${s?`<div class="fra2"><button class="pri" onclick="FR.go('${esc(d.uid)}','p')">Ver perfil</button><button class="pri" onclick="FR.map('${esc(d.uid)}')">Ver mapa</button><button class="frret" onclick="FR.ret('${esc(d.uid)}')">Retar a un duelo</button><button class="frret frdel" onclick="FR.del('${esc(d.uid)}')">Quitar de amigos</button></div>`:''}</div>`}).join('')}
 function fReq(){const inc=C().incoming(),out=C().outgoing();
  let h=`<div class="subh">Recibidas</div>`+(inc.length?inc.map(r=>frRow({nombre:r.deN,pid:r.deP,color:r.deC},`<button class="sm pri" onclick="FR.acc('${esc(r.id)}')">Aceptar</button><button class="sm" onclick="FR.rm('${esc(r.id)}')">Rechazar</button>`)).join(''):'<p class="m">No tienes solicitudes nuevas.</p>');
  if(out.length)h+=`<div class="subh">Enviadas</div>`+out.map(r=>frRow({nombre:r.paN,pid:r.paP,color:r.paC},`<button class="sm" onclick="FR.rm('${esc(r.id)}')">Cancelar</button>`)).join('');return h}
@@ -4279,7 +4280,8 @@ function fAdd(){let h=`<div class="srch"><input id="faq" value="${esc(faq)}" pla
 function fDraw(){let o=$$('frp');if(!fOpen){if(o)o.remove();const k=$$('frbk');if(k)k.remove();return}
  if(!o){const k=document.createElement('div');k.id='frbk';k.className='frbk';k.onclick=()=>FR.close();document.body.appendChild(k);o=document.createElement('div');o.id='frp';document.body.appendChild(o)}
  o.className='frp'+(fchat?' lft':'')+(fdet?' pfw':'')
- let h=`<div class="accx">${fchat?'<div class="chh"><h2>Chat global</h2><span class="m">Conversación abierta con todos los jugadores</span></div>':'<h2 style="margin:0">'+(fdet?'Perfil':'Amigos')+'</h2>'}<div class="fr-top">'+(!fchat&&C()&&C().name?'<button class="sm fr-bell" aria-label="Notificaciones" title="Notificaciones" onclick="ntfOpen()"><svg class="ic" width="16" height="16" viewBox="0 0 24 24"><path d="M6 17v-6a6 6 0 0112 0v6l2 2H4zM10 21h4"/></svg>'+(C().incoming&&C().incoming().length?'<i class="bdg">'+C().incoming().length+'</i>':'')+'</button>':'')+'<button class="sm" onclick="FR.close()">Cerrar</button></div></div><div class="frb2"${fchat?' style="display:flex;flex-direction:column;min-height:0"':''}>`;
+ let bellB=(!fchat&&C()&&C().name)?`<button class="sm fr-bell" aria-label="Notificaciones" title="Notificaciones" onclick="ntfOpen()"><svg class="ic" width="16" height="16" viewBox="0 0 24 24"><path d="M6 17v-6a6 6 0 0112 0v6l2 2H4zM10 21h4"/></svg>${C().incoming&&C().incoming().length?`<i class="bdg">${C().incoming().length}</i>`:''}</button>`:'';
+ let h=`<div class="accx">${fchat?'<div class="chh"><h2>Chat global</h2><span class="m">Conversación abierta con todos los jugadores</span></div>':'<h2 style="margin:0">'+(fdet?'Perfil':'Amigos')+'</h2>'}<div class="fr-top">${bellB}<button class="sm" onclick="FR.close()">Cerrar</button></div></div><div class="frb2"${fchat?' style="display:flex;flex-direction:column;min-height:0"':''}>`;
   if(fchat)h+=(C()&&C().name&&C().chatListen)?chatShell():'<p class="m">Necesitas iniciar sesión con una cuenta para usar el chat global.</p>';
  else if(fdet)h+=`<button class="sm" style="margin:0 0 10px" onclick="FR.back()">← Volver</button>`+PF.hero(fdet.d)+`<div class="pf-tabs"><button class="${fdet.m=='p'?'on':''}" onclick="FR.mode('p')">Resumen</button><button class="${fdet.m=='s'?'on':''}" onclick="FR.mode('s')">Estadísticas</button></div>`+profile(fdet.d,fdet.m,1)+`<div class="fr-acts"><button class="pri" onclick="FR.map('${esc(fdet.d.uid)}')">Ver mapa</button>`+(fl.some(x=>x.uid==fdet.d.uid)?`<button onclick="FR.ret('${esc(fdet.d.uid)}')">Retar a un duelo</button>`:'')+`</div>`;
  else if(!C()||!C().name)h+='<p class="m">Necesitas una cuenta para tener amigos.</p>';
@@ -4312,7 +4314,7 @@ window.FR={
  map:u=>{const d=fl.find(x=>x.uid==u)||(fdet&&fdet.d&&fdet.d.uid==u?fdet.d:null);if(!d)return;const v=d.vista,A=d.arena;
   if(A&&A.pv===false){notice('Mapa no disponible',d.nombre+' no permite que sus amigos vean su ciudad.');return}
   if(!v){notice('Mapa no disponible',d.nombre+' todavía no tiene una ciudad para mostrar.');return}
-  window.__cvd={v,n:d.nombre};cityView()},
+  window.__cvd={v:window.vNorm(v),n:d.nombre};cityView()},
  ret:async u=>{const d=fl.find(x=>x.uid==u);if(!d)return;try{await C().challenge({uid:u,nombre:d.nombre});notice('Reto enviado','Esperando respuesta de '+d.nombre+'. Las batallas de amistad no dan puntos.')}catch(e){notice('No se pudo retar',e.message||'Error')}}
 };
 /* ---------- animaciones ---------- */
@@ -5679,10 +5681,16 @@ function build(b){const m={};(b||[]).forEach(t=>{m[t[1]+','+t[2]]=t});const WS0=
    h+=t?`<div class="c k2" data-t="${t[0]}" data-l="${t[3]||1}">${c}</div>`:`<div class="c">${c}</div>`}}
  finally{WS=WS0}
  return h}
-window.cityView=function(){const d=window.__cvd;if(!d||!d.v)return;D=d;cityViewClose();
+window.vNorm=v=>{if(!v||v.__n)return v;const o=Object.assign({},v);let B=v.b,H=v.h;
+ try{if(typeof B=='string')B=JSON.parse(B)}catch(e){B=[]}try{if(typeof H=='string')H=JSON.parse(H)}catch(e){H=[]}
+ if(B&&!Array.isArray(B)&&typeof B=='object')B=Object.values(B);if(H&&!Array.isArray(H)&&typeof H=='object')H=Object.values(H);
+ o.b=(B||[]).map(t=>{if(Array.isArray(t))return[t[0],+t[1],+t[2],+t[3]||1];if(typeof t=='string'){const a=t.split(',');return[a[0],+a[1],+a[2],+a[3]||1]}
+  if(t&&typeof t=='object'){const k=t.type||t.t||t.k;return[k,+(t.x!=null?t.x:t.c),+(t.y!=null?t.y:t.r),+(t.lv||t.l)||1]}return null}).filter(t=>t&&t[0]&&isFinite(t[1])&&isFinite(t[2]));
+ o.h=(H||[]).map(h=>Array.isArray(h)?h:(h&&typeof h=='object'?[h.n,h.l||h.lv||0,h.a||h.atk||0,h.m||h.hp||0]:null)).filter(Boolean);o.__n=1;return o};
+window.cityView=function(){const d=window.__cvd;if(!d||!d.v)return;d.v=window.vNorm(d.v);D=d;cityViewClose();
  const o=document.createElement('div');o.id='cvov';
  const esc=t=>String(t==null?'':t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
- o.innerHTML=`<div class="cvh"><button onclick="cityViewClose()">Cerrar</button><div class="cvt"><b>${esc(d.v.city)}</b><span>Ciudad de ${esc(d.n)} · población ${d.v.pop||0}</span></div><span class="cvro"><svg class="ic" width="14" height="14" viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>Solo vista</span></div><div id="cvv"><div id="cvg">${build(d.v.b)}</div></div><div id="cvi" class="cvi"><span class="m">Toca una estructura para ver su nivel. Arrastra para moverte y usa + / − para acercar.</span></div><div class="cvz"><button onclick="cityViewZoom(1.25)" aria-label="Acercar">+</button><button onclick="cityViewZoom(.8)" aria-label="Alejar">&minus;</button><button onclick="cityViewFit()" aria-label="Ajustar" style="font-size:12px">Ver todo</button></div>`;
+ o.innerHTML=`<div class="cvh"><button onclick="cityViewClose()">Cerrar</button><div class="cvt"><b>${esc(d.v.city)}</b><span>Ciudad de ${esc(d.n)} · población ${d.v.pop||0}</span></div><span class="cvro"><svg class="ic" width="14" height="14" viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>Solo vista</span></div><div id="cvv"><div id="cvg">${build(d.v.b)}</div></div><div id="cvi" class="cvi"><span class="m">${(d.v.b||[]).length?'Toca una estructura para ver su nivel. Arrastra para moverte y usa + / − para acercar.':'Esta ciudad aún no tiene estructuras guardadas. Tu amigo debe abrir su partida con la versión actualizada.'}</span></div><div class="cvz"><button onclick="cityViewZoom(1.25)" aria-label="Acercar">+</button><button onclick="cityViewZoom(.8)" aria-label="Alejar">&minus;</button><button onclick="cityViewFit()" aria-label="Ajustar" style="font-size:12px">Ver todo</button></div>`;
  document.body.appendChild(o);cityViewFit();
  const v=q('cvv');
  v.addEventListener('wheel',e=>{if(e.ctrlKey||e.metaKey){e.preventDefault();setCs(cs*(e.deltaY<0?1.12:.89),1)}},{passive:false});
@@ -5783,5 +5791,18 @@ window.cityViewFit=function(){const v=q('cvv');if(!v)return;const w=Math.min(v.c
 #cvg .c.k2{cursor:pointer}#cvg .c.sel2{background:color-mix(in srgb,var(--a) 22%,transparent);box-shadow:inset 0 0 0 2px var(--a)}
 #cvov .cvz{bottom:calc(64px + env(safe-area-inset-bottom,0px))}
 #cvg .c .lv{display:block}
+</style>
+<script id="patch-admtag">
+window.admTag=function(u,full){try{const C=window.Cloud;if(!u||!C||!C.isAdm||!C.isAdm(u))return '';
+ return '<span class="adm-tag'+(full?' full':'')+'" title="Administrador"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.500l8 3v6c0 5-3.400 8.500-8 10-4.600-1.500-8-5-8-10v-6z"/><path d="M8.500 12l2.500 2.500 4.500-5"/></svg>'+(full?'<em>Admin</em>':'')+'</span>'}catch(e){return ''}};
+</script>
+<style id="patch-admtag-css">
+.adm-tag{position:relative;display:inline-flex;align-items:center;justify-content:center;gap:4px;vertical-align:middle;margin-right:6px;width:19px;height:19px;border-radius:50%;color:#fff;background:linear-gradient(140deg,#ff5d73,#c1121f 70%);box-shadow:inset 0 0 0 1px rgba(255,255,255,.28),0 2px 9px rgba(230,30,60,.5);overflow:hidden;line-height:1;flex:none}
+.adm-tag.full{width:auto;height:auto;padding:3px 8px 3px 6px;border-radius:99px}
+.adm-tag em{font:800 9px/1 Inter,system-ui,sans-serif;letter-spacing:.12em;text-transform:uppercase;font-style:normal}
+.adm-tag::after{content:"";position:absolute;top:0;bottom:0;width:40%;left:-60%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.55),transparent);transform:skewX(-20deg);animation:admSh 3.4s ease-in-out infinite}
+@keyframes admSh{0%,60%{left:-60%}100%{left:130%}}
+@media(prefers-reduced-motion:reduce){.adm-tag::after{animation:none;display:none}}
+.accn .adm-tag.full,.pf-n b .adm-tag.full{margin-right:8px}
 </style>
 </body></html>
