@@ -5794,15 +5794,14 @@ window.cityViewFit=function(){const v=q('cvv');if(!v)return;const w=Math.min(v.c
 </style>
 <script id="patch-admtag">
 window.admTag=function(u,full){try{const C=window.Cloud;if(!u||!C||!C.isAdm||!C.isAdm(u))return '';
- return '<span class="adm-tag'+(full?' full':'')+'" title="Administrador"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.500l8 3v6c0 5-3.400 8.500-8 10-4.600-1.500-8-5-8-10v-6z"/><path d="M8.500 12l2.500 2.500 4.500-5"/></svg>'+(full?'<em>Admin</em>':'')+'</span>'}catch(e){return ''}};
+ return '<span class="adm-tag'+(full?' full':'')+'" title="Administrador"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.500l8 3v6c0 5-3.400 8.500-8 10-4.600-1.500-8-5-8-10v-6z"/><path d="M8.500 12l2.500 2.500 4.500-5"/></svg>'+(full?'<em>Admin</em>':'')+'</span>'}catch(e){return ''}};
 </script>
 <style id="patch-admtag-css">
-.adm-tag{position:relative;display:inline-flex;align-items:center;justify-content:center;gap:4px;vertical-align:middle;margin-right:6px;width:19px;height:19px;border-radius:50%;color:#fff;background:linear-gradient(140deg,#ff5d73,#c1121f 70%);box-shadow:inset 0 0 0 1px rgba(255,255,255,.28),0 2px 9px rgba(230,30,60,.5);overflow:hidden;line-height:1;flex:none}
-.adm-tag.full{width:auto;height:auto;padding:3px 8px 3px 6px;border-radius:99px}
-.adm-tag em{font:800 9px/1 Inter,system-ui,sans-serif;letter-spacing:.12em;text-transform:uppercase;font-style:normal}
-.adm-tag::after{content:"";position:absolute;top:0;bottom:0;width:40%;left:-60%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.55),transparent);transform:skewX(-20deg);animation:admSh 3.4s ease-in-out infinite}
-@keyframes admSh{0%,60%{left:-60%}100%{left:130%}}
-@media(prefers-reduced-motion:reduce){.adm-tag::after{animation:none;display:none}}
-.accn .adm-tag.full,.pf-n b .adm-tag.full{margin-right:8px}
+/* insignia de administrador: integrada con el texto, sin círculos ni destellos */
+.adm-tag{display:inline-flex;align-items:center;gap:.3em;vertical-align:baseline;margin-right:.45em;color:#ff5a6e;line-height:1;white-space:nowrap;flex:none;font-weight:700}
+.adm-tag svg{width:.95em;height:.95em;position:relative;top:.1em;fill:rgba(255,90,110,.2);stroke:currentColor;filter:drop-shadow(0 0 3px rgba(255,70,95,.55))}
+.adm-tag.full{padding:.22em .62em .22em .5em;border-radius:99px;font-size:.62em;letter-spacing:.14em;text-transform:uppercase;background:linear-gradient(180deg,rgba(255,90,110,.2),rgba(255,90,110,.1));box-shadow:inset 0 0 0 1px rgba(255,90,110,.5);vertical-align:.18em}
+.adm-tag.full svg{top:0;width:1.15em;height:1.15em}
+.adm-tag em{font-style:normal;font-weight:800}
 </style>
 </body></html>
