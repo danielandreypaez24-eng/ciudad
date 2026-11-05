@@ -2229,7 +2229,7 @@ const ZSZ=[5,5,5,5,10,10,10,10,10,10,10,10,10,15,15];
 const ZN=[['Claro del bosque','#7fcf86'],['Cueva baja','#b09a86'],['Camino oscuro','#9a86d4'],['Pantano antiguo','#7fb8a0'],['Fortaleza de hierro','#aab4c4'],['Desierto cristalino','#e8c86a'],['Ciénaga profunda','#6fa890'],['Ciudadela mecánica','#9fb0c8'],['Bosque carmesí','#d46a7a'],['Desierto prismático','#f0c060'],['Abismo de ceniza','#ee7a50'],['Vacío eterno','#b8a0f2'],['Tundra fracturada','#a8d8f0'],['Mar de grietas','#5aa0d8'],['Trono del fin','#e06ad0']];
 {let a=1;ZONES.length=0;ZN.forEach((z,i)=>{const b=a+ZSZ[i]-1,n=Math.max(1,Math.ceil(ZSZ[i]/5));
  ZONES.push({n:z[0],d:`Zona ${i+1}: ${n} ${n==1?'capítulo':'capítulos'}, niveles ${a}–${b}.`,a,b,c:z[1],ch:n});a=b+1})}
-const YLK={cfg:{hp:1700,atk:5,ph2atk:1.8,lv:60,regenCd:120000,regenPct:.15,sumCd:180000,sumMin:3,sumMax:5,maxFoes:6,pwStep:.2,pwMax:.5,ph2:.5}};
+const YLK={cfg:{hp:1200,atk:5,ph2atk:1.8,lv:60,regenCd:120000,regenPct:.15,sumCd:180000,sumMin:3,sumMax:5,maxFoes:6,pwStep:.2,pwMax:.5,ph2:.5}};
 const YSK={ylk:1,d:'Yloka: regenera 15%, invoca y acumula poder (máx +50%)'};
 const rng=s=>()=>{s=(s*1664525+1013904223)>>>0;return s/4294967296};
 const XK=Object.keys(XM);
@@ -2242,7 +2242,7 @@ for(let id=61;id<=140;id++){const r=rng(id*7919),z=ZONES.findIndex(z=>id>=z.a&&i
  const idx=[];wv.forEach(w=>w.forEach(t=>{MN.push([t[0],t[1],t[2],t[4]]);idx.push(MN.length-1)}));LVS.push({id,b:boss,m:idx,waves:wv})}
 /* Yloka: nivel 20 */
 MN[19]=['Caballero maldito',3,25];delete LVS[19].waves;LVS[19].m=[18,19];LVS[19].b=true;window.YLV=YLK.cfg.lv;{const L=LVS[YLK.cfg.lv-1],T=['Yloka',YLK.cfg.atk,YLK.cfg.hp,YLK.cfg.lv,YSK];if(L.waves)L.waves[L.waves.length-1]=[T];else L.waves=[[T]];MN[L.m[L.m.length-1]]=['Yloka',YLK.cfg.atk,YLK.cfg.hp,YSK]}
-MCAT.Yloka='melee';XD.ylk=['Has llegado a un punto decisivo. Antes del final te esperan muchos desafíos.','Las grietas… se abren de nuevo…'];XM.yl=['Yloka',5,1700,YSK];XD.yl=XD.ylk;
+MCAT.Yloka='melee';XD.ylk=['Has llegado a un punto decisivo. Antes del final te esperan muchos desafíos.','Las grietas… se abren de nuevo…'];XM.yl=['Yloka',5,1200,YSK];XD.yl=XD.ylk;
 function yEl(){return document.querySelector('.fx9-ylk')}
 function yFx(t,c){const e=$('sqm'+(SQ.m.length?SQ.m.findIndex(m=>m.n=='Yloka'):0));if(e)fl(t,e,c||'#b070f0');if(e&&!RM)e.style.boxShadow='0 0 24px #9b4dff,0 0 8px #d9b0ff inset'}
 const YLR={jin:{first:4,every:6},sum:{first:5,every:8},reg:{first:6,every:8},rul:{first:8,every:10}}; /* poderes de Yloka por rondas desde que aparece */
@@ -2509,16 +2509,16 @@ async function yP2(){
 window.yScene=n=>{if(n==3)yP2()};
 
 /* escena 4 + 5: derrota, VICTORIA en blanco, silencio, negro y revelación del 60 */
-async function ySeq4(){yMusic(false);await yDlg(YSC.s4);
+async function ySeq4(full){yMusic(false);const sk=await yDlg(YSC.s4);if(!full)return;
  const w=document.createElement('div');w.style.cssText='position:fixed;inset:0;z-index:99;background:#fff;color:#000;display:flex;align-items:center;justify-content:center;font:700 44px sans-serif;letter-spacing:.25em;opacity:0;transition:opacity 1.2s';w.textContent='VICTORIA';document.body.appendChild(w);
  requestAnimationFrame(()=>requestAnimationFrame(()=>w.style.opacity=1));await sl(RM?300:5200);
  w.style.transition='background 1.8s,color 1.8s';w.style.background='#000';w.style.color='#000';await sl(RM?300:2400);
  w.innerHTML='<div style="text-align:center;color:#c89bff"><div style="font-size:110px;animation:y60 2.4s ease-out forwards">60</div><svg id="y60t" class="y60c" viewBox="0 0 260 120" width="280" height="130" style="display:block;margin:14px auto 0;opacity:0;transition:opacity 1.2s;overflow:visible"><g fill="none" stroke="#b070f0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path pathLength="100" d="M130 0 118 22 136 40 112 62 130 84 116 120"/><path pathLength="100" d="M136 40 168 52 190 80 228 92"/><path pathLength="100" d="M112 62 78 58 52 82 14 90"/><path pathLength="100" d="M130 84 158 100 176 120"/><path pathLength="100" d="M118 22 86 14 60 26"/></g></svg><button id="y60b" style="margin-top:22px;opacity:0;transition:opacity 1s">Continuar</button></div>';
  w.style.cssText+=';font:400 15px sans-serif;letter-spacing:0';await sl(RM?100:2400);const tx=w.querySelector('#y60t'),bt=w.querySelector('#y60b');tx.style.opacity=1;tx.classList.add('on');await sl(RM?100:1500);bt.style.opacity=1;bt.onclick=()=>w.remove()}
-const _sqW6=sqWin;sqWin=function(){const a=SQ&&SQ.adv,first=a&&a.lv==YV()&&!S.done['L'+YV()]&&!S.ylWin;yMusic(false);
- if(first){S.ylWin=1;save();const r=_sqW6.apply(this,arguments);setTimeout(()=>{ySeq4()},RM?0:1700);return r}return _sqW6.apply(this,arguments)};
+const _sqW6=sqWin;sqWin=function(){const a=SQ&&SQ.adv,isY=a&&a.lv==YV(),first=isY&&!S.ylWin;yMusic(false);
+ if(isY){if(first){S.ylWin=1;save()}const r=_sqW6.apply(this,arguments);setTimeout(()=>{ySeq4(first)},RM?0:1700);return r}return _sqW6.apply(this,arguments)};
 const _sqL6=sqLose;sqLose=function(){yMusic(false);return _sqL6.apply(this,arguments)};
-const _sqS6=sqStart;sqStart=function(a){const first=a&&a.lv==YV()&&!S.done['L'+YV()]&&!S.ylSc12;if(first){S.ylSc12=1;S.ylIntro=1;save()}
+const _sqS6=sqStart;sqStart=function(a){const first=a&&a.lv==YV();if(first&&!S.ylSc12){S.ylSc12=1;S.ylIntro=1;save()}
  const r=_sqS6.apply(this,arguments);if(first){const sq=SQ;setTimeout(()=>yScene12(sq),RM?0:400)}return r};
 /* icono morado de Yloka en el mapa de aventuras y en la ficha del nivel */
 const _zm=zoneMap;zoneMap=function(){let h=_zm.apply(this,arguments);try{const sv=(window.YSVG||'').replace('width="72" height="72"','width="32" height="32"');
@@ -6526,4 +6526,19 @@ new MutationObserver(()=>{if(q)return;q=requestAnimationFrame(()=>{q=0;try{attac
 @container (max-width:84px){#sqM>.cd .qchs{display:none!important}}
 @container (max-width:68px){#sqM>.cd .qlv{display:none!important}}
 </style>
+
+<script id="patch-keepheroes-js">
+(function(){
+'use strict';
+let M=null,cnt=0,mo=null,tm=0;
+function show(){try{const H=document.getElementById('sqH'),A=document.getElementById('sqa'),t=A||H;if(!t||!H)return;
+ const r=t.getBoundingClientRect(),h=H.getBoundingClientRect();
+ if(r.bottom>innerHeight-2||h.top<0)t.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'end'})}catch(e){}}
+function attach(){const m=document.getElementById('sqM');if(m===M)return;if(mo){mo.disconnect();mo=null}M=m;cnt=0;if(!M)return;
+ cnt=M.querySelectorAll(':scope>.cd').length;
+ mo=new MutationObserver(()=>{const n=M.querySelectorAll(':scope>.cd').length;if(n>cnt){clearTimeout(tm);tm=setTimeout(show,700)}cnt=n});
+ mo.observe(M,{childList:true})}
+let q=0;new MutationObserver(()=>{if(q)return;q=requestAnimationFrame(()=>{q=0;try{attach()}catch(e){}})}).observe(document.body,{childList:true,subtree:true});
+})();
+</script>
 </body></html>
