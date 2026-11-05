@@ -1223,7 +1223,7 @@ const zEnd=e=>{if(e.touches.length<2){pd=0;zCommit()}};
 $('view').addEventListener('touchend',zEnd,{passive:true});$('view').addEventListener('touchcancel',zEnd,{passive:true});
 $('view').addEventListener('wheel',e=>{if(e.ctrlKey||e.metaKey){e.preventDefault();{const r=$('view').getBoundingClientRect();zPreview((zPend?zTarget:Z)*Math.exp(-Math.max(-60,Math.min(60,e.deltaY))*.01),r.left+r.width/2,r.top+r.height/2)};clearTimeout(zT);zT=setTimeout(zCommit,140)}},{passive:false});
 /* combate */
-const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+let RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
 function sparks(x,y,n,c){if(RM)return;for(let i=0;i<n;i++){const d=document.createElement('i');d.className='sp';d.style.cssText=`left:${x}px;top:${y}px;color:${c}`;document.body.appendChild(d);const a=Math.random()*6.28,r=60+Math.random()*90;d.animate([{opacity:1,transform:'translate(0,0) rotate(45deg)'},{opacity:0,transform:`translate(${Math.cos(a)*r}px,${Math.sin(a)*r}px) rotate(45deg) scale(.3)`}],{duration:900+Math.random()*500,easing:'ease-out'}).finished.then(()=>d.remove())}}
 function shake(p){if(RM)return;const s=document.querySelector('.scr');if(s)s.animate([{transform:'none'},{transform:`translateX(-${p}px)`},{transform:`translateX(${p}px)`},{transform:'none'}],{duration:280})}
 function bossIntro(nm){const o=document.createElement('div');o.className='bnj';
@@ -5854,16 +5854,29 @@ drops=function(el,t){
 const _fl=fl;
 fl=function(t,el,c){try{if(el&&el._qL&&Date.now()<el._qL&&/^\+\d+ /.test(String(t)))return}catch(x){}return _fl.apply(this,arguments)};
 
+function lootIco(k){const c=icol(k);return '<i class="sq-li" style="--c:'+c+'" title="'+((NMI[k]||[k,k])[1])+'"><svg viewBox="0 0 24 24" width="22" height="22" fill="'+c+'" stroke="rgba(0,0,0,.35)" stroke-width="1" stroke-linejoin="round" aria-hidden="true">'+(k=='cristal'?'<path d="M12 2l6 7-6 13L6 9z"/><path d="M6 9h12M12 2l-2 7 2 13 2-13z" fill="none"/>':k=='piedra'?'<path d="M5 15l3-8 7-2 5 7-3 8-8 1z"/>':k=='polvo'?'<circle cx="8" cy="14" r="3"/><circle cx="15" cy="9" r="2.4"/><circle cx="16" cy="16" r="2"/>':k=='esencia'?'<path d="M12 2c4 5 6 8 6 11a6 6 0 0 1-12 0c0-3 2-6 6-11z"/>':k=='nucleo'?'<path d="M12 2l9 6v8l-9 6-9-6V8z"/>':'<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4" fill="none"/>')+'</svg></i>'}
+function smokeFx(e){if(RM)return;const r=e.getBoundingClientRect(),n=LOW?8:16;
+ for(let k=0;k<n;k++){const d=document.createElement('i'),sz=8+Math.random()*16,x=r.left+r.width*(.15+Math.random()*.7),y=r.top+r.height*(.35+Math.random()*.5),g=70+Math.random()*50;
+  d.style.cssText='position:fixed;left:0;top:0;z-index:62;pointer-events:none;border-radius:50%;width:'+sz+'px;height:'+sz+'px;background:radial-gradient(circle,rgba(190,190,205,.75),rgba(120,120,140,.0) 70%)';document.body.appendChild(d);
+  d.animate([{transform:'translate('+x+'px,'+y+'px) scale(.5)',opacity:0},{transform:'translate('+(x+(Math.random()-.5)*20)+'px,'+(y-g*.4)+'px) scale(1)',opacity:.85,offset:.3},{transform:'translate('+(x+(Math.random()-.5)*50)+'px,'+(y-g)+'px) scale(1.9)',opacity:0}],{duration:1500+Math.random()*900,delay:Math.random()*500,easing:'ease-out',fill:'both'}).finished.then(()=>d.remove(),()=>d.remove())}}
 function sqDeadFx(e,i){const m=SQ.m[i],anim=!m._dd;m._dd=1;e.dataset.dd='1';e.classList.add('sq-dead');
- if(anim&&!RM){e.animate([{filter:'brightness(2.4)',transform:'scale(1.07)'},{filter:'none',transform:'none'}],{duration:LOW?320:460,easing:'ease-out'});const r=e.getBoundingClientRect();sparks(r.left+r.width/2,r.top+r.height/2,LOW?5:9,'var(--m)')}
- const b=document.createElement('button');b.type='button';b.className='sq-lt';b.setAttribute('aria-label','Recoger botín');b.innerHTML=BAG+'<b>Botín</b><span>Toca para recoger</span>';
- b.onclick=ev=>{ev.stopPropagation();sqLoot(i)};e.appendChild(b);
- if(anim&&!RM)b.animate([{opacity:0,transform:'scale(.7)'},{opacity:1,transform:'none'}],{duration:380,delay:LOW?200:300,easing:'cubic-bezier(.2,.9,.3,1.2)',fill:'backwards'})}
+ const ks=Object.keys(m.loot.c||{}).concat(Object.keys(m.loot.i||{})).filter(k=>(m.loot.c[k]||m.loot.i[k])>0);
+ const mk=()=>{if(m.lootTaken||e.querySelector('.sq-lt'))return;if(!ks.length){m.lootTaken=1;return}
+  const b=document.createElement('button');b.type='button';b.className='sq-lt';b.setAttribute('aria-label','Recoger botín');
+  b.innerHTML='<span class="sq-pile">'+ks.slice(0,4).map(lootIco).join('')+'</span><span>Toca para recoger</span>';
+  b.onclick=ev=>{ev.stopPropagation();sqLoot(i)};e.appendChild(b);
+  if(anim&&!RM)b.animate([{opacity:0,transform:'translateY(-10px) scale(.6)'},{opacity:1,transform:'none'}],{duration:420,easing:'cubic-bezier(.2,.9,.3,1.3)',fill:'backwards'})};
+ if(!anim||RM){e.classList.add('sq-gh');mk();return}
+ /* la experiencia se recoge sola al morir */
+ if(!m._xp){m._xp=1;try{sqXpOrbs(e)}catch(x){}}
+ smokeFx(e);
+ const ca=e.animate([{opacity:1,filter:'none',transform:'none'},{opacity:.7,filter:'grayscale(1) blur(1px)',transform:'translateY(-4px)',offset:.35},{opacity:0,filter:'grayscale(1) blur(5px)',transform:'translateY(-22px) scale(.9)'}],{duration:LOW?1300:1800,easing:'ease-in',fill:'forwards'});
+ ca.finished.then(()=>{e.classList.add('sq-gh');ca.cancel();mk()},()=>{e.classList.add('sq-gh');mk()})}
 function sqDead(){if(!hasSQ())return;SQ.m.forEach((m,i)=>{if(m.hp>0)return;const e=$('sqm'+i);if(!e)return;
  if(!m.loot&&!m.rw){try{drops(e,m)}catch(x){}}
  if(!m.loot)m.loot={c:{},i:{},lines:[]};
- if(m.lootTaken){e.classList.add('gone');return}
- if(!e.dataset.dd||!e.querySelector('.sq-lt'))sqDeadFx(e,i)})}
+ if(m.lootTaken){if(!e.querySelector('.sq-lt'))e.classList.add('gone');return}
+ if(!e.dataset.dd)sqDeadFx(e,i)})}
 
 function lootPop(e,got){if(!e)return;const r=e.getBoundingClientRect(),d=document.createElement('div');d.className='sq-pop';
  d.innerHTML=(got.length?got.map(([k,g])=>g>0?'<div><i style="background:'+icol(k)+'"></i>'+itx(k,g)+'</div>':'<div class="no"><i style="background:'+icol(k)+'"></i>'+(NMI[k]||[k])[1]+': almacén lleno</div>').join(''):'<div class="no"><i></i>Sin botín material</div>');
@@ -5892,9 +5905,14 @@ window.sqLoot=function(i){if(!hasSQ())return;const m=SQ.m[i];if(!m||m.hp>0||!m.l
  for(const k in m.loot.i){const g=m.loot.i[k];S.inv[k]=(S.inv[k]||0)+g;got.push([k,g])}
  const txt=got.filter(x=>x[1]>0).map(x=>itx(x[0],x[1])).join(', ');B.log.push(txt?'Botín: '+txt+'.':'Sin botín material.');
  save();try{draw()}catch(x){}
- lootPop(e,got);sqXpOrbs(e);
- if(e){const lt=e.querySelector('.sq-lt');if(lt)lt.remove();
-  if(RM)e.classList.add('gone');else{e.animate([{opacity:1,transform:'none'},{opacity:0,transform:'translateY(-10px) scale(.92)'}],{duration:LOW?360:520,easing:'ease-in',fill:'forwards'}).finished.then(()=>{e.classList.add('gone')},()=>e.classList.add('gone'))}}
+ lootPop(e,got);
+ if(e){const lt=e.querySelector('.sq-lt');
+  if(!RM&&lt){const r=lt.getBoundingClientRect(),n=LOW?10:18;
+   for(let k=0;k<n;k++){const d=document.createElement('i'),sz=7+Math.random()*12,x=r.left+r.width*(.2+Math.random()*.6),y=r.top+r.height*(.4+Math.random()*.4);
+    d.style.cssText='position:fixed;left:0;top:0;z-index:62;pointer-events:none;border-radius:50%;width:'+sz+'px;height:'+sz+'px;background:radial-gradient(circle,rgba(240,205,140,.9),rgba(233,152,86,0) 70%)';document.body.appendChild(d);
+    d.animate([{transform:'translate('+x+'px,'+y+'px) scale(.6)',opacity:0},{transform:'translate('+(x+(Math.random()-.5)*30)+'px,'+(y-14)+'px) scale(1.3)',opacity:.9,offset:.3},{transform:'translate('+(x+(Math.random()-.5)*70)+'px,'+(y-60-Math.random()*40)+'px) scale(2)',opacity:0}],{duration:800+Math.random()*500,easing:'ease-out',fill:'both'}).finished.then(()=>d.remove(),()=>d.remove())}
+   lt.animate([{opacity:1,transform:'none',filter:'none'},{opacity:.9,transform:'scale(1.08)',filter:'blur(1px)',offset:.35},{opacity:0,transform:'translateY(-18px) scale(.7)',filter:'blur(4px)'}],{duration:LOW?520:700,easing:'ease-in',fill:'forwards'}).finished.then(()=>{lt.remove();e.classList.add('gone')},()=>{lt.remove();e.classList.add('gone')})}
+  else{if(lt)lt.remove();e.classList.add('gone')}}
  try{sqUpd()}catch(x){}};
 window.sqLootAll=function(){if(!hasSQ())return;let k=0;SQ.m.forEach((m,i)=>{if(m.hp<=0&&m.loot&&!m.lootTaken)setTimeout(()=>sqLoot(i),(k++)*(LOW?120:170))})};
 
@@ -5937,7 +5955,7 @@ function sqMark(){if(!hasSQ())return;const u=SQ.hs[SQ.ai],act=!!u&&u.hp>0&&!SQ.o
  sqDead();
  const q=document.querySelector('#sqa .qtn');
  if(q){const h=q.querySelector('.sq-hint'),need=act&&isMelee(u)&&fa&&ba;if(need&&!h)q.insertAdjacentHTML('beforeend','<span class="m sq-hint"> · Cuerpo a cuerpo: solo alcanzas la primera línea enemiga</span>');else if(!need&&h)h.remove()}
- const sa=$('sqa');if(sa&&SQ.waitLoot&&!SQ.over)sa.innerHTML='<div class="m" style="width:100%;text-align:center">Toca las tarjetas con <b>botín</b> para recogerlas</div><button class="pri" onclick="sqLootAll()">Recoger todo</button>'}
+ const sa=$('sqa');if(sa&&SQ.waitLoot&&!SQ.over)sa.innerHTML='<div class="m" style="width:100%;text-align:center">Toca el <b>botín</b> que dejaron para recogerlo</div><button class="pri" onclick="sqLootAll()">Recoger todo</button>'}
 const _su=sqUpd;
 sqUpd=function(){try{fixTarget()}catch(e){}const r=_su.apply(this,arguments);try{sqMark()}catch(e){console.error(e)}return r};
 
@@ -6000,5 +6018,424 @@ window.sqCC=async function(i,kind){const e=$('sqm'+i),D=RM?380:(LOW?1300:1800);i
 #sqM>.cd.sq-bound{filter:saturate(.5)}
 @media(max-width:600px){#sqM>.cd,#sqH>.cd{flex:1 1 calc(33.333% - 8px)!important;max-width:calc(33.333% - 2px)!important}.sqrl{font-size:8px;letter-spacing:.14em}.sq-cc b{font-size:9px}.sq-lt b{font-size:10.5px}.sq-lt span{font-size:8px}}
 @media(prefers-reduced-motion:reduce){.sq-lt::after{animation:none}}
+
+/* Parte 5: botín que queda en el campo */
+#sqM>.cd.sq-dead.sq-gh{background:none!important;border-color:transparent!important;box-shadow:none!important}
+#sqM>.cd.sq-dead.sq-gh>*:not(.sq-lt){visibility:hidden}
+#sqM>.cd.sq-dead.sq-gh::before,#sqM>.cd.sq-dead.sq-gh::after{display:none!important}
+#sqM>.cd.sq-dead>*:not(.sq-lt){opacity:1}
+.sq-lt{background:none!important;border:0!important;gap:6px}
+.sq-lt::after{display:none}
+.sq-pile{display:flex;flex-wrap:wrap;justify-content:center;max-width:76px;filter:drop-shadow(0 3px 5px rgba(0,0,0,.5))}
+.sq-pile .sq-li{display:inline-flex;margin:-5px -3px;animation:sqBob 2.4s ease-in-out infinite}
+.sq-pile .sq-li:nth-child(2){animation-delay:.4s;transform:rotate(8deg)}.sq-pile .sq-li:nth-child(3){animation-delay:.8s}.sq-pile .sq-li:nth-child(4){animation-delay:1.2s}
+.sq-pile .sq-li svg{filter:drop-shadow(0 0 5px var(--c))}
+@keyframes sqBob{0%,100%{translate:0 0}50%{translate:0 -3px}}
+.sq-lt>span:last-child{font-size:9px;color:var(--m);font-weight:400}
+@media(prefers-reduced-motion:reduce){.sq-pile .sq-li{animation:none}}
 </style>
+<style id="patch-cfg-css">
+#cfgb{padding:5px 7px;display:inline-flex;align-items:center;justify-content:center}
+header #cfgb{grid-column:2;grid-row:1}
+#cfgb svg,#cfgf svg,.cfg-slotb svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+#cfgf{position:fixed;right:8px;top:calc(8px + env(safe-area-inset-top,0px));z-index:7;display:none;width:34px;height:34px;padding:0;border-radius:50%;align-items:center;justify-content:center;background:var(--s);opacity:.85;box-shadow:0 4px 12px rgba(0,0,0,.4)}
+#cfgf svg{width:19px;height:19px}
+.cfg-slotb{display:inline-flex;align-items:center;gap:8px}
+.cfg-slotb svg{width:18px;height:18px}
+#cfgw{position:fixed;inset:0;z-index:9996;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;padding:12px}
+#cfgw .cfg-p{width:min(440px,94vw);max-height:90vh;overflow:auto;background:var(--s);color:var(--t);border-radius:22px;box-shadow:0 10px 40px rgba(0,0,0,.5);padding:18px 18px 14px}
+#cfgw .cfg-h{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:4px}
+#cfgw .cfg-h h1{margin:0}
+#cfgw .cfg-x{padding:4px 10px;border-radius:10px}
+#cfgw .cfg-s{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--m);margin:16px 0 6px;padding-top:12px;border-top:1px solid var(--l)}
+#cfgw .cfg-r{padding:9px 0}
+#cfgw .cfg-t{display:flex;align-items:center;justify-content:space-between;gap:10px}
+#cfgw .cfg-t b{font-weight:600}
+#cfgw .cfg-t small{display:block;color:var(--m);font-size:11px;line-height:1.3}
+#cfgw .cfg-v{display:flex;align-items:center;gap:10px;margin-top:6px}
+#cfgw .cfg-v input[type=range]{flex:1;padding:0;border:0;background:none;accent-color:var(--a)}
+#cfgw .cfg-v span{min-width:38px;text-align:right;font-variant-numeric:tabular-nums;color:var(--m)}
+#cfgw .cfg-sw{appearance:none;-webkit-appearance:none;flex:none;width:42px;height:24px;padding:0;border-radius:999px;border:1px solid var(--l);background:var(--l);position:relative;cursor:pointer;transition:background .15s}
+#cfgw .cfg-sw::after{content:"";position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:var(--t);transition:transform .15s}
+#cfgw .cfg-sw:checked{background:var(--a);border-color:var(--a)}
+#cfgw .cfg-sw:checked::after{transform:translateX(18px)}
+#cfgw .cfg-f{display:flex;gap:8px;justify-content:space-between;margin-top:16px}
+html.noanim *,html.noanim *::before,html.noanim *::after{animation-duration:.001s!important;animation-delay:0s!important;animation-iteration-count:1!important;transition-duration:0s!important;transition-delay:0s!important;scroll-behavior:auto!important}
+</style>
+<script id="patch-cfg-js">
+/* ===== CONFIGURACIÓN PARA TODOS (parte 1): música por sección, efectos, vibración y animaciones =====
+   Se guarda en este dispositivo (localStorage 'ciudad-cfg'), vale para todas las partidas y está disponible
+   en la pantalla de partidas, en la ciudad y durante los combates. */
+(function(){
+'use strict';
+const SYSRM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const SECS=[['aldea','Aldea','Ciudad y mapa de aventuras'],['aventura','Aventuras','Niveles normales'],['jefe','Jefes','Combates contra jefes'],['duelo','Duelos','Batallas entre jugadores']];
+const def=()=>({mus:{aldea:{on:true,v:100},aventura:{on:true,v:100},jefe:{on:true,v:100},duelo:{on:true,v:100}},anim:!SYSRM,vib:true});
+let CFG=def();
+try{const q=JSON.parse(localStorage.getItem('ciudad-cfg')||'null');if(q){
+ SECS.forEach(([k])=>{const s=q.mus&&q.mus[k];if(s){CFG.mus[k].on=s.on!==false;if(typeof s.v=='number')CFG.mus[k].v=Math.max(0,Math.min(100,Math.round(s.v)))}});
+ if(typeof q.anim=='boolean')CFG.anim=q.anim;if(typeof q.vib=='boolean')CFG.vib=q.vib}}catch(_){}
+const save=()=>{try{localStorage.setItem('ciudad-cfg',JSON.stringify(CFG))}catch(_){}};
+window.CFG=CFG;
+
+/* ---------- música: volumen general × volumen de la sección que suena ---------- */
+const secOf=k=>{k=k||'';return k.indexOf('duelo')==0?'duelo':k.indexOf('jefe')==0?'jefe':k=='aventura'?'aventura':'aldea'};
+const secMult=k=>{const s=CFG.mus[secOf(k)];return s.on?s.v/100:0};
+function applyMusic(){const M=window.MT;if(!M)return;const a=M.cur&&M.el&&M.el[M.cur];if(a&&!a.paused){clearInterval(a._iv);a.volume=Math.max(0,Math.min(1,M.MV))}}
+if(window.MT){
+ let master=window.MT.MV;
+ Object.defineProperty(window.MT,'MV',{configurable:true,enumerable:true,get(){return Math.max(0,Math.min(1,master*secMult(window.MT.cur)))},set(v){master=v}});
+ window.mtVol=function(v){master=Math.max(0,Math.min(1,v/100));try{localStorage.setItem('ciudad-mvol',master)}catch(_){}applyMusic();try{if(window.MT.pa)window.MT.pa.volume=master}catch(_){}};
+ window.cfgMaster=()=>master;
+}
+/* música sintética de Yloka: si la sección «Jefes» está silenciada, no suena */
+try{const _y=yMusic;yMusic=function(on){if(on&&secMult('jefe')===0)return;return _y.apply(this,arguments)}}catch(_){}
+
+/* ---------- vibración ---------- */
+try{const _v=navigator.vibrate&&navigator.vibrate.bind(navigator);if(_v)navigator.vibrate=function(p){return CFG.vib?_v(p):false}}catch(_){}
+
+/* ---------- animaciones ---------- */
+function applyAnim(){
+ document.documentElement.classList.toggle('noanim',!CFG.anim);
+ try{RM=!CFG.anim||SYSRM}catch(_){}}
+{const _an=Element.prototype.animate;
+ Element.prototype.animate=function(kf,o){
+  if(!CFG.anim){const x=(o&&typeof o=='object')?Object.assign({},o):{};x.duration=1;x.delay=0;x.endDelay=0;x.iterations=1;o=x}
+  return _an.call(this,kf,o)}}
+applyAnim();
+
+/* ---------- interfaz ---------- */
+const GEAR='<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>';
+const has=sec=>{const m=window.MT&&window.MT.meta||{};return Object.keys(m).some(k=>secOf(k)==sec)};
+const sw=(id,on,fn)=>`<input type="checkbox" class="cfg-sw" id="${id}" ${on?'checked':''} onchange="${fn}" aria-label="Activar o desactivar">`;
+function render(){
+ let w=document.getElementById('cfgw');if(!w)return;
+ const keep=w.querySelector('.cfg-p')?w.querySelector('.cfg-p').scrollTop:0;
+ const fxOn=typeof SND!=='undefined'?SND.on:true,fxV=typeof SND!=='undefined'?Math.round(SND.vol*100):50,mm=Math.round((window.cfgMaster?window.cfgMaster():.6)*100);
+ w.innerHTML=`<div class="cfg-p" role="dialog" aria-label="Configuración">
+ <div class="cfg-h"><h1>Configuración</h1><button class="cfg-x" onclick="CFGU.close()" aria-label="Cerrar">✕</button></div>
+ <span class="m">Se guarda en este dispositivo y vale para todas tus partidas.</span>
+ <div class="cfg-s">Música</div>
+ <div class="cfg-r"><div class="cfg-t"><b>Volumen general</b></div><div class="cfg-v"><input type="range" min="0" max="100" value="${mm}" oninput="CFGU.master(this.value)" aria-label="Volumen general de la música"><span id="cfgv-m">${mm}%</span></div></div>
+ ${SECS.map(([k,n,d])=>{const s=CFG.mus[k];return `<div class="cfg-r"><div class="cfg-t"><span><b>${n}</b><small>${d}${has(k)?'':' · aún sin canción'}</small></span>${sw('cfgs-'+k,s.on,`CFGU.sec('${k}',this.checked)`)}</div><div class="cfg-v"><input type="range" min="0" max="100" value="${s.v}" ${s.on?'':'disabled'} id="cfgr-${k}" oninput="CFGU.secV('${k}',this.value)" aria-label="Volumen de ${n}"><span id="cfgv-${k}">${s.v}%</span></div></div>`}).join('')}
+ <div class="cfg-s">Efectos de sonido</div>
+ <div class="cfg-r"><div class="cfg-t"><span><b>Efectos</b><small>Alertas, fiestas, derrotas y avisos</small></span>${sw('cfgfx',fxOn,'CFGU.fx(this.checked)')}</div><div class="cfg-v"><input type="range" min="0" max="100" value="${fxV}" ${fxOn?'':'disabled'} id="cfgr-fx" oninput="CFGU.fxV(this.value)" onchange="CFGU.test()" aria-label="Volumen de efectos"><span id="cfgv-fx">${fxV}%</span></div></div>
+ <div class="cfg-r"><div class="cfg-t"><span><b>Vibración</b><small>En las alertas de invasión (celulares)</small></span>${sw('cfgvib',CFG.vib,'CFGU.vib(this.checked)')}</div></div>
+ <div class="cfg-s">Visual</div>
+ <div class="cfg-r"><div class="cfg-t"><span><b>Animaciones</b><small>Fuegos artificiales, partículas, destellos y transiciones. Apágalas si el juego va lento.</small></span>${sw('cfganim',CFG.anim,'CFGU.anim(this.checked)')}</div></div>
+ <div class="cfg-f"><button onclick="CFGU.reset()">Restablecer</button><button class="pri" onclick="CFGU.close()">Listo</button></div></div>`;
+ const p=w.querySelector('.cfg-p');if(p)p.scrollTop=keep}
+const $i=id=>document.getElementById(id);
+window.CFGU={
+ open(){if($i('cfgw'))return;const w=document.createElement('div');w.id='cfgw';w.onclick=e=>{if(e.target===w)CFGU.close()};document.body.appendChild(w);render()},
+ close(){const w=$i('cfgw');if(w)w.remove();save()},
+ master(v){window.mtVol&&window.mtVol(+v);const e=$i('cfgv-m');if(e)e.textContent=Math.round(v)+'%'},
+ sec(k,on){CFG.mus[k].on=!!on;save();applyMusic();const r=$i('cfgr-'+k);if(r)r.disabled=!on},
+ secV(k,v){CFG.mus[k].v=+v;save();applyMusic();const e=$i('cfgv-'+k);if(e)e.textContent=Math.round(v)+'%'},
+ fx(on){if(typeof SND!=='undefined'){SND.on=!!on;sndSave()}const r=$i('cfgr-fx');if(r)r.disabled=!on;if(on)CFGU.test()},
+ fxV(v){if(typeof SND!=='undefined'){SND.vol=v/100;sndSave()}const e=$i('cfgv-fx');if(e)e.textContent=Math.round(v)+'%'},
+ test(){try{snd('aviso')}catch(_){}},
+ vib(on){CFG.vib=!!on;save();if(on){try{navigator.vibrate&&navigator.vibrate(60)}catch(_){}}},
+ anim(on){CFG.anim=!!on;save();applyAnim()},
+ reset(){if(!confirm('¿Restablecer toda la configuración de sonido y animaciones?'))return;
+  const d=def();CFG.mus=d.mus;CFG.anim=d.anim;CFG.vib=d.vib;save();
+  if(window.mtVol)window.mtVol(60);if(typeof SND!=='undefined'){SND.on=true;SND.vol=.5;sndSave()}
+  applyMusic();applyAnim();render()}};
+document.addEventListener('keydown',e=>{if(e.key=='Escape'&&$i('cfgw'))CFGU.close()});
+
+/* botón en la ciudad (encabezado) */
+function mkHeaderBtn(){const mb=$i('mb');if(!mb||$i('cfgb'))return;const b=document.createElement('button');b.id='cfgb';b.setAttribute('aria-label','Configuración');b.title='Configuración';b.innerHTML=GEAR;b.onclick=()=>CFGU.open();mb.insertAdjacentElement('afterend',b)}
+mkHeaderBtn();
+/* botón flotante durante combates y pantallas completas (el encabezado queda tapado) */
+{const f=document.createElement('button');f.id='cfgf';f.setAttribute('aria-label','Configuración');f.title='Configuración';f.innerHTML=GEAR;f.onclick=()=>CFGU.open();document.body.appendChild(f);
+ setInterval(()=>{const g=$i('game'),inGame=g&&!g.classList.contains('hide'),full=inGame&&document.querySelector('#ov .scr, #pvb');f.style.display=(full&&!$i('cfgw'))?'flex':'none'},400)}
+/* botón en la pantalla de partidas */
+function slotBtn(){const s=$i('slots');if(!s||$i('cfgsl'))return;const d=document.createElement('div');d.style.cssText='margin-top:22px;text-align:center';d.id='cfgsl';d.innerHTML=`<button class="cfg-slotb" onclick="CFGU.open()">${GEAR}<span>Configuración</span></button>`;s.appendChild(d)}
+try{const _s=slots;slots=function(){const r=_s.apply(this,arguments);slotBtn();return r}}catch(_){}
+slotBtn();
+})();
+</script>
+
+<script id="patch-demon-js">
+/* ===== INVASIONES DEMONÍACAS (parte 2): desde que superas el nivel 60 =====
+   · Intervalo entre invasiones: 6 a 10 minutos (antes 20 a 30).
+   · Si pierdes: -45 % de solar, filar y recursos y -15 % de cristales mágicos y demás objetos.
+   · Aldeanos (en campamento, libres o en torre mineral): 2 % de que mueran 2-3 y 10 % de que mueran 1-2.
+   · Guarda la gravedad de la derrota (S.ivrep.sev, de 0 a 1) para que la parte 3 destruya edificios. */
+(function(){
+'use strict';
+const DEM={lv:60,gap:[360000,600000],resPct:.45,objPct:.15,pSevere:.02,pMild:.10};
+const RES=['solar','filar','recursos'];
+const OBJ=[['piedra','piedra mágica','piedras mágicas'],['cristal','cristal mágico','cristales mágicos'],['polvo','polvo arcano','polvo arcano'],['nucleo','núcleo','núcleos'],['esencia','esencia','esencias']];
+const RN={solar:'solares',filar:'filares',recursos:'recursos'};
+const demOn=()=>!!(typeof S!=='undefined'&&S&&S.done&&S.done['L'+DEM.lv]);
+window.demOn=demOn;
+
+/* intervalo corto una vez superado el nivel 60 */
+Object.defineProperty(IVC,'gap',{configurable:true,get:()=>demOn()?DEM.gap:[1200000,1800000]});
+
+/* primera vez: avisa y acorta la espera que ya estuviera programada */
+setInterval(()=>{try{
+ if(!demOn()||S.dem||$('game').classList.contains('hide'))return;
+ S.dem=1;const n=Date.now();
+ if(S.ivnext&&!S.iv)S.ivnext=Math.min(S.ivnext,n+DEM.gap[0]+Math.floor(Math.random()*(DEM.gap[1]-DEM.gap[0])));
+ save();notice('Invasiones demoníacas','Superaste el nivel 60: ahora llegan cada 6 a 10 minutos y, si pierdes, el saqueo es brutal y puedes perder aldeanos.')}catch(e){}},2000);
+
+/* marca cada invasión nueva como demoníaca */
+{const _p=ivPlan;ivPlan=function(){const had=!!(S&&S.iv);_p.apply(this,arguments);if(S&&S.iv&&!had&&demOn()&&!S.iv.dem){S.iv.dem=true;save()}}}
+
+/* textos del aviso */
+{const _n=notice;notice=function(t,x){if(t==='¡Invasión en camino!'&&demOn())x='Invasión demoníaca: '+x;return _n.call(this,t,x)}}
+{const _u=ivUI;ivUI=function(){const r=_u.apply(this,arguments);try{const iv=S&&S.iv;if(iv&&iv.dem){
+  const h=document.querySelector('#ov h2');if(h&&/inminente/i.test(h.textContent))h.textContent='Invasión demoníaca';
+  const p=document.querySelector('#ov p.hint');if(p)p.textContent=iv.dem&&ivDef(iv).t>=ivAtk(iv)?'Con esta defensa la ciudad resistiría.':'Si pierdes: -45 % de solar, filar y recursos, -15 % de cristales y demás objetos, y podrías perder aldeanos.'}}catch(e){}return r}}
+setInterval(()=>{try{const b=document.getElementById('iva');if(b&&S&&S.iv&&S.iv.dem&&/^Invasión /.test(b.textContent))b.textContent=b.textContent.replace(/^Invasión /,'Demoníaca ')}catch(e){}},400);
+
+/* aldeanos que mueren: se eligen al azar entre los de campamento, torre mineral y libres */
+function killVillagers(n){const out={cam:0,min:0,free:0};
+ for(let i=0;i<n&&S.pop>0;i++){
+  const free=Math.max(0,S.pop-used()),pool=[];
+  S.b.forEach(b=>{if((b.rest||0)>0)pool.push(['rest',b,b.rest]);if((b.w||0)>0)pool.push(['w',b,b.w])});
+  let r=Math.random()*(free+pool.reduce((a,p)=>a+p[2],0));
+  if(r<free)out.free++;
+  else{r-=free;for(const p of pool){if(r<p[2]){p[1][p[0]]--;out[p[0]=='rest'?'cam':'min']++;break}r-=p[2]}}
+  S.pop--}
+ habSync();return out}
+function villagerRoll(){const r=Math.random();
+ if(r<DEM.pSevere)return 2+Math.floor(Math.random()*2);   /* 2 a 3 */
+ if(r<DEM.pSevere+DEM.pMild)return 1+Math.floor(Math.random()*2); /* 1 a 2 */
+ return 0}
+
+/* resolución */
+{const _r=ivResolve;ivResolve=function(){
+  const iv=S&&S.iv,t0=S&&S.ivrep&&S.ivrep.t;
+  const pre=iv&&iv.dem?JSON.parse(JSON.stringify({c:S.coins,i:S.inv})):null;
+  let d=null,a=0;if(iv&&iv.dem){try{d=ivDef(iv);a=ivAtk(iv)}catch(e){}}
+  const res=_r.apply(this,arguments);
+  try{const r=S&&S.ivrep;
+   if(!pre||!r||r.t===t0||S.iv)return res;
+   r.dem=true;
+   if(r.win){save();return res}
+   /* derrota demoníaca: se deshace la pérdida normal y se aplica la demoníaca */
+   const L=r.L.slice(0,2),loss={},oloss={};
+   RES.forEach(k=>{const v=Math.floor(pre.c[k]||0),l=Math.floor(v*DEM.resPct);S.coins[k]=Math.max(0,(pre.c[k]||0)-l);loss[k]=l});
+   OBJ.forEach(([k])=>{const v=Math.floor(pre.i[k]||0);if(v>0){const l=Math.min(v,Math.max(1,Math.ceil(v*DEM.objPct)));S.inv[k]=v-l;oloss[k]=l}});
+   const nd=villagerRoll(),dead=nd?killVillagers(nd):{cam:0,min:0,free:0},tot=dead.cam+dead.min+dead.free;
+   r.sev=a>0?Math.max(0,Math.min(1,(a-(d?d.t:0))/a)):1;S.lastSev=r.sev;
+   L.push('Las hordas demoníacas arrasaron la ciudad.');
+   L.push('Saqueo (-45 %): '+RES.map(k=>'-'+loss[k]+' '+RN[k]).join(', ')+'.');
+   const ol=OBJ.filter(([k])=>oloss[k]).map(([k,s,p])=>'-'+oloss[k]+' '+(oloss[k]==1?s:p));
+   L.push(ol.length?'Objetos perdidos (-15 %): '+ol.join(', ')+'.':'No tenías objetos que perder.');
+   if(tot){const w=[];if(dead.cam)w.push(dead.cam+' en campamento');if(dead.min)w.push(dead.min+' en torre mineral');if(dead.free)w.push(dead.free+' libre'+(dead.free>1?'s':''));
+    L.push('Aldeanos muertos: '+tot+' ('+w.join(', ')+').');
+    S.mlog=S.mlog||[];S.mlog.unshift('Murieron '+tot+' aldeano'+(tot>1?'s':'')+' en una invasión demoníaca')}
+   else L.push('Ningún aldeano murió.');
+   if(iv.hero)L.push('Los héroes defensores quedaron heridos (nunca mueren).');
+   r.L=L;save();draw();ivReport();
+   try{notice('Invasión demoníaca perdida','Pérdidas: '+RES.map(k=>loss[k]+' '+RN[k]).join(', ')+(tot?' · '+tot+' aldeano'+(tot>1?'s':'')+' muerto'+(tot>1?'s':''):''))}catch(e){}
+  }catch(e){console.error(e)}
+  return res}}
+
+/* informe con título demoníaco */
+{const _rp=ivReport;ivReport=function(){const r=S&&S.ivrep;if(r&&r.dem){
+  modal(`<div class="uh"><div class="ib big">${ic('mur',30)}</div><div class="uhi"><h2>Invasión demoníaca</h2><span class="m">${r.win?'✓ Victoria':'✕ Derrota'}</span></div></div><!--E-->
+  <div class="reqs">${r.L.map(x=>`<div class="req ${r.win?'ok':''}"><span>${x}</span></div>`).join('')}</div>`);return}
+  return _rp.apply(this,arguments)}}
+window.__DEM=DEM;
+})();
+</script>
+
+<style id="patch-wreck-css">
+.c.wr{cursor:pointer}
+.c.wr .wk>svg{filter:grayscale(1) brightness(.5) contrast(1.15);transform:rotate(-5deg) scale(.9);transform-origin:50% 90%}
+.c .wreck{position:absolute;inset:0;pointer-events:none;overflow:visible}
+.c .wreck>svg{position:absolute;inset:0;width:100%;height:100%}
+.c .wreck .wsm{position:absolute;left:38%;bottom:48%;width:26%;height:26%;border-radius:50%;background:rgba(40,36,34,.75);filter:blur(2px);opacity:0;animation:wsmk 3.2s ease-out infinite}
+.c .wreck .wsm.s2{left:54%;bottom:44%;width:20%;height:20%;animation-delay:1.5s}
+@keyframes wsmk{0%{opacity:0;transform:translateY(0) scale(.6)}20%{opacity:.8}100%{opacity:0;transform:translateY(-130%) scale(1.7)}}
+#alerts #rpb{color:var(--r)}
+.rpl{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--l)}
+.rpl .ib{flex:none}
+.rpl .rt{flex:1;min-width:0}.rpl .rt b{display:block}.rpl .rt small{color:var(--m);font-size:11px}
+.rpl button{flex:none;padding:6px 10px}
+</style>
+<script id="patch-wreck-js">
+/* ===== EDIFICIOS DESTRUIDOS (parte 3) =====
+   · Tras perder una invasión demoníaca se destruyen edificios según lo que faltó de defensa (S.ivrep.sev, 0 a 1):
+     faltó casi todo → la mayoría; faltó poco → uno o ninguno. El establecimiento central y las decoraciones/caminos no se destruyen.
+   · Un edificio destruido se ve gris, agrietado y con humo, deja de funcionar (se trata como «no construido») y libera a sus trabajadores.
+   · Repararlo cuesta cristales mágicos + diamantino, más caro cuanto más alto es su nivel (muros: la mitad). */
+(function(){
+'use strict';
+const FAR=8640000000000000; /* fecha máxima: «aún no construido» y válida en JSON */
+const RP={cr:2,dia:2,wall:1};
+const repCost=b=>{const l=L(b);return b.type=='mur'?{cristal:RP.wall*l,diamantino:RP.wall*l}:{cristal:RP.cr*l,diamantino:RP.dia*l+1}};
+const canPay=c=>(S.inv.cristal||0)>=c.cristal&&(S.coins.diamantino||0)>=c.diamantino;
+const dead=()=>S.b.filter(b=>b.dead);
+window.wreckList=dead;
+
+function wreckBuildings(sev){
+ const n0=Date.now(),el=S.b.filter(b=>b.type!='est'&&!DECO.includes(b.type)&&!b.dead&&n0>=b.end);
+ const exp=el.length*0.8*Math.pow(Math.max(0,Math.min(1,sev)),1.3);
+ let k=Math.floor(exp)+(Math.random()<exp-Math.floor(exp)?1:0);k=Math.min(k,el.length);
+ for(let i=el.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[el[i],el[j]]=[el[j],el[i]]}
+ const hit=el.slice(0,k);
+ hit.forEach(b=>{b.dead=1;b.end0=b.end;b.end=FAR;b.d=b.d||1;b.rest=0;b.w=0;delete b.nl});
+ return hit}
+
+/* ---------- aspecto: gris, grietas, escombros, humo y marca roja ---------- */
+const WRECK='<span class="wreck"><svg viewBox="0 0 100 100" aria-hidden="true"><path d="M48 14 41 34 52 46 43 62 54 78" fill="none" stroke="#120b08" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M52 46 68 52 74 68" fill="none" stroke="#120b08" stroke-width="2" stroke-linecap="round"/><path d="M14 90 22 78 32 86 42 76 52 88 64 78 76 87 86 80 90 92z" fill="#4b4642" stroke="#120b08" stroke-width="1.5" stroke-linejoin="round"/><circle cx="82" cy="18" r="12" fill="#c0392b" stroke="#fff" stroke-width="2"/><path d="M82 11v9" stroke="#fff" stroke-width="3" stroke-linecap="round"/><circle cx="82" cy="25" r="1.8" fill="#fff"/></svg><i class="wsm"></i><i class="wsm s2"></i></span>';
+function paintWrecks(){if(!S||!G)return;
+ G.forEach((c,i)=>{const b=cell(i%15,(i/15)|0);
+  if(b&&b.dead){
+   if(!c.classList.contains('wr'))c.classList.add('wr');
+   const sp=c.firstChild;
+   if(sp&&!c.querySelector('.wreck')){
+    sp.classList.add('wk');if(sp.firstChild&&sp.firstChild.style)sp.firstChild.style.opacity='';
+    const p=c.querySelector('.prog');if(p)p.remove();
+    const lv=c.querySelector('.lv');
+    c.insertAdjacentHTML('beforeend',WRECK)}
+  }else if(c.classList.contains('wr'))c.classList.remove('wr')})}
+{const _d=draw;draw=function(){_d.apply(this,arguments);try{paintWrecks()}catch(e){}}}
+setInterval(()=>{try{if(S&&G&&!$('game').classList.contains('hide'))paintWrecks()}catch(e){}},1000);
+
+/* ---------- reparar ---------- */
+function repairOne(id,quiet){const b=S.b.find(x=>x.id==id);if(!b||!b.dead)return false;const c=repCost(b);if(!canPay(c))return false;
+ S.inv.cristal-=c.cristal;S.coins.diamantino-=c.diamantino;
+ b.end=b.end0!=null?b.end0:0;delete b.dead;delete b.end0;b.last=Date.now();
+ save();draw();
+ try{const el=G[b.y*15+b.x];const r=el.getBoundingClientRect();sparks(r.left+r.width/2,r.top+r.height/2,14,'var(--a)');fl('Reparado',el,'var(--a)')}catch(e){}
+ return true}
+const rows=b=>{const c=repCost(b);return reqRow('Cristales mágicos',(S.inv.cristal||0)>=c.cristal,(S.inv.cristal||0)+'/'+c.cristal)+reqRow('Diamantino',(S.coins.diamantino||0)>=c.diamantino,Math.floor(S.coins.diamantino||0)+'/'+c.diamantino)};
+function repairUI(id){const b=S.b.find(x=>x.id==id);if(!b||!b.dead)return;const c=repCost(b),ok=canPay(c);
+ modal(`<div class="uh"><div class="ib big">${ic(b.type,30)}</div><div class="uhi"><h2>${NM[b.type]}</h2><span class="m" style="color:var(--r)">Destruido · nivel ${L(b)}</span></div></div><!--E-->
+ <div class="note warn">Este edificio quedó en ruinas y no funciona hasta que lo repares.</div>
+ <div class="reqs">${rows(b)}</div>
+ <div class="pmf two"><button class="pri" ${ok?'':'disabled'} onclick="wreckRepair(${b.id})">Reparar</button><button onclick="sheetClose()">Cerrar</button></div>`)}
+function repairList(){const ds=dead();if(!ds.length){sheetClose();return}
+ const tot=ds.reduce((a,b)=>{const c=repCost(b);a.cristal+=c.cristal;a.diamantino+=c.diamantino;return a},{cristal:0,diamantino:0}),ok=canPay(tot);
+ modal(`<div class="uh"><div class="ib big">${ic('mur',30)}</div><div class="uhi"><h2>Edificios destruidos</h2><span class="m">${ds.length} en ruinas</span></div></div><!--E-->
+ <div>${ds.map(b=>{const c=repCost(b);return `<div class="rpl"><span class="ib">${ic(b.type,24)}</span><span class="rt"><b>${NM[b.type]} · nivel ${L(b)}</b><small>${c.cristal} cristales mágicos · ${c.diamantino} diamantino</small></span><button ${canPay(c)?'':'disabled'} onclick="wreckRepair(${b.id},1)">Reparar</button></div>`}).join('')}</div>
+ <p class="m hint">Tienes ${S.inv.cristal||0} cristales mágicos y ${Math.floor(S.coins.diamantino||0)} diamantino.</p>
+ <div class="pmf two"><button class="pri" ${ok?'':'disabled'} onclick="wreckAll()">Reparar todo (${tot.cristal} + ${tot.diamantino})</button><button onclick="sheetClose()">Cerrar</button></div>`)}
+window.wreckRepair=(id,list)=>{if(repairOne(id)){if(list)repairList();else sheetClose()}else{if(list)repairList();else repairUI(id)}};
+window.wreckAll=()=>{dead().slice().forEach(b=>repairOne(b.id));if(dead().length)repairList();else sheetClose()};
+
+/* tocar un edificio destruido */
+{const og=$('grid').onclick;$('grid').onclick=function(e){
+  if(typeof place!=='undefined'&&!place){const c=e.target.closest('.c');if(c){const b=cell(+c.dataset.x,+c.dataset.y);if(b&&b.dead){repairUI(b.id);return}}}
+  return og.call(this,e)}}
+
+/* botón «Reparar (N)» junto a los avisos */
+setInterval(()=>{try{const g=$('game');if(!S||!g||g.classList.contains('hide'))return;
+ let box=$('alerts');if(!box){box=document.createElement('div');box.id='alerts';g.appendChild(box)}
+ let b=$('rpb');const n=dead().length;
+ if(!n){if(b)b.remove();return}
+ if(!b){b=document.createElement('button');b.id='rpb';b.onclick=repairList;box.appendChild(b)}
+ const t='Reparar ('+n+')';if(b.textContent!==t)b.textContent=t}catch(e){}},700);
+
+/* ---------- consecuencia de perder una invasión demoníaca ---------- */
+{const _r=ivResolve;ivResolve=function(){
+  const t0=S&&S.ivrep&&S.ivrep.t,res=_r.apply(this,arguments);
+  try{const r=S&&S.ivrep;
+   if(!r||r.t===t0||!r.dem||r.win||r.wr||r.sev==null)return res;
+   r.wr=1;const hit=wreckBuildings(r.sev);
+   if(hit.length){const by={};hit.forEach(b=>by[b.type]=(by[b.type]||0)+1);
+    r.L.push('Edificios destruidos: '+hit.length+' ('+Object.entries(by).map(([k,v])=>v+' '+NM[k]).join(', ')+').');
+    r.L.push('Tócalos para repararlos con cristales mágicos y diamantino.')}
+   else r.L.push('Ningún edificio quedó destruido.');
+   save();draw();ivReport()}catch(e){console.error(e)}
+  return res}}
+})();
+</script>
+
+<style id="patch-rows-css">
+/* ===== Aventuras (parte 4): una sola fila, sin etiquetas ni filas separadas =====
+   Héroes: primera línea adelantada hacia el enemigo, retaguardia un poco atrás.
+   Monstruos: los de primera línea al centro y adelantados hacia tus héroes; la retaguardia en los laterales. */
+.sqrl{display:none!important}
+#sqM.r1,#sqH.r1{flex-wrap:nowrap!important;align-items:flex-start!important;justify-content:center!important;gap:4px}
+#sqM.r1>.cd,#sqH.r1>.cd{flex:1 1 0!important;min-width:0!important;max-width:calc(100%/max(var(--n,3),3) - 4px)!important}
+#sqM.r1>.cd.sq-fw{margin-top:18px!important}
+#sqH.r1>.cd.sq-bkh{margin-top:18px!important}
+#sqM:not(.r1)>.cd.sq-fw{margin-top:0!important}
+</style>
+<script id="patch-rows-js">
+(function(){
+'use strict';
+const MAXROW=5; /* hasta 5 tarjetas caben en una sola fila; con más, se parte en una segunda fila (sin etiquetas) */
+function centerOrder(n){const mid=Math.floor((n-1)/2),o=[mid];for(let d=1;o.length<n;d++){if(mid+d<n)o.push(mid+d);if(o.length<n&&mid-d>=0)o.push(mid-d)}return o}
+function same(a,b){return a.length==b.length&&a.every((x,i)=>x===b[i])}
+function reflow(){
+ const M=document.getElementById('sqM'),H=document.getElementById('sqH');if(!M||!H||typeof SQ==='undefined'||!SQ||!SQ.m||!SQ.hs)return;
+ M.querySelectorAll('.sqrl').forEach(x=>x.remove());H.querySelectorAll('.sqrl').forEach(x=>x.remove());
+ /* monstruos: primera línea al centro, retaguardia a los lados */
+ const items=SQ.m.map((m,i)=>{const e=document.getElementById('sqm'+i);return e&&{e,back:e.classList.contains('sq-bk')}}).filter(Boolean),n=items.length;
+ const order=[...items.filter(x=>!x.back),...items.filter(x=>x.back)],idx=centerOrder(n),slots=new Array(n);
+ order.forEach((x,k)=>slots[idx[k]]=x);
+ const want=slots.map(x=>x.e),have=Array.from(M.children);
+ if(!same(want,have))want.forEach(e=>M.appendChild(e));
+ slots.forEach(x=>x.e.classList.toggle('sq-fw',!x.back));
+ M.style.setProperty('--n',n);M.classList.toggle('r1',n<=MAXROW);
+ /* héroes: en el orden de la escuadra; la retaguardia se retrasa */
+ const hs=SQ.hs.map((u,i)=>{const e=document.getElementById('sqh'+i);return e&&{e,u}}).filter(Boolean);
+ const hw=hs.map(x=>x.e),hh=Array.from(H.children);
+ if(!same(hw,hh))hw.forEach(e=>H.appendChild(e));
+ hs.forEach(x=>x.e.classList.toggle('sq-bkh',!x.u.f));
+ H.style.setProperty('--n',hs.length);H.classList.add('r1')}
+let busy=false;
+function run(){if(busy)return;busy=true;try{reflow()}catch(e){console.error(e)}busy=false}
+const ov=document.getElementById('ov');
+if(ov)new MutationObserver(()=>{if(document.getElementById('sqM'))run()}).observe(ov,{childList:true,subtree:true});
+setInterval(()=>{if(document.getElementById('sqM'))run()},500);
+})();
+</script>
+
+
+<style id="patch-hist-css">
+/* ===== Parte 6: historial con íconos ===== */
+#sqlog .lg{display:flex;align-items:center;gap:9px;padding:6px 8px;margin:0 0 4px;border-radius:10px;border-left:3px solid var(--c,var(--l));background:color-mix(in srgb,var(--c,#888) 9%,transparent);font-size:12px;line-height:1.3;color:var(--t)}
+#sqlog .lg-i{flex:none;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--c);background:color-mix(in srgb,var(--c) 18%,transparent)}
+#sqlog .lg-i svg{width:16px;height:16px}
+#sqlog .lg-t{flex:1;min-width:0}
+#sqlog .lg-n{flex:none;font-weight:800;font-size:14px;color:var(--c);min-width:2.2em;text-align:right}
+#sqlog .lg.k-hit{--c:#6fcf8a}#sqlog .lg.k-hurt{--c:#ff6a7a}#sqlog .lg.k-heal{--c:#5fd0a0}#sqlog .lg.k-loot{--c:#e9a35a}#sqlog .lg.k-xp{--c:#b6ff6a}#sqlog .lg.k-fx{--c:#7fb8ff}#sqlog .lg.k-flag{--c:#c9a0ff}#sqlog .lg.k-say{--c:#9a95c0;font-style:italic}#sqlog .lg.k-def{--c:#9a95c0}
+</style>
+<script id="patch-hist-js">
+(function(){
+'use strict';
+const P=d=>'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+d+'</svg>';
+const IC={
+ hit:P('<path d="M14.5 4l5.5-1-1 5.500L9 18l-3-3z"/><path d="M5 19l-2 2M7 14l3 3"/>'),
+ hurt:P('<path d="M12 21s-8-5-8-11a4.500 4.500 0 0 1 8-2.500A4.500 4.500 0 0 1 20 10c0 6-8 11-8 11z"/><path d="M12 8l-2 4h3l-2 4"/>'),
+ heal:P('<path d="M12 5v14M5 12h14"/>'),
+ loot:P('<path d="M9 3h6l-1.200 3h-3.600zM8.200 6h7.600c2.600 1.600 4.200 4.500 4.200 8 0 4-2.700 6.500-8 6.500S4 18 4 14c0-3.500 1.600-6.400 4.200-8z"/>'),
+ xp:P('<path d="M12 3l2.600 5.600 6 .7-4.500 4.100 1.300 6L12 16.300 6.600 19.400l1.300-6L3.400 9.300l6-.7z"/>'),
+ fx:P('<path d="M12 2v20M3.500 7l17 10M3.500 17l17-10"/>'),
+ flag:P('<path d="M5 21V4M5 4h11l-2 4 2 4H5"/>'),
+ say:P('<path d="M4 5h16v11H9l-5 4z"/>'),
+ def:P('<circle cx="12" cy="12" r="3"/>')};
+const esc=t=>t.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+function cls(t){
+ const hs=(typeof SQ!=='undefined'&&SQ&&SQ.hs)?SQ.hs.map(u=>u.n):[],isH=n=>hs.includes((n||'').trim());
+ let m;
+ if(/^Botín|^Recompensa|suelta|Sin botín/.test(t))return['loot',null];
+ if(/gana \d+ de experiencia|mejora: nivel/.test(t))return['xp',(t.match(/gana (\d+)/)||[])[1]?'+'+t.match(/gana (\d+)/)[1]:null];
+ if(m=t.match(/^(.+?) (?:ataca a|contraataca a) (.+?)(?: [^:]*)?: -(\d+) HP/))return[isH(m[2])?'hurt':'hit','-'+m[3]];
+ if(m=t.match(/^(.+?) recibe (\d+) de daño/))return['hit','-'+m[2]];
+ if(m=t.match(/sufre (?:veneno|quemadura): -(\d+)/))return['hit','-'+m[1]];
+ if(m=t.match(/El veneno causa -(\d+)/))return['hurt','-'+m[1]];
+ if(m=t.match(/(?:recupera|se cura|cura a .+?:) \+?(\d+)/))return['heal','+'+m[1]];
+ if(m=t.match(/\+(\d+) HP/))return['heal','+'+m[1]];
+ if(/cae incapacitado|Aventura fallida|Aventura completada|Oleada|nueva fase|Comienza/.test(t))return['flag',null];
+ if(/^«/.test(t)||/: «/.test(t))return['say',null];
+ if(/esquiva|guardia|escudo|protege|intercepta|provoca|congel|atad|petrific|inmovil|veneno|marca|regenera|prepara|resiste|invoca|absorbe/i.test(t))return['fx',null];
+ return['def',null]}
+function proc(){const l=document.getElementById('sqlog');if(!l)return;
+ l.querySelectorAll(':scope>div:not(.lg)').forEach(d=>{const t=d.textContent,[k,n]=cls(t);
+  d.className='lg k-'+k;d.innerHTML='<span class="lg-i">'+IC[k]+'</span><span class="lg-t">'+esc(t)+'</span>'+(n?'<span class="lg-n">'+n+'</span>':'')})}
+let q=0;
+new MutationObserver(()=>{if(q)return;q=requestAnimationFrame(()=>{q=0;try{proc()}catch(e){console.error(e)}})}).observe(document.body,{childList:true,subtree:true});
+})();
+</script>
 </body></html>
