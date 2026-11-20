@@ -3912,11 +3912,13 @@ onAuthStateChanged(auth,async u=>{
  else{unlisten();musicStop();uid=null;window.Cloud.name=null;window.Cloud.me=null;notify();refresh();window.LD&&LD.done()}});
 /* ===== CHAT GLOBAL y SUGERENCIAS DE AMIGOS ===== */
 Object.assign(window.Cloud,{
- chatListen(cb){return onSnapshot(query(collection(db,'chat'),orderBy('t','desc'),limit(80)),sn=>cb(sn.docs.map(d=>({id:d.id,...d.data()})).reverse()),e=>{console.warn('chat',e);cb([],e)})},
+ chatListen(cb){return onSnapshot(query(collection(db,'chat'),orderBy('t','desc'),limit(120)),sn=>{const l=sn.docs.map(d=>({id:d.id,...d.data()})).reverse();window.Cloud._chatCut=l.length>=120?l[0].t:0;cb(l)},e=>{console.warn('chat',e);cb([],e)})},
+ async chatPrune(){const cut=window.Cloud._chatCut,n=Date.now();if(!uid||!cut||n-(window.Cloud._cp||0)<60000)return;window.Cloud._cp=n;
+  try{const r=await getDocs(query(collection(db,'chat'),where('t','<',cut),orderBy('t','asc'),limit(200)));await Promise.all(r.docs.map(d=>deleteDoc(d.ref)))}catch(e){console.warn('chat prune',e)}},
  async chatSend(txt){txt=String(txt||'').trim().slice(0,300);if(!txt)return;
   if(!uid||!window.Cloud.me)throw new Error('Necesitas una cuenta.');
   const n=Date.now();if(n-(window.Cloud._ct||0)<1200)throw new Error('Espera un momento antes de enviar otro mensaje.');window.Cloud._ct=n;
-  await setDoc(doc(collection(db,'chat')),{uid,nombre:window.Cloud.me.nombre||window.Cloud.name,color:window.Cloud.me.color||'',txt,t:n})},
+  await setDoc(doc(collection(db,'chat')),{uid,nombre:window.Cloud.me.nombre||window.Cloud.name,color:window.Cloud.me.color||'',txt,t:n});window.Cloud.chatPrune()},
  typingListen(cb){return onSnapshot(collection(db,'chat_typing'),sn=>cb(sn.docs.filter(d=>d.id!==uid).map(d=>d.data())),e=>console.warn('typing',e))},
  async typingSet(on){if(!uid)return;const n=Date.now();if(on&&n-(window.Cloud._tt||0)<2000)return;window.Cloud._tt=on?n:0;
   try{await setDoc(doc(db,'chat_typing',uid),{nombre:(window.Cloud.me&&window.Cloud.me.nombre)||window.Cloud.name,t:on?n:0})}catch(e){}},
