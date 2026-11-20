@@ -5660,7 +5660,7 @@ function render(){const o=document.getElementById('ntfov');if(!o)return;const c=
  if(log.length)b+=`<div class="ns">Actividad reciente</div>`+log.slice(0,10).map(l=>`<div class="ni"><span class="nd">${l.k=='aceptada'?IC.chk:IC.user}</span><div class="nt">${esc(l.t)}<time>${ago(l.at)}</time></div></div>`).join('');
  if(out.length)b+=`<div class="ns">Enviadas</div>`+out.map(r=>`<div class="ni">${av(r.paC,r.paN,34)}<div class="nt">Esperando a <b>${esc(r.paN)}</b></div><div class="na"><button onclick="ntfDel('${esc(r.id)}')">Cancelar</button></div></div>`).join('');
  if(!b)b=`<div class="ne">${IC.bell.replace('width="20" height="20"','width="36" height="36"')}<span>No tienes notificaciones.</span></div>`;
- o.innerHTML=`<div class="panel ntp"><div class="nh"><h2>${IC.bell}Notificaciones</h2><button onclick="ntfClose()">Cerrar</button></div><div class="nb">${b}</div></div>`}
+ const _ob=o.querySelector('.nb'),_st=_ob?_ob.scrollTop:0;o.innerHTML=`<div class="panel ntp"><div class="nh"><h2>${IC.bell}Notificaciones</h2><button onclick="ntfClose()">Cerrar</button></div><div class="nb">${b}</div></div>`;if(_st){const _nb=o.querySelector('.nb');if(_nb)_nb.scrollTop=_st}}
 window.ntfOpen=()=>{if(!C()||!C().name)return;open=true;let o=document.getElementById('ntfov');if(!o){o=document.createElement('div');o.id='ntfov';o.onclick=e=>{if(e.target===o)ntfClose()};document.body.appendChild(o)}render()};
 window.ntfClose=()=>{open=false;const o=document.getElementById('ntfov');if(o)o.remove()};
 window.ntfAcc=async id=>{try{await C().accept(id)}catch(e){}render()};
@@ -6877,7 +6877,8 @@ close();d.body.appendChild(m);d.body.appendChild(b)})();</script>
    if(lg.length){html+='<div class="sec">Actividad reciente</div>';lg.forEach(function(l){html+='<div class="nf"><span class="mi" style="width:34px;height:34px">'+SV(P.user,18)+'</span><span>'+esc(l.t)+'<br><span style="font-size:11px;opacity:.6">'+esc(ago(l.at))+'</span></span></div>'})}
    if(!rq.length&&!lg.length)html+='<div class="em">Sin solicitudes ni avisos.</div>'}
   if(list.some(function(m){return m.rw?m.cl:m.rd}))html+='<button class="clr" type="button" id="mld">Borrar leídos</button>';
-  sc.innerHTML='<div class="mh"><button type="button" id="mlx" aria-label="Volver">'+SV(P.back,18)+'</button><h2>Correo</h2></div><div class="mb"><div class="tabs">'+T.map(function(t){return '<button type="button" data-t="'+t[0]+'" class="'+(tab==t[0]?'on':'')+'">'+t[1]+(t[2]?'<i>'+t[2]+'</i>':'')+'</button>'}).join('')+'</div>'+html+'</div>';
+  var _mo=sc.querySelector('.mb'),_mt=_mo?_mo.scrollTop:0;sc.innerHTML='<div class="mh"><button type="button" id="mlx" aria-label="Volver">'+SV(P.back,18)+'</button><h2>Correo</h2></div><div class="mb"><div class="tabs">'+T.map(function(t){return '<button type="button" data-t="'+t[0]+'" class="'+(tab==t[0]?'on':'')+'">'+t[1]+(t[2]?'<i>'+t[2]+'</i>':'')+'</button>'}).join('')+'</div>'+html+'</div>';
+  if(_mt){var _mn=sc.querySelector('.mb');if(_mn)_mn.scrollTop=_mt}
   sc.querySelector('#mlx').onclick=close;var a=sc.querySelector('#mla');if(a)a.onclick=claimAll;var x=sc.querySelector('#mld');if(x)x.onclick=del;
   sc.querySelectorAll('[data-t]').forEach(function(t){t.onclick=function(){tab=t.dataset.t;won=null;paint()}});
   sc.querySelectorAll('.mt').forEach(function(t){t.onclick=function(){var m=ms.filter(function(z){return z.id==t.dataset.id})[0];if(!m)return;m.op=!m.op;m.rd=true;won=null;try{save()}catch(e){}badge();paint()}});
@@ -6952,7 +6953,7 @@ close();d.body.appendChild(m);d.body.appendChild(b)})();</script>
   h+='<button class="ac" type="button" id="ach">'+SV('<circle cx="12" cy="12" r="9"/><path d="M9.5 9.3a2.6 2.6 0 015 .9c0 1.7-2.5 2.2-2.5 3.8M12 17.2h.01"/>')+'Ayuda y soporte</button>';
   h+='<button class="ac" type="button" id="acg">'+SV(P.cfg)+'Configuración</button>';
   if(n)h+='<button class="ac out" type="button" id="aco">'+SV(P.out)+'Cerrar sesión</button>';
-  h+='</div>';pn.innerHTML=h;
+  h+='</div>';var _o=pn.querySelector('.ab2'),_t=_o?_o.scrollTop:0;pn.innerHTML=h;if(_t){var _n=pn.querySelector('.ab2');if(_n)_n.scrollTop=_t}
   var $=function(i){return pn.querySelector('#'+i)};$('acx').onclick=close;
   if($('acc'))$('acc').onclick=function(){try{navigator.clipboard.writeText(m.pid);$('acc').textContent='¡Copiado!'}catch(e){}};
   if($('acl'))$('acl').onclick=function(){close();try{cuentaDlg()}catch(e){}};
