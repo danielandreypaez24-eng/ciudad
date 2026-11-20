@@ -3883,7 +3883,7 @@ Object.assign(window.Cloud,{
  async linkAdmin(){if(!uid||window.Cloud.admUid)return;window.Cloud.admUid=uid;try{await setDoc(doc(db,'config','admin'),{uid})}catch(e){window.Cloud.admUid=null}},
  async viewOf(u){const s=await getDoc(doc(db,'perfiles',u));return s.exists()?s.data():null},
  team,isSearching:()=>searching,
- supplies:()=>{try{const u=S.sup||{};return {v:Math.max(0,u.vendaje|0),b:Math.max(0,u.botiquin|0)}}catch(e){return {v:0,b:0}}},
+ supplies:()=>{try{const u=S.sup||{};const i=(S.bot&&S.bot.bag&&S.bot.inv)||{};return {v:Math.max(0,u.vendaje|0),b:Math.max(0,u.botiquin|0),q:{vida:Math.max(0,i.vida|0),bomb:Math.max(0,i.bomb|0),mana:Math.max(0,i.mana|0)}}}catch(e){return {v:0,b:0,q:{vida:0,bomb:0,mana:0}}}},
  async startSearch(){if(!uid)throw new Error('Necesitas una cuenta.');if(!team().length)throw new Error('Equipa al menos un héroe.');
   inB=false;searching=true;pend.clear();const put=()=>setDoc(doc(db,'cola',uid),{uid,nombre:window.Cloud.name,estado:'buscando',t:Date.now()});
   await put();qi=setInterval(()=>put().catch(()=>{}),20000);
@@ -4570,7 +4570,7 @@ const mkU=x=>{const cls=x.cls||'guerrero',lv=x.lv|0,s=stOf(cls,lv);return{n:x.n,
 const alive=a=>a.map((u,i)=>u.hp>0?i:-1).filter(i=>i>=0);
 const ord=a=>alive(a); /* orden de actuación: de izquierda a derecha, como se ven las tarjetas */ /* orden de actuación: más rápido primero */
 const opp=s=>s=='a'?'b':'a';
-function initState(r){const sp=x=>({v:(x&&x.v)|0,b:(x&&x.b)|0}),u={a:r.ta.map(mkU),b:r.tb.map(mkU)};return{u,sup:{a:sp(r.ua),b:sp(r.ub)},turn:'a',ai:ord(u.a)[0]||0,bt:{a:0,b:0},vs:{a:0,b:0},seq:0,log:['¡Comienza el duelo!'],win:null,ev:null}}
+function initState(r){const sp=x=>({v:(x&&x.v)|0,b:(x&&x.b)|0,q:{vida:(x&&x.q&&x.q.vida)|0,bomb:(x&&x.q&&x.q.bomb)|0,mana:(x&&x.q&&x.q.mana)|0}}),u={a:r.ta.map(mkU),b:r.tb.map(mkU)};return{u,sup:{a:sp(r.ua),b:sp(r.ub)},turn:'a',ai:ord(u.a)[0]||0,bt:{a:0,b:0},vs:{a:0,b:0},seq:0,log:['¡Comienza el duelo!'],win:null,ev:null}}
 /* ---------- estilos de la cuenta atrás ---------- */
 if(!$$('pvcd-css')){const s=document.createElement('style');s.id='pvcd-css';s.textContent=`
 .pvcd{position:fixed;inset:0;z-index:170;display:flex;align-items:center;justify-content:center;padding:max(20px,env(safe-area-inset-top,0px)) 20px max(20px,env(safe-area-inset-bottom,0px));background:radial-gradient(120% 90% at 50% 20%,color-mix(in srgb,var(--a) 16%,var(--bg)),var(--bg) 70%);color:var(--t);text-align:center;animation:pvcdIn .35s ease both}
@@ -4630,6 +4630,7 @@ function upd(){if(!R||!$$('pvM'))return;const st=R.st,mine=st.turn==R.me&&!st.wi
  if(st.win&&R.ov)cdStop();
  if(R.arm&&(R.armSeq!==st.seq||!mine))R.arm=null;
  if(R.sup&&(!mine||R.busy))R.sup=null;
+ if(R.alq&&(!mine||R.busy))R.alq=null;
  if(!E[R.t]||E[R.t].hp<=0){const k=alive(E)[0];if(k!=null)R.t=k}
  if(!U[R.a]||U[R.a].hp<=0){const k=alive(U)[0];if(k!=null)R.a=k}
  const au=mine?U[st.ai]:(U.find(x=>x.hp>0)||U[0]),healer=!!au&&au.sk.some(id=>['heal','gheal'].includes(SKL[id].k));
@@ -4640,16 +4641,17 @@ function upd(){if(!R||!$$('pvM'))return;const st=R.st,mine=st.turn==R.me&&!st.wi
   e.classList.toggle('sq-ok',act0&&rc&&u.hp>0);e.classList.toggle('sq-no',act0&&!rc&&u.hp>0)});
  U.forEach((u,i)=>{const e=$$('pvh'+i);if(!e)return;$$('pvhb'+i).style.width=100*Math.max(0,u.hp)/u.mhp+'%';$$('pvhv'+i).textContent=Math.max(0,u.hp)+'/'+u.mhp;$$('pvhm'+i).style.width=100*u.mp/Math.max(1,u.mmp)+'%';$$('pvhmv'+i).textContent='Maná '+u.mp+'/'+u.mmp;$$('pvhs'+i).style.width=100*Math.max(0,u.st|0)/Math.max(1,u.mst|0)+'%';$$('pvhsv'+i).textContent='Res '+(u.st|0)+'/'+(u.mst|0);$$('pvht'+i).textContent=fx(u);
   e.classList.toggle('dead',u.hp<=0);e.classList.toggle('sel',mine&&i==st.ai&&u.hp>0);e.classList.toggle('sup-ok',!!(R.sup&&mine&&u.hp>0&&u.hp<u.mhp));e.classList.toggle('qal',!!(healer&&mine&&!st.win&&i==R.a&&u.hp>0&&i!=st.ai))});
+ E.forEach((u,i)=>{const e=$$('pvm'+i);if(e)e.classList.toggle('alq-unst',!!(R.st.prep&&R.st.prep[R.o]&&R.st.prep[R.o].who==i&&u.hp>0));if(e)e.dataset.alq=((R.alq=='qb'||R.alq=='qz')&&u.hp>0)?R.alq:''});U.forEach((u,i)=>{const e=$$('pvh'+i);if(e){e.classList.toggle('alq-unst',!!(R.st.prep&&R.st.prep[R.me]&&R.st.prep[R.me].who==i&&u.hp>0))}if(e)e.dataset.alq=((R.alq=='qv'&&u.hp>0&&u.hp<u.mhp)||(R.alq=='qm'&&u.hp>0&&u.mp<u.mmp))?R.alq:''});
  $$('pvr').textContent='vs '+R.rn+(R.cd?' · Preparando…':'');
  $$('pvLog').innerHTML=st.log.slice(-30).reverse().map(l=>`<div class="m">${esc(l)}</div>`).join('');
  if(st.win){$$('pvA').innerHTML=R.res||'<div class="qtn">Calculando resultado…</div>';return}
  const off=!mine||R.busy||!au||au.hp<=0||!!R.sup,lim=LIM[au&&au.cls]||[3,2],tg=E[R.t],al=U[R.a],ak=R.arm&&SKL[R.arm],tot=au?au.atk+(ak&&['dmg','mag','slow','psn'].includes(ak.k)?ak.v:0):0;
- const txt=R.sup?`Elige a quién curar con <b>${R.sup=='sb'?'Botiquín':'Vendaje'}</b> · toca un héroe herido`:R.cd?'El duelo está por comenzar…':mine?`Turno de <b>${esc(au.n)}</b>${tg&&tg.hp>0?' · Objetivo: <b>'+esc(tg.n)+'</b>':''}${healer&&al&&al.hp>0?' · Aliado: <b>'+esc(al.n)+'</b>':''}`:`Esperando la jugada de <b>${esc(R.rn)}</b>…`;
+ const txt=R.alq?`Alquimia: elige ${(R.alq=='qb'||R.alq=='qz')?'un <b>enemigo</b>':'un <b>héroe aliado</b>'} para usar <b>${AQN[R.alq]}</b>`:R.sup?`Elige a quién curar con <b>${R.sup=='sb'?'Botiquín':'Vendaje'}</b> · toca un héroe herido`:R.cd?'El duelo está por comenzar…':mine?`Turno de <b>${esc(au.n)}</b>${tg&&tg.hp>0?' · Objetivo: <b>'+esc(tg.n)+'</b>':''}${healer&&al&&al.hp>0?' · Aliado: <b>'+esc(al.n)+'</b>':''}`:`Esperando la jugada de <b>${esc(R.rn)}</b>…`;
  const ab=(au?au.sk:[]).map(id=>{const k=SKL[id],c=cst(id),cd=au.cd[id]|0,dis=off||cd>0||(au[c.r]|0)<c.v||(k.k=='phx'&&(au.px||au.pu)),ct=c.v+' '+(c.r=='st'?'res.':'maná'),why=dis?(cd>0?'Recarga: '+cd+' ronda(s)':off?'Espera tu turno':'Falta de '+(c.r=='st'?'resistencia':'maná')):'';
    return `<button class="qab${R.arm==id?' qon':''}" aria-pressed="${R.arm==id}" ${dis?'disabled':''} data-sk="${id}" data-who="d" data-rk="${(()=>{try{const h=S.heroes.find(x=>x.n==au.n);return h?skRank(h,id):1}catch(e){return 1}})()}" data-why="${esc(why)}" aria-label="${esc(k.n)}" onclick="PVB.arm('${id}')"><b>${esc(narrow.matches?k.n:k.n.slice(0,2))}</b><small>${cd>0?'R'+cd:esc(ct)}</small></button>`}).join('')+Array.from({length:Math.max(0,lim[0]-(au?au.sk.length:0))},()=>'<div class="qpv" title="Espacio de habilidad activa libre">+</div>').join('');
  const pv=Array.from({length:lim[1]},()=>'<div class="qpv" title="Espacio de habilidad pasiva libre"></div>').join('');
  const gcd=au?(au.cd.gp|0):0,gOff=off||!au||!au.gp||gcd>0,sv=st.sup[R.me].v|0,sb=st.sup[R.me].b|0;
- $$('pvA').innerHTML=`<div class="qtn">${txt}</div><div class="qcb"><div class="qcl"${narrow.matches&&!(au&&au.sk.length)?' style="display:none"':''}><span class="qlb">Activas</span><div class="qag">${ab}</div></div><div class="qcc"><span class="qdm">Daño total: <b>${tot} ATQ</b>${ak?' · <b>+ '+esc(ak.n)+'</b>':''}</span><button class="pri qatk${ak?' qarm':''}" ${off?'disabled':''} title="${off?'Espera tu turno':(ak?'Ataca y aplica '+esc(ak.n):'Ataque normal: sin coste')}" onclick="PVB.go('atk')">ATACAR</button><div class="qsub"><button ${gOff?'disabled':''} title="${gOff?'Recarga: '+gcd+' ronda(s) o turno no disponible':'Ataque fuerte'}" onclick="PVB.go('gp')">Ataque fuerte<small>${gcd>0?'Recarga '+gcd:'Sin coste'}</small></button><button ${off?'disabled':''} onclick="PVB.act('def')">Defender<small>Guardia</small></button></div></div><div class="qcr"><span class="qlb">Pasivas</span><div class="qag">${pv}</div></div></div>${R.sup?'<button id="pvsb" onclick="PVB.supNo()">Cancelar selección</button>':sv+sb>0?`<button id="pvsb" ${off?'disabled':''} onclick="PVB.sup()">${ic('ven',14)} Suministros (${sv} · ${sb})</button>`:''}${!mine&&!R.cd&&R.stale?'<button class="pri" style="width:100%;margin-top:8px" onclick="PVB.claim()">El rival no responde: reclamar victoria</button>':''}`}
+ $$('pvA').innerHTML=`<div class="qtn">${txt}</div><div class="qcb"><div class="qcl"${narrow.matches&&!(au&&au.sk.length)?' style="display:none"':''}><span class="qlb">Activas</span><div class="qag">${ab}</div></div><div class="qcc"><span class="qdm">Daño total: <b>${tot} ATQ</b>${ak?' · <b>+ '+esc(ak.n)+'</b>':''}</span><button class="pri qatk${ak?' qarm':''}" ${off?'disabled':''} title="${off?'Espera tu turno':(ak?'Ataca y aplica '+esc(ak.n):'Ataque normal: sin coste')}" onclick="PVB.go('atk')">ATACAR</button><div class="qsub"><button ${gOff?'disabled':''} title="${gOff?'Recarga: '+gcd+' ronda(s) o turno no disponible':'Ataque fuerte'}" onclick="PVB.go('gp')">Ataque fuerte<small>${gcd>0?'Recarga '+gcd:'Sin coste'}</small></button><button ${off?'disabled':''} onclick="PVB.act('def')">Defender<small>Guardia</small></button></div></div><div class="qcr"><span class="qlb">Pasivas</span><div class="qag">${pv}</div></div></div>${R.sup?'<button id="pvsb" onclick="PVB.supNo()">Cancelar selección</button>':sv+sb>0?`<button id="pvsb" ${off?'disabled':''} onclick="PVB.sup()">${ic('ven',14)} Suministros (${sv} · ${sb})</button>`:''}${aqBtn(off||!!R.sup)}${!mine&&!R.cd&&R.stale?'<button class="pri" style="width:100%;margin-top:8px" onclick="PVB.claim()">El rival no responde: reclamar victoria</button>':''}`}
 /* ---------- acciones (solo el jugador con el turno) ---------- */
 function lose(t,d,ln){if(d>=t.hp&&t.px>0){t.px=0;t.pu=1;t.hp=1;ln.push(`¡Último resplandor! ${t.n} sobrevive con 1 HP.`);return}t.hp=Math.max(0,t.hp-d)}
 function skipCC(ns,ln,ev){ev.sk=ev.sk||[];let g=0;
@@ -4660,11 +4662,11 @@ function skipCC(ns,ln,ev){ev.sk=ev.sk||[];let g=0;
   ln.push(`${u.n} está ${kd=='bd'?'atado':'inmovilizado'} y pierde su turno.`);
   const o=ord(L),p=o.indexOf(ns.ai),nx=p>=0?o[p+1]:undefined;
   if(nx!=null)ns.ai=nx;
-  else{const ot=side=='a'?'b':'a';ns.bt=ns.bt||{a:0,b:0};ns.bt[side]=0;ns.turn=ot;upkeep(ns.u[ot]);ns.ai=ord(ns.u[ot])[0]||0;ln.push(`— Turno de ${ot==R.me?'tu equipo':R.rn} —`)}}}
+  else{const ot=side=='a'?'b':'a';ns.bt=ns.bt||{a:0,b:0};ns.bt[side]=0;ns.turn=ot;aqTick(ns,side,ln,ev);upkeep(ns.u[ot]);ns.ai=ord(ns.u[ot])[0]||0;ln.push(`— Turno de ${ot==R.me?'tu equipo':R.rn} —`)}}}
 function hit(t,d){if(t.eva>0){t.eva--;return 0}if(t.g>0){d=Math.max(1,d-t.g);t.g=0}if(t.mk>0&&d>0){d++;t.mk--}return Math.max(1,d)}
 function upkeep(list){list.forEach(u=>{if(u.hp<=0)return;if(u.pz>0){u.hp=Math.max(1,u.hp-1);u.pz--}if(u.rg>0){u.hp=Math.min(u.mhp,u.hp+1);u.rg--}if(u.tk>0)u.tk--;u.mp=Math.min(u.mmp,u.mp+1);u.st=Math.min(u.mst|0,(u.st|0)+1);for(const k in u.cd)u.cd[k]=Math.max(0,u.cd[k]-1)})}
 async function act(a,fr){const st=R.st;if(R.cd||R.busy||st.win||st.turn!=R.me)return;const ns=clone(st),U=ns.u[R.me],E=ns.u[R.o],u=U[ns.ai];if(!u||u.hp<=0)return;
- const k=typeof SKL!=='undefined'?SKL[a]:null,kind=k?k.k:null,needT=a=='atk'||a=='gp'||['dmg','mag','slow','psn','mark','bind','freeze','petr'].includes(kind);
+ const k=typeof SKL!=='undefined'?SKL[a]:null,kind=k?k.k:null,needT=a=='atk'||a=='gp'||a=='qb'||a=='qz'||['dmg','mag','slow','psn','mark','bind','freeze','petr'].includes(kind);
  let j=R.t;const tk=alive(E).filter(i=>E[i].tk>0);if(tk.length&&!tk.includes(j))j=tk[0];if(needT&&(!E[j]||E[j].hp<=0))return;
  if(k&&(!u.sk.includes(a)||(u.cd[a]|0)>0))return;if(a=='gp'&&(!u.gp||(u.cd.gp|0)>0))return;
  if(kind=='phx'&&(u.px||u.pu)){notice('Sin efecto','El Último resplandor ya está activo o ya se usó en este duelo.');return}
@@ -4673,15 +4675,31 @@ async function act(a,fr){const st=R.st;if(R.cd||R.busy||st.win||st.turn!=R.me)re
  if((a=='sb'||a=='sv')){const al=U[ally];if(!ns.sup[R.me][a=='sb'?'b':'v']||!al||al.mhp-al.hp<=0){notice('Sin efecto','Ese aliado ya tiene la vida completa.');return}
   if(a=='sb'&&((ns.bt&&ns.bt[R.me])|0)>=2){notice('Límite del turno','Solo puedes usar 2 botiquines por turno.');return}
   if(a=='sv'&&((ns.vs&&ns.vs[R.me])|0)>=5){notice('Ataca primero','Ya usaste 5 vendajes seguidos: ataca antes de usar otro.');return}}
+ if(a=='qv'||a=='qm'||a=='qb'){const key=a=='qv'?'vida':a=='qm'?'mana':'bomb',q=(ns.sup[R.me].q=ns.sup[R.me].q||{vida:0,bomb:0,mana:0});if((q[key]|0)<1){notice('Sin objetos','Ya no te quedan de esos objetos.');return}if(a!='qb'){const al=U[ally];if(!al||al.hp<=0||(a=='qv'?al.mhp-al.hp<=0:al.mp>=al.mmp)){notice('Sin efecto',a=='qv'?'Ese aliado ya tiene la vida completa.':'Ese aliado ya tiene el maná completo.');return}}}
+ let cmbm=null;
+ if(a=='qc'){const m=(R.cmb||[]).slice(),need={};R.cmb=null;const P=window.ALQ_CFG&&window.ALQ_CFG.pct;if(u.cls!='alquimista'||m.length!=2||!P||P[m[0]]==null||P[m[1]]==null)return;ns.prep=ns.prep||{a:null,b:null};
+  if(ns.prep[R.me]){notice('Mezcla activa','Ya tienes una mezcla inestable activa.');return}
+  const q=(ns.sup[R.me].q=ns.sup[R.me].q||{vida:0,bomb:0,mana:0});m.forEach(k=>need[k]=(need[k]|0)+1);if(Object.keys(need).some(k=>(q[k]|0)<need[k])){notice('Sin objetos','No tienes esas dos pociones.');return}cmbm=m}
+ if(a=='qz'&&!(ns.prep&&ns.prep[R.me])){notice('Sin mezcla','No hay ninguna mezcla inestable activa.');return}
+ if((a=='qv'||a=='qm'||a=='qb'||a=='qc')&&u.cls=='alquimista'){const L=window.alqLimOf(u.lv),N=((ns.alqN&&ns.alqN[R.me])|0);if(N>=L){notice('Límite de pociones','El alquimista ya usó sus '+L+' pociones de este combate.');return}}
  let free=fr?1:0,ln=[];
  /* la primera línea enemiga protege a la retaguardia de los ataques cuerpo a cuerpo */
  const physHit=a=='atk'||a=='gp'||(k&&isPhys(a)&&['dmg','slow','psn'].includes(kind));
  if(needT&&physHit&&melee(u)&&!tk.length&&!front(E[j])){const f=alive(E).find(i=>front(E[i]));if(f!=null){ln.push(`${u.n} no alcanza a ${E[j].n}: la primera línea enemiga lo protege.`);j=f}}
- let icd=0;if(needT&&['dmg','mag','slow','psn','bind','freeze','petr'].includes(kind||'dmg')||a=='atk'||a=='gp'){if(E[j]&&!front(E[j])){const c=alive(E).find(i=>i!=j&&E[i].ic>0);if(c!=null){icd=1;E[c].ic--;ln.push(`${E[c].n} intercepta el golpe dirigido a ${E[j].n} (-1 de daño).`);j=c}}}
+ let icd=0;if(a!='qb'&&a!='qz'&&(needT&&['dmg','mag','slow','psn','bind','freeze','petr'].includes(kind||'dmg')||a=='atk'||a=='gp')){if(E[j]&&!front(E[j])){const c=alive(E).find(i=>i!=j&&E[i].ic>0);if(c!=null){icd=1;E[c].ic--;ln.push(`${E[c].n} intercepta el golpe dirigido a ${E[j].n} (-1 de daño).`);j=c}}}
  R.busy=true;upd();const ev={s:R.me,i:ns.ai,o:R.o,j:needT?j:null,d:0,x:''},t=E[j];
  if(cost)u[cost.r]=(u[cost.r]|0)-cost.v;
  if(a=='atk'||a=='gp'){ns.vs=ns.vs||{a:0,b:0};ns.vs[R.me]=0;let d=u.atk;if(a=='gp'){d=(u.gp&&u.gp.d)||u.atk+1;u.cd.gp=2;if(u.cls=='guerrero')d++}if(u.cls=='arquero'&&Math.random()<.2){d++;ln.push('¡Disparo certero!')}if(u.slw>0){d=Math.max(1,d-1);u.slw--;ln.push(`${u.n} ataca con menos fuerza (lento).`)}d=Math.max(1,d-icd);const x=hit(t,d);lose(t,x,ln);ev.d=x;if(!x)ev.x='Esquiva';ln.push(x?`${u.n} ataca a ${t.n}: -${x} HP.`:`${t.n} esquiva el ataque de ${u.n}.`)}
  else if(a=='def'){u.g=Math.max(u.g,1);u.mp=Math.min(u.mmp,u.mp+1);ev.x='Guardia';ln.push(`${u.n} se defiende (reduce 1 el próximo golpe y recupera 1 de maná).`)}
+ else if(a=='qv'||a=='qm'||a=='qb'){const key=a=='qv'?'vida':a=='qm'?'mana':'bomb';ns.sup[R.me].q[key]--;ev.q=key;if(u.cls=='alquimista'){ns.alqN=ns.alqN||{a:0,b:0};ns.alqN[R.me]++}
+  if(a=='qb'){lose(t,10,ln);ev.d=10;ln.push(`${u.n} lanza una Bombacitadora a ${t.n}: -10 HP.`)}
+  else{const al=U[ally];ev.j=ally;ev.o=R.me;if(a=='qv'){const g=Math.min(Math.max(1,Math.round(al.mhp*.03)),al.mhp-al.hp);al.hp+=g;ev.hl=[{0:ally,1:g}];ev.sup='qv';ev.n=g;ev.x='+'+g;ln.push(`${u.n} usa una Poción de vida sobre ${al.n}: +${g} HP.`)}else{const g=Math.min(2,al.mmp-al.mp);al.mp+=g;ev.n=g;ev.x='+'+g;ln.push(`${u.n} usa una Poción de maná sobre ${al.n}: +${g} de maná.`)}}
+  try{if(S&&S.bot&&S.bot.inv){S.bot.inv[key]=Math.max(0,(S.bot.inv[key]|0)-1);save()}}catch(e){}}
+ else if(a=='qc'){const q=ns.sup[R.me].q,N=window.ALQ_NAME;cmbm.forEach(k=>{q[k]=(q[k]|0)-1});ns.alqN=ns.alqN||{a:0,b:0};ns.alqN[R.me]++;const pct=window.alqMixPct(cmbm[0],cmbm[1]);ns.prep[R.me]={pct,left:window.ALQ_CFG.mixTurns+1,who:ns.ai,n:cmbm.slice()};ev.q='mix';ev.m=cmbm.slice();ev.n=pct;ev.x='Mezcla inestable';
+  ln.push(`${u.n} combina ${N[cmbm[0]]} y ${N[cmbm[1]]}: ¡mezcla inestable de ${Math.max(1,Math.round(pct))} de daño!`);
+  try{if(S&&S.bot&&S.bot.inv){cmbm.forEach(k=>{S.bot.inv[k]=Math.max(0,(S.bot.inv[k]|0)-1)});save()}}catch(e){}}
+ else if(a=='qz'){const pp=ns.prep[R.me],d0=window.alqDmgOf(pp.pct,t);ns.prep[R.me]=null;ev.q='zap';lose(t,d0,ln);ev.d=d0;ln.push(`${u.n} lanza la mezcla inestable a ${t.n}: -${d0} HP.`);
+  const sp=window.ALQ_CFG.selfPct;if(sp>0){const sd=Math.max(1,Math.round(d0*sp/100));lose(u,sd,ln);ln.push(`${u.n} sufre ${sd} de daño por la mezcla.`)}}
  else if(a=='sb'||a=='sv'){const al=U[ally],g=Math.min(HEAL[a=='sb'?'b':'v'],al.mhp-al.hp);al.hp+=g;ns.sup[R.me][a=='sb'?'b':'v']--;ns.bt=ns.bt||{a:0,b:0};ns.vs=ns.vs||{a:0,b:0};if(a=='sb')ns.bt[R.me]++;else ns.vs[R.me]++;ev.x='+'+g;ev.j=ally;ev.o=R.me;ev.hl=[{0:ally,1:g}];ev.sup=a;ln.push(`${u.n} usa ${a=='sb'?'un botiquín':'un vendaje'} sobre ${al.n}: +${g} HP.`);try{if(S&&S.sup){const f=a=='sb'?'botiquin':'vendaje';S.sup[f]=Math.max(0,(S.sup[f]|0)-1);save()}}catch(e){}}
  else{u.cd[a]=k.cd||0;ev.k=a;ln.push(`${u.n} usa ${k.n}.`);
   if(['dmg','mag','slow','psn'].includes(kind)){let vv=k.v;if(u.ec>0&&['mag','slow','psn'].includes(kind)){vv=Math.max(vv+1,Math.round(vv*1.5));u.ec=0;ln.push('¡Resonancia! La habilidad hace +50 %.')}vv=Math.max(1,vv-icd);const d=Math.max(1,hit(t,vv)||1);lose(t,d,ln);if(kind=='slow')t.slw=2;if(kind=='psn'){t.pz=3;t.hp=Math.max(1,t.hp)}ev.d=d;ln.push(`${t.n} recibe ${d} de daño.`)}
@@ -4701,7 +4719,7 @@ async function act(a,fr){const st=R.st;if(R.cd||R.busy||st.win||st.turn!=R.me)re
  if(t&&t.hp<=0&&needT)ln.push(`${t.n} cae.`);
  /* siguiente héroe (por velocidad), o pasa el turno al rival */
  if(!alive(E).length){ns.win=R.me}
- else if(!free){const o=ord(U),p=o.indexOf(ns.ai),nx=p>=0?o[p+1]:undefined;if(nx!=null)ns.ai=nx;else{ns.bt=ns.bt||{a:0,b:0};ns.bt[R.me]=0;ns.turn=R.o;upkeep(E);ns.ai=ord(E)[0]||0;ln.push(`— Turno de ${R.rn} —`)}}
+ else if(!free){const o=ord(U),p=o.indexOf(ns.ai),nx=p>=0?o[p+1]:undefined;if(nx!=null)ns.ai=nx;else{ns.bt=ns.bt||{a:0,b:0};ns.bt[R.me]=0;ns.turn=R.o;aqTick(ns,R.me,ln,ev);upkeep(E);ns.ai=ord(E)[0]||0;ln.push(`— Turno de ${R.rn} —`)}}
  if(!ns.win&&!free){try{skipCC(ns,ln,ev)}catch(e){console.error(e)}}
  ns.log=ns.log.concat(ln).slice(-30);ns.seq=st.seq+1;ns.ev=ev;
  await play(ev,R.st,ns);R.st=ns;R.last=Math.max(R.last|0,ns.seq);upd();
@@ -4709,9 +4727,13 @@ async function act(a,fr){const st=R.st;if(R.cd||R.busy||st.win||st.turn!=R.me)re
   if(er)notice('Sin conexión','No se pudo enviar tu jugada: '+(er.message||'error'))}
  R.busy=false;R.seqAt=Date.now();upd();if(ns.win)finish()}
 /* animación de una jugada (propia o recibida): mismo ataque que las aventuras */
-async function play(ev,before,after){if(!ev||!$$('pvM'))return;const id=(s,i)=>$$((s==R.me?'pvh':'pvm')+i),A=id(ev.s,ev.i),B=ev.j!=null?id(ev.o,ev.j):null,enemy=ev.s!=R.me,
+async function play(ev,before,after){await play0(ev,before,after);
+ try{if(ev&&ev.px&&$$('pvM')&&window.aqPx){const sd=ev.px.s,ix=ev.px.i,m=sd==R.me,e=$$((m?'pvh':'pvm')+ix);
+  await window.aqPx(e,ev.px.d,()=>{try{const un=after&&after.u&&after.u[sd]&&after.u[sd][ix];if(!un)return;const b=$$((m?'pvhb':'pvmb')+ix),t=$$((m?'pvhv':'pvmv')+ix);if(b)b.style.width=100*Math.max(0,un.hp)/un.mhp+'%';if(t)t.textContent=Math.max(0,un.hp)+'/'+un.mhp}catch(e){}})}}catch(e){}}
+async function play0(ev,before,after){if(!ev||!$$('pvM'))return;const id=(s,i)=>$$((s==R.me?'pvh':'pvm')+i),A=id(ev.s,ev.i),B=ev.j!=null?id(ev.o,ev.j):null,enemy=ev.s!=R.me,
   stt=after||before,u0=stt&&stt.u&&stt.u[ev.s]&&stt.u[ev.s][ev.i],t0=ev.j!=null&&stt&&stt.u&&stt.u[ev.o]&&stt.u[ev.o][ev.j];
  try{
+  if(ev.q&&window.aqFx){const tg=(ev.q=='bomb'||ev.q=='zap')?B:(ev.q=='mix'?A:(ev.j!=null?id(ev.o,ev.j):A));await window.aqFx(ev.q,A,tg||A,(ev.q=='bomb'||ev.q=='zap')?ev.d:ev.n,()=>{try{const sd=ev.o,ix=ev.j,m=sd==R.me,un=after&&after.u&&after.u[sd]&&after.u[sd][ix];if(!un)return;const b=$$((m?'pvhb':'pvmb')+ix),t=$$((m?'pvhv':'pvmv')+ix);if(b)b.style.width=100*Math.max(0,un.hp)/un.mhp+'%';if(t)t.textContent=Math.max(0,un.hp)+'/'+un.mhp;if(m){const mb=$$('pvhm'+ix),mt=$$('pvhmv'+ix);if(mb)mb.style.width=100*un.mp/Math.max(1,un.mmp)+'%';if(mt)mt.textContent='Maná '+un.mp+'/'+un.mmp}}catch(e){}},ev);return}
   /* 1) habilidad: aparece el cuadro con su nombre y efecto (propia o del rival) */
   if(ev.k&&typeof SKL!=='undefined'&&SKL[ev.k]&&u0){const k=SKL[ev.k],c=cst(ev.k);
    await window.skCard({n:u0.n,sub:clsOf(u0).n+' · Nivel '+(u0.lv|0),sk:k.n,d:k.d||'',chips:[c.v+' '+(c.r=='st'?'res.':'maná')].concat(k.cd?['Recarga '+k.cd]:[]),enemy})}
@@ -4740,16 +4762,47 @@ async function finish(){if(!R||R.fin)return;R.fin=1;cdStop();const won=R.st.win=
  try{if(R.tipo!='amistad')rk=await window.arenaDuel({won,id:R.id,oppUid:R.ou,oppName:R.rn})}catch(e){}
  R.res=`<div style="width:100%;text-align:center"><b>${won?'¡Victoria!':'Derrota'}</b>${rk?`<br><span class="m">${rk.gain>0?'+':''}${rk.gain} pts de Arena · +${rk.pr} prestigio${rk.star?(rk.up?' · ¡subes de rango!':' · ¡nueva estrella!'):''}</span>`:''}</div><button class="pri" style="width:100%" onclick="PVB.close()">Continuar</button>`;R.rk=rk;try{banner(won?'VICTORIA':'DERROTA')}catch(e){}upd();if(rk&&window.arenaFx)setTimeout(()=>arenaFx(rk),250)}
 function close(){if(!R)return;const r=R;cdStop();const sw=$$('pvsw');if(sw)sw.remove();R=null;clearInterval(r.iv);try{r.un&&r.un()}catch(e){}const e=$$('pvb');if(e)e.remove();try{C().endBattle(r.id)}catch(e){}}
+const AQN={qv:'Poción de vida',qm:'Poción de maná',qb:'Bombacitadora',qz:'Mezcla inestable'},AQK={qv:'vida',qm:'mana',qb:'bomb'};
+function aqQ(){const q=(R&&R.st&&R.st.sup&&R.st.sup[R.me]&&R.st.sup[R.me].q)||{};return{vida:q.vida|0,bomb:q.bomb|0,mana:q.mana|0}}
+function aqIc(k){return window.alqIcon?alqIcon(k):(window.botIco?botIco(k):'')}
+function aqTick(ns,side,ln,ev){const p=ns.prep&&ns.prep[side];if(!p)return;p.left--;
+ if(p.left>0){ln.push(`La mezcla inestable (${side==R.me?'tuya':R.rn}) se agita: ${p.left==1?'queda 1 turno':'quedan '+p.left+' turnos'}.`);return}
+ ns.prep[side]=null;const L=ns.u[side],u=L[p.who]&&L[p.who].hp>0?L[p.who]:L.find(x=>x.hp>0);if(!u)return;
+ const d=window.alqDmgOf(p.pct,u);lose(u,d,ln);ev.px={s:side,i:L.indexOf(u),d};ln.push(`¡La mezcla inestable explota sobre ${u.n}! -${d} HP.`);
+ if(!alive(L).length)ns.win=side=='a'?'b':'a'}
+function aqBtn(off){if(!R)return '';const q=aqQ(),n=q.vida+q.bomb+q.mana,pp=R.st.prep&&R.st.prep[R.me],pl=pp?Math.min(pp.left,window.ALQ_CFG.mixTurns):0;if(R.alq)return '<button id="pvab" onclick="PVB.aqNo()">Cancelar selección</button>';if(n<1&&!pp)return '';return `<button id="pvab" ${off?'disabled':''} onclick="PVB.alq()"><span class="alqi">${aqIc('vida')}</span> ALQUIMIA (${q.vida} · ${q.bomb} · ${q.mana})${pp?' ⚗'+pl:''}</button>${pp?`<span class="alqpv"><span class="alqi">${aqIc('zap')}</span> Mezcla inestable: ${pl==1?'último turno':'quedan '+pl+' turnos'}</span>`:''}`}
 window.PVB={
- tgt:i=>{if(R&&R.st.u[R.o][i].hp>0){R.t=i;upd()}},
- ally:i=>{if(!R)return;const u=R.st.u[R.me][i];if(R.sup){if(!u||u.hp<=0||u.hp>=u.mhp){notice('Sin efecto',u&&u.hp>=u.mhp?u.n+' ya tiene la vida completa.':'Ese héroe no puede recibir curación.');return}const a=R.sup;R.sup=null;R.a=i;act(a);return}if(u&&u.hp>0){R.a=i;upd()}},
+ tgt:i=>{if(R&&(R.alq=='qb'||R.alq=='qz')&&R.st.u[R.o][i].hp>0&&R.st.turn==R.me&&!R.busy){const k=R.alq;R.t=i;R.alq=null;act(k);return}if(R&&R.st.u[R.o][i].hp>0){R.t=i;upd()}},
+ ally:i=>{if(!R)return;const u=R.st.u[R.me][i];if(R.alq&&R.alq!='qb'&&R.alq!='qz'){const k=R.alq;if(!u||u.hp<=0||(k=='qv'?u.hp>=u.mhp:u.mp>=u.mmp)){notice('Sin efecto',!u||u.hp<=0?'Ese héroe está caído.':k=='qv'?u.n+' ya tiene la vida completa.':u.n+' ya tiene el maná completo.');return}R.alq=null;R.a=i;act(k);return}if(R.sup){if(!u||u.hp<=0||u.hp>=u.mhp){notice('Sin efecto',u&&u.hp>=u.mhp?u.n+' ya tiene la vida completa.':'Ese héroe no puede recibir curación.');return}const a=R.sup;R.sup=null;R.a=i;act(a);return}if(u&&u.hp>0){R.a=i;upd()}},
  act,
+alq:()=>{if(!R||R.busy||R.cd||R.st.win||R.st.turn!=R.me||R.sup)return;const old=$$('pvaw');if(old){old.remove();return}
+  const q=aqQ(),it=[['qv','vida',q.vida],['qb','bomb',q.bomb],['qm','mana',q.mana]],w=document.createElement('div');w.id='pvaw';w.className='suppop alqw';
+  const au=R.st.u[R.me][R.st.ai],pp=R.st.prep&&R.st.prep[R.me],tt=q.vida+q.bomb+q.mana;
+  w.innerHTML=it.map(([a,k,n])=>`<button type="button" class="supic" ${n<1?'disabled':''} data-a="${a}" title="${AQN[a]} · en la mochila: ${n}" aria-label="${AQN[a]}: ${n}">${aqIc(k)}<b>${n}</b></button>`).join('')
+   +(au&&au.cls=='alquimista'?`<button type="button" class="supic alqmixb" ${pp||tt<2?'disabled':''} data-a="qc" title="${pp?'Ya hay una mezcla inestable activa':tt<2?'Necesitas al menos dos pociones':'Combinar dos pociones (usa tu turno)'}" aria-label="Combinar pociones">${aqIc('mix')}<b>⚗</b></button>`:'')
+   +(pp?`<button type="button" class="supic alqzapb" data-a="qz" title="Lanzar la mezcla inestable · quedan ${Math.min(pp.left,window.ALQ_CFG.mixTurns)} turno(s)" aria-label="Lanzar mezcla inestable">${aqIc('zap')}<b>${Math.min(pp.left,window.ALQ_CFG.mixTurns)}</b></button>`:'');
+  w.onclick=e=>{const b=e.target.closest('.supic');if(!b||b.disabled)return;w.remove();PVB.aqPick(b.dataset.a)};
+  document.body.appendChild(w);const an=$$('pvab'),r=an?an.getBoundingClientRect():null;
+  w.style.left=r?Math.max(8,Math.min(innerWidth-w.offsetWidth-8,r.left))+'px':'8px';w.style.bottom=r?(innerHeight-r.top+8)+'px':'90px';
+  const off=e=>{if(w.contains(e.target)||(an&&an.contains(e.target)))return;w.remove();document.removeEventListener('pointerdown',off,true)};setTimeout(()=>document.addEventListener('pointerdown',off,true),0)},
+ aqPick:a=>{if(!R||R.busy||R.cd||R.st.win||R.st.turn!=R.me)return;const q=aqQ();
+  {const au0=R.st.u[R.me][R.st.ai];if(a!='qz'&&au0&&au0.cls=='alquimista'){const L=window.alqLimOf(au0.lv),N=((R.st.alqN&&R.st.alqN[R.me])|0);if(N>=L){notice('Límite de pociones','El alquimista ya usó sus '+L+' pociones de este combate.');return}}}
+  if(a=='qc'){const au=R.st.u[R.me][R.st.ai],pp=R.st.prep&&R.st.prep[R.me];if(!au||au.cls!='alquimista'){notice('Sin efecto','Solo el héroe Alquimista puede combinar pociones.');return}if(pp){notice('Mezcla activa','Ya tienes una mezcla inestable activa.');return}
+   if(q.vida+q.bomb+q.mana<2){notice('Sin objetos','Necesitas al menos dos pociones.');return}
+   if(window.alqMixUI)window.alqMixUI(k=>q[k]|0,(k1,k2)=>{R.cmb=[k1,k2];act('qc')});return}
+  if(a=='qz'){if(!(R.st.prep&&R.st.prep[R.me])){notice('Sin mezcla','No hay ninguna mezcla inestable activa.');return}}
+  else if((q[AQK[a]]|0)<1){notice('Sin objetos','Ya no te quedan de esos objetos.');return}
+  const U=R.st.u[R.me],E=R.st.u[R.o];if((a=='qb'||a=='qz')&&!alive(E).length)return;
+  if(a=='qv'&&!U.some(u=>u.hp>0&&u.hp<u.mhp)){notice('Sin efecto','Ningún héroe necesita curación.');return}
+  if(a=='qm'&&!U.some(u=>u.hp>0&&u.mp<u.mmp)){notice('Sin efecto','Ningún héroe necesita maná.');return}
+  R.sup=null;R.alq=a;upd()},
+ aqNo:()=>{if(R){R.alq=null;upd()}},
  arm:id=>{if(!R||R.busy||R.cd||R.st.win||R.st.turn!=R.me)return;R.arm=R.arm==id?null:id;R.armSeq=R.st.seq;upd()},
  go:async w=>{if(!R||R.busy||R.cd||R.st.win||R.st.turn!=R.me)return;const id=R.arm;R.arm=null;
   if(id){await act(id,true);if(!R||R.st.win||R.st.turn!=R.me)return;const u=R.st.u[R.me][R.st.ai];if(!u||u.hp<=0)return}
   return act(w)},
  log:()=>{const l=$$('pvLog');if(l)l.classList.toggle('on')},
- sup:()=>{if(!R||R.busy||R.cd||R.st.win||R.st.turn!=R.me)return;const old=$$('pvsw');if(old){old.remove();return}
+ sup:()=>{if(!R||R.busy||R.cd||R.st.win||R.st.turn!=R.me)return;R.alq=null;{const o2=$$('pvaw');if(o2)o2.remove()}const old=$$('pvsw');if(old){old.remove();return}
   const st=R.st,sp=st.sup[R.me],vs=(st.vs&&st.vs[R.me])|0,bt=(st.bt&&st.bt[R.me])|0;
   const info=(id,k,n,off,extra)=>{const s0=typeof SUP!=='undefined'&&SUP[id]?SUP[id]:{n:id=='botiquin'?'Botiquín':'Vendaje',ic:id=='botiquin'?'bot':'ven',heal:HEAL[k]};return{id:'s'+k,ic:s0.ic,count:n,off,tip:s0.n+' (+'+s0.heal+' HP) · disponibles: '+n+extra}};
   const items=[info('vendaje','v',sp.v|0,(sp.v|0)<1||vs>=5,' · seguidos: '+vs+'/5'+(vs>=5?' · ataca antes de seguir':'')),info('botiquin','b',sp.b|0,(sp.b|0)<1||bt>=2,' · usos este turno: '+bt+'/2')];
@@ -7049,4 +7102,454 @@ close();d.body.appendChild(m);d.body.appendChild(b)})();</script>
  function close(){if(host)host.remove();host=sc=null;d.removeEventListener('keydown',kd)}
  window.REP={open:function(){if(sc)return;sc=d.createElement('div');sc.id='rpsc';sc.setAttribute('role','dialog');sc.setAttribute('aria-label','Reportes');host=mount('rep-v2',sc);d.addEventListener('keydown',kd);tab='all';list=null;load()}};
 })();</script>
+<style id="bot-css">
+.bdl{position:fixed;inset:0;z-index:150;display:flex;align-items:flex-end;justify-content:center;gap:10px;padding:0 10px max(14px,env(safe-area-inset-bottom));background:linear-gradient(to top,rgba(10,6,24,.62),rgba(10,6,24,.28) 55%,rgba(10,6,24,0));opacity:0;transition:opacity .4s ease}
+.bdl.on{opacity:1}
+.bdl .bpt{flex:none;width:min(34vw,170px);align-self:flex-end;transform:translateX(-40px);opacity:0;transition:transform .55s ease,opacity .55s ease;pointer-events:none}
+.bdl.on .bpt{transform:none;opacity:1}
+.bdl .bpt img,.bdl .bpt svg{display:block;width:100%;height:auto;max-height:46vh;object-fit:contain;background:none;animation:bfl 3.4s ease-in-out infinite alternate;filter:drop-shadow(0 6px 10px rgba(0,0,0,.35))}
+@keyframes bfl{from{transform:translateY(0)}to{transform:translateY(-8px)}}
+.bdl .bbb{flex:1;max-width:460px;background:var(--s);color:var(--t);border:1px solid var(--l);border-radius:16px;padding:10px 14px 12px;box-shadow:0 8px 28px rgba(0,0,0,.4);cursor:pointer;transform:translateY(16px);opacity:0;transition:transform .45s ease .15s,opacity .45s ease .15s;margin-bottom:4px}
+.bdl.on .bbb{transform:none;opacity:1}
+.bdl .bnm{font-weight:700;color:var(--a);font-size:13px;letter-spacing:.03em}
+.bdl .bsb{font-size:11px;color:var(--m);margin-bottom:6px}
+.bdl .btx{font-size:14px;line-height:1.45;min-height:3.9em}
+.bdl .bhn{font-size:10px;color:var(--m);text-align:right;margin-top:4px;opacity:.8}
+.bdl .bch{display:flex;gap:8px;margin-top:10px}.bdl .bch button{flex:1}
+@media(prefers-reduced-motion:reduce){.bdl,.bdl .bpt,.bdl .bbb{transition:none}.bdl .bpt img,.bdl .bpt svg{animation:none}}
+.bmx{display:flex;gap:12px;align-items:center;margin:4px 0 10px}.bmx .bpt{width:84px;flex:none}.bmx .bpt img,.bmx .bpt svg{width:100%;height:auto;display:block}
+.bed textarea{width:100%;min-height:54px;box-sizing:border-box;margin:4px 0}.bed .brw{border:1px solid var(--l);border-radius:10px;padding:8px;margin:8px 0}.bed img.th{height:38px;vertical-align:middle;margin-left:6px}
+</style>
+<script>
+/* ===== BOTICARIO · PARTE 1: estructura, evento de Maelis, diálogos y editor de administrador ===== */
+(function(){
+const KEY='ciudad-botic',NEED=300000;
+const SC={
+ intro:{ln:[
+  'Vaya... No esperaba encontrar una ciudad en crecimiento por estos territorios.',
+  'He recorrido varios caminos desde que abandoné Vardhel. Allí, los talleres alquímicos terminaron bajo el control de la corona. Cada frasco, cada ingrediente y cada preparación necesitaban autorización.',
+  'No pienso volver a trabajar bajo esas condiciones.',
+  'He observado tu ciudad y creo que aquí podría establecer un pequeño boticario.',
+  'No te pediré que financies mis investigaciones ni que me entregues tus recursos. Solo necesito un lugar donde instalarme y trabajar.',
+  '¿Me permitirías establecer mi boticario en tu ciudad?'],sub:'Viajera · Alquimista'},
+ yes:{ln:['Te lo agradezco de verdad. No te arrepentirás.','Elige un lugar para mi boticario y empezaré a instalarme en cuanto esté listo.'],sub:'Boticario'},
+ no:{ln:['Lo entiendo. Seguiré mi camino entonces.','Tu ciudad podrá seguir progresando con normalidad, pero no tendrá acceso a los beneficios exclusivos del Boticario.'],sub:'Viajera · Alquimista'}};
+const cfg=()=>{try{return Object.assign({name:'Maelis Vardena',img:{},txt:{}},JSON.parse(localStorage.getItem(KEY)||'{}'))}catch(e){return{name:'Maelis Vardena',img:{},txt:{}}}};
+const wr=c=>{try{localStorage.setItem(KEY,JSON.stringify(c));return true}catch(e){notice('Editor','La imagen es muy pesada para guardarla. Usa un PNG más pequeño.');return false}};
+const line=(id,i)=>{const c=cfg();return (c.txt[id+'.'+i])||SC[id].ln[i]};
+const face=(id,i)=>{const c=cfg();return c.img[id+'.'+i]||c.img.p||''};
+const PH='<svg viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg"><path d="M18 118c0-30 12-50 32-50s32 20 32 50z" fill="#6b4a9a" stroke="#1b1230" stroke-width="2.4"/><circle cx="50" cy="44" r="21" fill="#f0cfae" stroke="#1b1230" stroke-width="2.4"/><path d="M26 46c-4-24 12-38 26-36 16 2 24 16 22 36-4-12-12-18-24-18S30 36 26 46z" fill="#7a5aa8" stroke="#1b1230" stroke-width="2.4" stroke-linejoin="round"/><circle cx="43" cy="46" r="2.2" fill="#1b1230"/><circle cx="57" cy="46" r="2.2" fill="#1b1230"/><path d="M45 55q5 3 10 0" fill="none" stroke="#1b1230" stroke-width="2" stroke-linecap="round"/><rect x="68" y="78" width="14" height="22" rx="5" fill="#e0683e" stroke="#1b1230" stroke-width="2"/><rect x="71" y="72" width="8" height="8" fill="#c9a566" stroke="#1b1230" stroke-width="1.6"/></svg>';
+const pic=(id,i)=>{const u=face(id,i);return u?`<img src="${u}" alt="">`:PH};
+const A=()=>(S.bot=S.bot||{ms:0});
+const busy=()=>{const n=Date.now();return S.b.some(b=>n<b.end)||(typeof resList=='function'&&resList().some(r=>n<r.end))};
+const mainScr=()=>{try{const o=$('ov');return !place&&!SCR&&!SQ&&!(o&&o.firstElementChild)&&!document.querySelector('.fx9-ylk,.bdl')&&!$('game').classList.contains('hide')}catch(e){return false}};
+
+/* motor de diálogos: palabra por palabra · 1er toque completa · 2º toque continúa */
+function dlg(id,done,choices,extra){
+ const sc=SC[id],c=cfg();let i=0,tm=null,words=[],k=0,typing=false;
+ const o=document.createElement('div');o.className='bdl';
+ o.innerHTML='<div class="bpt"></div><div class="bbb"><div class="bnm"></div><div class="bsb"></div><div class="btx"></div><div class="bxt"></div><div class="bch"></div><div class="bhn">Toca para continuar</div></div>';
+ document.body.appendChild(o);const BX=o.querySelector('.bxt'),P=o.querySelector('.bpt'),B=o.querySelector('.bbb'),T=o.querySelector('.btx'),H=o.querySelector('.bhn'),CH=o.querySelector('.bch');
+ o.querySelector('.bnm').textContent=c.name;o.querySelector('.bsb').textContent=sc.sub;
+ const rm=typeof RM!='undefined'&&RM;
+ const last=()=>i>=sc.ln.length-1;
+ const fin=()=>{clearInterval(tm);typing=false;T.textContent=line(id,i);H.style.display=last()&&choices?'none':'';
+  if(last()&&extra)BX.innerHTML=extra();if(last()&&choices&&!CH.children.length)choices.forEach(([lb,fn,cls,dis])=>{const b=document.createElement('button');b.textContent=lb;if(cls)b.className=cls;if(dis&&dis())b.disabled=true;b.onclick=e=>{e.stopPropagation();close(fn)};CH.appendChild(b)})};
+ const show=()=>{P.innerHTML=pic(id,i);CH.innerHTML='';BX.innerHTML='';words=line(id,i).split(' ');k=0;T.textContent='';typing=true;H.style.display='none';
+  if(rm){fin();return}clearInterval(tm);tm=setInterval(()=>{k++;T.textContent=words.slice(0,k).join(' ');if(k>=words.length){fin();H.style.display=last()&&choices?'none':''}},55)};
+ const close=fn=>{clearInterval(tm);o.classList.remove('on');setTimeout(()=>{o.remove();try{fn&&fn()}catch(e){console.warn(e)}try{done&&done()}catch(e){}},rm?0:420)};
+ B.onclick=()=>{if(typing){fin();return}if(!last()){i++;show();return}if(!choices)close()};
+ show();requestAnimationFrame(()=>requestAnimationFrame(()=>o.classList.add('on')));
+ return o}
+window.botDlg=dlg;window.BOTSC=SC;window.botCfg=cfg;window.botPic=pic;
+
+/* estructura */
+SH.bot={n:'Boticario',d:'Pociones y objetos alquímicos para el combate.',cost:{},t:20000,e:'Pociones y mochila alquímica'};NM.bot='Boticario';LV.bot=[{}];
+DECL.bot=()=>S&&S.bot&&S.bot.ok?1:0;
+window.STN=window.STN||{};
+window.STN.bot=(s=18)=>`<svg class="ic bs" width="${s}" height="${s}" viewBox="0 0 100 100" style="stroke:none;fill:none" aria-hidden="true"><path d="M12 94H92l-6 6H6z" fill="#1b1230" opacity=".25"/><rect x="14" y="46" width="68" height="46" rx="3" fill="#a8794a" stroke="#1b1230" stroke-width="2"/><rect x="14" y="70" width="68" height="22" fill="#8c6238"/><path d="M8 50L48 18l40 32z" fill="#6b4a9a" stroke="#1b1230" stroke-width="2.4" stroke-linejoin="round"/><path d="M8 50L48 18v32z" fill="#fff" fill-opacity=".18"/><rect x="62" y="22" width="9" height="14" fill="#8c6238" stroke="#1b1230" stroke-width="1.8"/><rect x="40" y="62" width="16" height="30" rx="2" fill="#2a1a3c" stroke="#1b1230" stroke-width="1.8"/><rect x="20" y="56" width="14" height="12" rx="2" fill="#ffe08a" stroke="#1b1230" stroke-width="1.6"/><rect x="62" y="56" width="14" height="12" rx="2" fill="#ffe08a" stroke="#1b1230" stroke-width="1.6"/><path d="M85 60h10v8l4 8c1 4-1 7-5 7h-8c-4 0-6-3-5-7l4-8z" fill="#e0683e" stroke="#1b1230" stroke-width="1.8" stroke-linejoin="round" transform="translate(-6 8) scale(.85)"/><circle cx="48" cy="38" r="6" fill="#8fe0cf" stroke="#1b1230" stroke-width="1.8"/></svg>`;
+
+/* menú de la estructura (el contenido de pociones llega en la parte 2) */
+const _tw=tower;tower=function(b){if(b.type!='bot')return _tw(b);const c=cfg(),a=A();
+ modal(head(b,'Boticario de '+c.name)+`<div class="bmx"><div class="bpt">${pic('intro',0)}</div><div><b>${esc(c.name)}</b><p class="m" style="margin:4px 0 0">Se ha instalado en tu ciudad. Pronto tendrá pociones y la Mochila Alquímica para tus héroes.</p></div></div>
+ <div class="note">${a.bag?'Mochila Alquímica: adquirida.':'Mochila Alquímica: se ofrece con el establecimiento en nivel 8 y un héroe Alquimista.'}</div>${ADM?'<p><button onclick="botEdit()">Configurar a '+esc(c.name)+' (administrador)</button></p>':''}`)};
+
+/* editor del administrador: nombre, imágenes PNG (conservan transparencia) y textos */
+window.botEdit=function(){if(!ADM)return;const c=cfg();let h='<div class="bed"><h2>Configurar alquimista</h2><label>Nombre<input id="bnm" maxlength="30" value="'+esc(c.name)+'"></label>'
+ +'<div class="brw"><b>Imagen principal (PNG)</b><input type="file" accept="image/png" data-k="p">'+(c.img.p?'<img class="th" src="'+c.img.p+'"> <button data-x="p">Quitar</button>':'')+'</div>';
+ (window.BOTIMG||[]).forEach(([k,n])=>{h+='<div class="brw"><b>'+n+' (PNG)</b><input type="file" accept="image/png" data-k="'+k+'">'+(c.img[k]?'<img class="th" src="'+c.img[k]+'"> <button data-x="'+k+'">Quitar</button>':'')+'</div>'});
+ for(const id of Object.keys(SC))SC[id].ln.forEach((_,i)=>{const k=id+'.'+i;h+='<div class="brw"><span class="m">'+id+' · diálogo '+(i+1)+'</span><textarea data-t="'+k+'">'+esc(line(id,i))+'</textarea><input type="file" accept="image/png" data-k="'+k+'">'+(c.img[k]?'<img class="th" src="'+c.img[k]+'"> <button data-x="'+k+'">Quitar</button>':'')+'</div>'});
+ h+='<p><button class="pri" id="bsv">Guardar</button> <button onclick="sheetClose()">Cerrar</button></p></div>';
+ $('ov').innerHTML='<div class="sheet"><div class="panel pm" style="margin:auto;max-height:92%;overflow:auto">'+h+'</div></div>';
+ const pn=$('ov');pn.querySelectorAll('input[type=file]').forEach(f=>f.onchange=()=>{const fl=f.files[0];if(!fl)return;if(fl.type!='image/png'){notice('Editor','Sube una imagen PNG.');return}
+  if(fl.size>450000){notice('Editor','El PNG pesa más de 450 KB. Redúcelo.');return}const r=new FileReader();r.onload=()=>{const x=cfg();x.img[f.dataset.k]=r.result;if(wr(x))botEdit()};r.readAsDataURL(fl)});
+ pn.querySelectorAll('[data-x]').forEach(b=>b.onclick=()=>{const x=cfg();delete x.img[b.dataset.x];wr(x);botEdit()});
+ $('bsv').onclick=()=>{const x=cfg();x.name=($('bnm').value.trim()||'Maelis Vardena').slice(0,30);pn.querySelectorAll('[data-t]').forEach(t=>{const k=t.dataset.t,[id,i]=k.split('.'),v=t.value.trim();if(v&&v!=SC[id].ln[+i])x.txt[k]=v;else delete x.txt[k]});
+  if(wr(x)){notice('Alquimista','Configuración guardada.');sheetClose()}}};
+
+/* contador oculto y evento de presentación */
+const need=()=>ADM?8000:NEED,lvOk=()=>ADM||E()>=7;let rp=false;
+function ev(){const a=A();
+ a.dlg=1;saveSoon();dlg('intro',null,[['Aceptar',()=>{a.ok=1;a.dlg=0;save();dlg('yes',()=>{place='bot';S.pend='bot';save();draw();try{tut()}catch(e){}})}],['No aceptar',()=>{a.no=1;a.dlg=0;save();dlg('no')}]])}
+let st=0;const saveSoon=()=>{if(!st)st=setTimeout(()=>{st=0;save()},300)};
+setInterval(()=>{try{if(!S||$('game').classList.contains('hide')||document.hidden)return;const a=A();
+ if(!a.ok&&!a.no&&lvOk()){if(a.ms<need()){a.ms+=1000;if(a.ms%10000==0)saveSoon()}
+  else if(mainScr()&&!busy())ev()}
+ if(a.ok&&!count('bot')&&!rp&&mainScr()&&!busy()){rp=true;place='bot';S.pend='bot';draw();notice('Boticario','Elige dónde colocar el Boticario.')}}catch(e){}},1000);
+window.botReset=()=>{if(!ADM)return;S.bot={ms:0};save();notice('Boticario','Evento reiniciado.')};
+})();
+</script>
+<style id="bot-css2">
+.bcard{display:flex;gap:10px;align-items:center;border:1px solid var(--l);border-radius:12px;padding:8px;margin:6px 0;background:rgba(255,255,255,.04)}
+.bcard .bi{flex:none;width:46px;height:46px}.bcard .bi svg,.bcard .bi img{width:100%;height:100%;object-fit:contain;display:block}
+.bcard .bt{flex:1;min-width:0}.bcard .bt b{display:block}.bcard .bt .m{font-size:12px}
+.bcard .bs2{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:4px;font-size:12px}
+.bcard.lk{opacity:.55}.bglb{border:1px dashed var(--l);border-radius:12px;padding:8px 10px;font-size:13px;margin:4px 0 8px}
+.bxt .bcard{margin:8px 0 0}
+</style>
+<script>
+/* ===== BOTICARIO · PARTE 2: Mochila Alquímica, aldeanos, existencias y reposición ===== */
+(function(){
+const A=()=>(S.bot=S.bot||{ms:0}),cfg=()=>window.botCfg();
+const BAGC={solar:500,filar:300,recursos:200,cristal:10};
+const ITEMS={
+ vida:{n:'Poción de vida',d:'Recupera el 3 % de la vida máxima del héroe seleccionado.',cost:{solar:50,filar:10},need:2},
+ bomb:{n:'Bombacitadora',d:'Al lanzarla, explota y causa 10 puntos de daño.',cost:{solar:100,filar:50,recursos:10},need:3},
+ mana:{n:'Poción de maná',d:'Recupera 2 puntos de maná del héroe seleccionado.',cost:{solar:150,filar:100,diamantino:1},need:5}};
+/* Progresión por cantidad de aldeanos: [capacidad, reposición en segundos]. null = se conserva el valor anterior (los tiempos de 5 aldeanos para vida y bombas no están definidos: se editan aquí) */
+window.BOT={items:ITEMS,slots:5,prog:{2:{vida:[2,180]},3:{vida:[2,125],bomb:[3,360]},4:{vida:[3,40],bomb:[4,300]},5:{vida:[4,null],bomb:[5,null],mana:[3,600]}}};
+window.BOTIMG=[['bag','Mochila Alquímica'],['vida','Poción de vida'],['bomb','Bombacitadora'],['mana','Poción de maná']];
+const res=(k,w)=>{let cap=0,rep=0,on=false;for(let i=2;i<=Math.min(w,5);i++){const r=(BOT.prog[i]||{})[k];if(r){on=true;if(r[0]!=null)cap=r[0];if(r[1]!=null)rep=r[1]}}return{on,cap,rep}};
+const wOf=()=>{const b=S.b.find(x=>x.type=='bot'&&Date.now()>=x.end);return b?Math.min(b.w||0,BOT.slots):0};
+const strict=c=>Object.entries(c).every(([k,v])=>have(k)>=v);
+const payS=c=>{for(const k in c){if(S.coins[k]!==undefined)S.coins[k]-=c[k];else S.inv[k]-=c[k]}};
+const SV={
+ bag:'<svg viewBox="0 0 48 48"><rect x="10" y="14" width="28" height="30" rx="8" fill="#a8794a" stroke="#1b1230" stroke-width="2"/><path d="M17 14c0-8 14-8 14 0" fill="none" stroke="#1b1230" stroke-width="2.4"/><rect x="15" y="26" width="18" height="12" rx="3" fill="#6b4a9a" stroke="#1b1230" stroke-width="1.8"/><circle cx="24" cy="32" r="3" fill="#8fe0cf" stroke="#1b1230" stroke-width="1.4"/></svg>',
+ vida:'<svg viewBox="0 0 48 48"><rect x="19" y="4" width="10" height="9" rx="2" fill="#c9a566" stroke="#1b1230" stroke-width="1.8"/><path d="M19 13v6L9 36c-2 5 1 9 6 9h18c5 0 8-4 6-9L29 19v-6z" fill="#e0405a" stroke="#1b1230" stroke-width="2" stroke-linejoin="round"/><path d="M24 38c-6-4-8-7-8-10 0-3 5-4 8 0 3-4 8-3 8 0 0 3-2 6-8 10z" fill="#fff" fill-opacity=".85"/></svg>',
+ bomb:'<svg viewBox="0 0 48 48"><circle cx="22" cy="29" r="15" fill="#e0683e" stroke="#1b1230" stroke-width="2"/><path d="M30 16l5-6M35 10l4-2" stroke="#1b1230" stroke-width="2.4" stroke-linecap="round"/><circle cx="41" cy="7" r="3" fill="#ffd25a"/><path d="M22 40c-5-2-7-6-6-10 3 2 5 1 6-3 2 3 6 5 6 9 0 3-3 5-6 4z" fill="#ffd25a" fill-opacity=".85"/></svg>',
+ mana:'<svg viewBox="0 0 48 48"><rect x="19" y="4" width="10" height="9" rx="2" fill="#c9a566" stroke="#1b1230" stroke-width="1.8"/><path d="M19 13v6L9 36c-2 5 1 9 6 9h18c5 0 8-4 6-9L29 19v-6z" fill="#4a90e8" stroke="#1b1230" stroke-width="2" stroke-linejoin="round"/><circle cx="20" cy="34" r="3" fill="#fff" fill-opacity=".7"/><circle cx="29" cy="30" r="2" fill="#fff" fill-opacity=".6"/></svg>'};
+const ico=k=>{const u=cfg().img[k];return u?`<img src="${u}" alt="">`:SV[k]};
+window.botIco=ico;window.botRes=res;window.botItems=ITEMS;
+const chips=c=>Object.entries(c).map(([k,v])=>{const sh=have(k)<v,I2=INV[k]||['Piedras','var(--m)'];return CN[k]?`<span class="cc${sh?' no':''}" style="color:var(--k-${k})">${ic(CN[k][0],14)}<b>${v}</b><em>${CN[k][1]}</em></span>`:`<span class="cc${sh?' no':''}" style="color:${I2[1]}">${ic(({cristal:'cri',polvo:'pol',nucleo:'nuc',piedra:'pie'})[k]||'cri',14)}<b>${v}</b><em>${I2[0]}</em></span>`}).join('');
+const bagCard=()=>`<div class="bcard"><div class="bi">${ico('bag')}</div><div class="bt"><b>Mochila Alquímica</b><span class="m">Herramienta especial · Objeto alquímico</span><div class="bs2">${chips(BAGC)}</div></div></div>`;
+
+/* ---- existencias y reposición (cada objeto con su propio temporizador) ---- */
+function refill(){const a=A(),w=wOf(),n=Date.now();if(!a.ok)return;a.st=a.st||{};a.t=a.t||{};a.inv=a.inv||{vida:0,bomb:0,mana:0};
+ for(const k in ITEMS){const r=res(k,w);if(!r.on)continue;if(a.st[k]==null){a.st[k]=r.cap;a.t[k]=0}if(a.st[k]>r.cap)a.st[k]=r.cap;
+  if(a.st[k]<r.cap){if(!a.t[k])a.t[k]=n;const ms=r.rep*1000;if(ms>0)while(a.st[k]<r.cap&&n-a.t[k]>=ms){a.st[k]++;a.t[k]+=ms}if(a.st[k]>=r.cap)a.t[k]=0}else a.t[k]=0}}
+window.botRefill=refill;
+
+/* ---- compra de la mochila (precio fijo, sin descuentos ni pago con diamantino) ---- */
+function buyBag(){const a=A();if(a.bag||!strict(BAGC))return false;payS(BAGC);a.bag=1;a.inv=a.inv||{vida:0,bomb:0,mana:0};save();draw();return true}
+window.botBuyBag=function(){if(buyBag()){sheetClose();botDlg('bagok')}else notice('Boticario','Faltan recursos para la mochila.')};
+function buyItem(k){const a=A(),it=ITEMS[k],r=res(k,wOf());refill();if(!a.bag||!r.on||(a.st[k]|0)<1||!strict(it.cost))return;payS(it.cost);a.st[k]--;a.inv[k]=(a.inv[k]|0)+1;if(!a.t[k])a.t[k]=Date.now();refill();save();draw();menu()}
+window.botBuyItem=buyItem;
+window.botWk=function(id,d){const b=S.b.find(x=>x.id==id),w=b.w||0;if(d>0&&(w>=BOT.slots||S.pop-used()<1))return;if(d<0&&w<1)return;b.w=w+d;b.last=Date.now();refill();save();draw();menu()};
+
+/* ---- menú del Boticario ---- */
+const LN=['¿Buscas algo en especial?','Cada frasco lleva su tiempo. No me apresures.','Los precios son los precios.','Con más manos, preparo más rápido.'];
+let curId=null;
+function menu(){const b=S.b.find(x=>x.type=='bot');if(!b)return;curId=b.id;refill();const a=A(),c=cfg(),w=Math.min(b.w||0,BOT.slots),free=S.pop-used();
+ let sl='';for(let i=0;i<BOT.slots;i++)sl+=i<w?`<button class="cslot" onclick="botWk(${b.id},-1)" aria-label="Quitar">${ic('pop',26)}</button>`:`<button class="cslot" ${free>0?'':'disabled'} onclick="botWk(${b.id},1)" aria-label="Añadir">+</button>`;
+ let it='';for(const k in ITEMS){const I=ITEMS[k],r=res(k,w),st=a.st&&a.st[k]|0,ok=a.bag&&r.on&&st>0&&strict(I.cost);
+  it+=`<div class="bcard${r.on?'':' lk'}"><div class="bi">${ico(k)}</div><div class="bt"><b>${I.n}</b><span class="m">${I.d}</span><div class="bs2">${chips(I.cost)}</div>
+  <div class="bs2">${r.on?`<span>Disponible: <b>${st}/${r.cap}</b></span>${st<r.cap?`<span class="m">próxima en <b data-bt="${k}">…</b></span>`:''}<span>En mochila: <b>${a.inv&&a.inv[k]|0}</b></span>`:`<span class="m">Requiere ${I.need} aldeanos (tienes ${w})</span>`}</div></div>
+  <button ${ok?'':'disabled'} onclick="botBuyItem('${k}')">${!a.bag?'Sin mochila':!r.on?'Bloqueada':st<1?'Agotada':'Comprar'}</button></div>`}
+ modal(head(b,w<2?'Necesita ayudantes':'Boticario de '+c.name)+`<div id="btm"></div><div class="bmx"><div class="bpt">${botPic('intro',0)}</div><div class="bglb" style="flex:1">${esc(c.name)}: «${LN[Math.floor(Math.random()*LN.length)]}»</div></div>
+  ${a.bag?'<div class="note ok">Mochila Alquímica adquirida.</div>':`<div class="sx">Mochila Alquímica</div>${bagCard()}<button class="pri" ${strict(BAGC)?'':'disabled'} onclick="botBuyBag()">Comprar mochila</button>`}
+  <div class="sx">Ayudantes (${w}/${BOT.slots})</div><div class="slg">${sl}</div><p class="m hint">Más aldeanos desbloquean pociones y aceleran la reposición. Habitantes libres: ${free}. El precio de los objetos no cambia.</p>
+  <div class="sx">Objetos</div>${it}${ADM?'<p><button onclick="botEdit()">Configurar a '+esc(c.name)+' (administrador)</button></p>':''}`);
+ const sig=JSON.stringify([a.st,w,a.bag]);clearInterval(window.__bti);window.__bti=setInterval(()=>{if(!$('btm')){clearInterval(window.__bti);return}refill();const A2=A();
+  if(JSON.stringify([A2.st,wOf(),A2.bag])!=sig){menu();return}
+  document.querySelectorAll('[data-bt]').forEach(e=>{const k=e.dataset.bt,r=res(k,wOf());e.textContent=A2.t&&A2.t[k]?mmss(A2.t[k]+r.rep*1000-Date.now()):'—'})},500)}
+const _t=tower;tower=function(b){if(b.type!='bot')return _t(b);menu()};
+
+/* ---- 2.ª escena: reconoce al héroe alquimista y ofrece la mochila ---- */
+BOTSC.bag={sub:'Boticario',ln:['Espera un momento... ¿Ese héroe es alquimista?','Interesante. Hacía tiempo que no encontraba a alguien con esa especialidad.','Sabes, he estado trabajando en algo desde que llegué a tu ciudad. Una herramienta que podría facilitar bastante la preparación de mezclas durante los combates.','La llamo Mochila Alquímica.','No es precisamente barata, pero tampoco pienso regalar el trabajo de mis investigaciones.','Con ella, tu alquimista podrá llevar preparaciones especiales y experimentar con combinaciones que todavía no he conseguido perfeccionar.','¿Te interesa?']};
+BOTSC.bagok={sub:'Boticario',ln:['¡Excelente! Cuida bien esa mochila. No encontrarás otra igual en cualquier mercado.','Ahora bien, debo advertirte algo: las mezclas alquímicas no siempre reaccionan como uno espera.','Por el momento, solo he conseguido desarrollar una combinación de dos pociones. La mezcla puede producir una inestabilidad de maná.','Si la preparas, tendrás que decidir cuándo utilizarla. No podrás conservarla indefinidamente: después de dos turnos, la inestabilidad terminará manifestándose.','Si consigues lanzarla, la mezcla explotará al alcanzar su objetivo y también dañará a quien la haya utilizado.','Si no la utilizas a tiempo... bueno, no te recomiendo descubrirlo por las malas.','Por ahora, eso es todo lo que puedo ofrecerte. Todavía tengo mucho trabajo pendiente.']};
+const hasAlq=()=>S.heroes.some(h=>h.cls=='alquimista');
+let tw=0;
+setInterval(()=>{try{if(!S||$('game').classList.contains('hide')||document.hidden)return;const a=A();if(!a.ok)return;
+ const b=S.b.find(x=>x.type=='bot'&&Date.now()>=x.end);if(!b)return;refill();
+ const main=!place&&!SCR&&!SQ&&!$('ov').firstElementChild&&!document.querySelector('.fx9-ylk,.bdl');
+ if(main&&!a.bag&&!a.s2&&(ADM||(E()>=8&&hasAlq()))&&!S.b.some(x=>Date.now()<x.end)){a.s2=1;save();
+  botDlg('bag',null,[['Comprar',()=>{if(buyBag())botDlg('bagok');else notice('Boticario','Faltan recursos para la mochila.')},'pri',()=>!strict(BAGC)],['En otro momento',()=>{}]],bagCard)}
+ else if(main&&wOf()<2&&++tw>=40){tw=0;const c=document.querySelector(`#grid .c[data-x="${b.x}"][data-y="${b.y}"]`);if(c)fl('Necesita ayudantes',c,'var(--a)')}}catch(e){}},1000);
+})();
+</script>
+<script id="alq-pve">
+/* ===== Parte 3A · ALQUIMIA en aventuras (PvE): modo escuadra y modo clásico =====
+   Usa el inventario real de la mochila (S.bot.inv), la vida/maná reales de los héroes y el turno existente.
+   Cada uso cuenta como la acción del héroe que actúa. Valores editables en ALQ.cfg. */
+(function(){
+const KEYS=['vida','bomb','mana'];
+const cfg=window.ALQ_CFG={vidaPct:.03,manaGain:2,bombDmg:10,
+ pct:{vida:3,bomb:10,mana:2},   /* valor porcentual de cada poción para la combinación (editable; una poción nueva solo necesita su valor aquí) */
+ mixBonus:1.15,mixTurns:2,      /* daño combinado = (valor1 + valor2) × 1,15 · turnos para lanzarla */
+ selfPct:2};                    /* % del daño final de la mezcla que recibe el que la lanza (mín. 1) */
+window.alqLimOf=lv=>{lv=lv|0;return lv>=51?5:lv>=39?4:lv>=21?3:2};  /* usos de pociones por combate del héroe Alquimista según su nivel */
+/* ---- clase Alquimista (no existía): línea intermedia, se desbloquea al instalarse Maelis ---- */
+try{if(!CLS.alquimista){CLS.alquimista={n:'Alquimista',hp:5,atk:1,mp:4,g:{hp:1,a:3,m:4},pos:'Línea intermedia',d:'Línea intermedia: queda expuesto si caen los héroes delanteros. Combina dos pociones en una mezcla inestable.',unlock:()=>!!(S.bot&&S.bot.ok),ut:'Requiere que Maelis haya instalado el Boticario'}}
+ if(typeof CLSYM!=='undefined'&&!CLSYM.alquimista)CLSYM.alquimista={c:'#b36cf0',s:'<path d="M9.5 3h5v5l4.2 8.6c1 2-0.4 4.4-2.7 4.4H8c-2.3 0-3.7-2.4-2.7-4.4L9.5 8z" fill="currentColor" fill-opacity=".85"/><circle cx="10" cy="15.5" r="1.3" fill="#fff" fill-opacity=".8"/><circle cx="14" cy="13.5" r="1" fill="#fff" fill-opacity=".7"/>'};
+ if(typeof STM!=='undefined'&&!STM.alquimista)STM.alquimista=4;if(typeof SPD!=='undefined'&&!SPD.alquimista)SPD.alquimista=3}catch(e){console.warn('[ALQUIMISTA] clase',e)}
+const MIXSV='<svg viewBox="0 0 48 48"><rect x="19" y="4" width="10" height="9" rx="2" fill="#c9a566" stroke="#1b1230" stroke-width="1.8"/><path d="M19 13v6L9 36c-2 5 1 9 6 9h18c5 0 8-4 6-9L29 19v-6z" fill="#9b5de5" stroke="#1b1230" stroke-width="2" stroke-linejoin="round"/><path d="M13 34l6-4 5 5 6-6 5 4" fill="none" stroke="#b6ff5a" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="18" cy="39" r="2.4" fill="#ff8a2a"/><circle cx="30" cy="40" r="2" fill="#4a90e8"/></svg>';
+const COL={vida:'#e0405a',bomb:'#ff8a2a',mana:'#4a90e8',zap:'#b36cf0',mix:'#b36cf0'};
+const NAME={vida:'Poción de vida',bomb:'Bombacitadora',mana:'Poción de maná',zap:'Mezcla inestable',mix:'Combinar pociones'};
+const isFoe=k=>k=='bomb'||k=='zap';
+const AQ={item:null,tg:null,busy:0};
+const g=id=>document.getElementById(id);
+const cnt=k=>Math.max(0,Math.floor((S&&S.bot&&S.bot.inv&&S.bot.inv[k])||0));
+const hasBag=()=>!!(S&&S.bot&&S.bot.bag&&S.bot.inv);
+const inSq=()=>typeof SQ!=='undefined'&&!!SQ&&!!g('sqH')&&g('sqH').isConnected;
+const inCl=()=>!inSq()&&typeof B!=='undefined'&&!!B&&!!B.h&&!B.sqm&&!B.tut&&!!g('hc')&&g('hc').isConnected;
+const heroes=()=>inSq()?SQ.hs:inCl()?[B.h]:[];
+const foes=()=>inSq()?SQ.m:inCl()?B.m:[];
+const heroEl=i=>inSq()?g('sqh'+i):g('hc');
+const foeEl=i=>inSq()?g('sqm'+i):g('m'+i);
+const over=()=>inSq()?SQ.over:(B&&B.over);
+const canAct=()=>{if(!S||!hasBag())return false;
+ if(inSq()){const u=SQ.hs[SQ.ai];return !SQ.busy&&!SQ.over&&!!u&&u.hp>0&&!(u.fz>0)}
+ if(inCl())return !busy&&!B.over&&B.h.hp>0;return false};
+const why=(k,u)=>{if(!u)return 'Objetivo no válido.';
+ if(isFoe(k))return u.hp>0?null:u.n+' ya está derrotado.';
+ if(u.hp<=0)return u.n+' está caído.';
+ if(k=='vida')return u.hp>=u.mhp?u.n+' ya tiene la vida completa.':null;
+ return u.mp>=u.mmp?u.n+' ya tiene el maná completo.':null};
+const amount=(k,u)=>k=='vida'?Math.max(0,Math.min(Math.max(1,Math.round(u.mhp*cfg.vidaPct)),u.mhp-u.hp)):k=='mana'?Math.max(0,Math.min(cfg.manaGain,u.mmp-u.mp)):k=='zap'?dmgOf((prepOf()||{pct:0}).pct,u):cfg.bombDmg;
+const icon=k=>(k=='mix'||k=='zap')?MIXSV:(window.botIco?botIco(k):'');
+const prepOf=()=>inSq()?SQ.prep:inCl()?B.prep:null;
+const setPrep=p=>{if(inSq())SQ.prep=p;else if(inCl())B.prep=p};
+const fmt=x=>String(Number(x.toFixed(2))).replace('.',',');
+const mixPct=(a,b)=>(cfg.pct[a]+cfg.pct[b])*cfg.mixBonus;
+const alqObj=()=>inSq()?SQ:inCl()?B:null;
+const alqBlock=()=>{const al=heroes()[inSq()?SQ.ai:0],o=alqObj();if(!al||al.cls!='alquimista'||!o)return false;const L=window.alqLimOf(al.lv),N=o.alqN|0;if(N>=L){toast('El alquimista ya usó sus '+L+' pociones de este combate.');return true}return false};
+const alqBump=a=>{const o=alqObj();if(o&&a&&a.cls=='alquimista')o.alqN=(o.alqN|0)+1};
+const dmgOf=(pct,t)=>Math.max(1,Math.round(pct));   /* daño plano: no depende de la vida del objetivo */
+window.alqMixPct=mixPct;window.alqDmgOf=dmgOf;
+function toast(m){const o=document.querySelector('.supt');if(o)o.remove();const d=document.createElement('div');d.className='supt';d.textContent=m;document.body.appendChild(d);
+ d.animate([{opacity:0},{opacity:1,offset:.12},{opacity:1,offset:.85},{opacity:0}],{duration:RM?1800:2200}).finished.then(()=>d.remove(),()=>d.remove())}
+
+/* ---------- selección ---------- */
+const tgEl=i=>isFoe(AQ.item)?foeEl(i):heroEl(i);
+const tgList=()=>isFoe(AQ.item)?foes():heroes();
+function paint(){document.querySelectorAll('.alq-ok,.alq-sel').forEach(e=>{e.classList.remove('alq-ok','alq-sel');e.style.removeProperty('--ac')});
+ if(!AQ.item)return;tgList().forEach((u,i)=>{const e=tgEl(i);if(!e)return;if(!why(AQ.item,u)){e.classList.add('alq-ok');e.style.setProperty('--ac',COL[AQ.item]);if(i===AQ.tg)e.classList.add('alq-sel')}})}
+function bar(){let b=g('alqbar');if(!AQ.item){if(b)b.remove();return}
+ const k=AQ.item,u=AQ.tg!=null?tgList()[AQ.tg]:null;if(!b){b=document.createElement('div');b.id='alqbar';document.body.appendChild(b)}
+ b.style.setProperty('--ac',COL[k]);
+ const eff=u?(isFoe(k)?`<b style="color:${COL[k]}">-${amount(k,u)} HP</b> <span class="m">(${Math.max(0,u.hp)} → ${Math.max(0,u.hp-amount(k,u))} de ${u.mhp})</span>`:k=='vida'?`<b style="color:${COL[k]}">+${amount(k,u)} HP</b> <span class="m">(${u.hp} → ${u.hp+amount(k,u)} de ${u.mhp})</span>`:`<b style="color:${COL[k]}">+${amount(k,u)} maná</b> <span class="m">(${u.mp} → ${u.mp+amount(k,u)} de ${u.mmp})</span>`):'';
+ b.innerHTML=u?`<span class="ib">${icon(k)}</span><span><b>${NAME[k]}</b> → ${u.n}: ${eff}</span><button class="pri" ${AQ.busy?'disabled':''} onclick="alqConfirm()">Confirmar</button><button ${AQ.busy?'disabled':''} onclick="alqCancel()">Cancelar</button>`
+  :`<span class="ib">${icon(k)}</span><span><b>${NAME[k]}</b>: ${isFoe(k)?'elige un enemigo resaltado':'elige un héroe resaltado'}</span><button onclick="alqCancel()">Cancelar</button>`}
+window.alqCancel=()=>{if(AQ.busy)return;AQ.item=null;AQ.tg=null;const w=g('alqw');if(w)w.remove();paint();bar()};
+function pick(k){if(AQ.busy||!canAct())return;
+ if(k!='zap'&&alqBlock())return;
+ if(k=='mix')return openMix();
+ if(k!='zap'&&cnt(k)<1){toast('No te quedan '+NAME[k].toLowerCase()+'s en la mochila.');return}
+ if(!tgList.call(null,0)&&false)return;
+ AQ.item=k;const ok=tgList().some(u=>!why(k,u));
+ if(!ok){AQ.item=null;toast(isFoe(k)?'No hay enemigos a los que lanzar el objeto.':k=='vida'?'Ningún héroe necesita curación.':'Ningún héroe necesita maná.');return}
+ AQ.tg=null;
+ if(isFoe(k)){const cur=inSq()?SQ.t:B.t;if(foes()[cur]&&foes()[cur].hp>0)AQ.tg=cur}
+ paint();bar()}
+window.alqOpen=()=>{if(AQ.busy||!canAct())return;const old=g('alqw');if(old){old.remove();return}
+ try{window.supCancel&&supCancel()}catch(e){}AQ.item=null;AQ.tg=null;paint();bar();
+ const w=document.createElement('div');w.id='alqw';w.className='suppop alqw';
+ const pr=prepOf(),al=heroes()[inSq()?SQ.ai:0],tot=cnt('vida')+cnt('bomb')+cnt('mana');
+ w.innerHTML=KEYS.map(k=>`<button type="button" class="supic" ${cnt(k)<1?'disabled':''} data-k="${k}" title="${NAME[k]} · en la mochila: ${cnt(k)}" aria-label="${NAME[k]}: ${cnt(k)}">${icon(k)}<b>${cnt(k)}</b></button>`).join('')
+  +(al&&al.cls=='alquimista'?`<button type="button" class="supic alqmixb" ${pr||tot<2?'disabled':''} data-k="mix" title="${pr?'Ya hay una mezcla inestable activa':tot<2?'Necesitas al menos dos pociones':'Combinar dos pociones (usa tu turno)'}" aria-label="Combinar pociones">${icon('mix')}<b>⚗</b></button>`:'')
+  +(pr?`<button type="button" class="supic alqzapb" data-k="zap" title="Lanzar la mezcla inestable (${pr.pct>0?Math.max(1,Math.round(pr.pct))+' de daño':''}) · quedan ${Math.min(pr.left,cfg.mixTurns)} turno(s)" aria-label="Lanzar mezcla inestable">${icon('zap')}<b>${Math.min(pr.left,cfg.mixTurns)}</b></button>`:'');
+ w.onclick=e=>{const b=e.target.closest('.supic');if(!b||b.disabled)return;w.remove();pick(b.dataset.k)};
+ document.body.appendChild(w);const an=g('alqb'),r=an?an.getBoundingClientRect():null;
+ w.style.left=r?Math.max(8,Math.min(innerWidth-w.offsetWidth-8,r.left))+'px':'8px';w.style.bottom=r?(innerHeight-r.top+8)+'px':'90px';
+ const off=e=>{if(w.contains(e.target)||(an&&an.contains(e.target)))return;w.remove();document.removeEventListener('pointerdown',off,true)};
+ setTimeout(()=>document.addEventListener('pointerdown',off,true),0)};
+
+/* ---------- animaciones (cada objeto, la suya) ---------- */
+const ctr=e=>{const r=e.getBoundingClientRect();return{x:r.left+r.width/2,y:r.top+r.height/2,w:r.width,h:r.height}};
+const mk=css=>{const d=document.createElement('div');d.style.cssText='position:fixed;pointer-events:none;z-index:120;'+css;document.body.appendChild(d);return d};
+const run=(d,kf,o)=>{if(RM){d.remove();return Promise.resolve()}return d.animate(kf,{fill:'both',...o}).finished.catch(()=>{}).then(()=>d.remove())};
+const wait=ms=>sl(RM?40:ms);
+function slowBars(e){try{e.querySelectorAll('.bar i,[id^="sqhb"],[id^="sqhm"],.qbq i').forEach(b=>{b.style.transition='width 1s ease';setTimeout(()=>{b.style.transition=''},1200)})}catch(x){}}
+async function fxDrink(k,e){const c=ctr(e),col=COL[k],f=mk(`left:${c.x-22}px;top:${c.y-c.h/2-30}px;width:44px;height:44px`);f.innerHTML=icon(k);const s=f.querySelector('svg,img');if(s){s.style.width='44px';s.style.height='44px'}
+ await run(f,[{transform:'translateY(0) rotate(0)',opacity:0},{transform:'translateY(8px) rotate(-28deg)',opacity:1,offset:.3},{transform:'translateY(14px) rotate(-70deg)',opacity:1,offset:.7},{transform:'translateY(20px) rotate(-90deg) scale(.6)',opacity:0}],{duration:560,easing:'ease-in-out'})}
+function fxAura(k,e,txt){const c=ctr(e),col=COL[k];if(!RM){
+ const a=mk(`left:${c.x-c.w*.7}px;top:${c.y-c.h*.7}px;width:${c.w*1.4}px;height:${c.h*1.4}px;border-radius:50%;background:radial-gradient(circle,${col}cc 0%,${col}55 45%,transparent 70%);mix-blend-mode:screen`);
+ run(a,[{opacity:0,transform:'scale(.7)'},{opacity:.95,transform:'scale(1.05)',offset:.4},{opacity:0,transform:'scale(1.3)'}],{duration:1200,easing:'ease-out'});
+ e.animate([{boxShadow:`0 0 0 0 ${col}00`,filter:'none'},{boxShadow:`0 0 28px 8px ${col}`,filter:'brightness(1.3)',offset:.35},{boxShadow:`0 0 0 0 ${col}00`,filter:'none'}],{duration:1200,easing:'ease-out'});
+ for(let i=0;i<9;i++){const p=mk(`left:${c.x-c.w/2+Math.random()*c.w}px;top:${c.y+c.h*(.1+Math.random()*.35)}px;width:7px;height:7px;border-radius:50%;background:${col};box-shadow:0 0 8px ${col}`);
+  run(p,[{opacity:0,transform:'translateY(0) scale(.5)'},{opacity:1,offset:.25},{opacity:0,transform:`translateY(${-35-Math.random()*45}px) scale(1.1)`}],{duration:800+Math.random()*500,delay:Math.random()*220,easing:'ease-out'})}}
+ try{fl(txt,e,col)}catch(x){}}
+async function fxThrow(from,to,key){key=key||'bomb';const a=ctr(from),b=ctr(to);
+ if(!RM)from.animate([{transform:'none'},{transform:'translateY(-10px) rotate(-6deg) scale(1.05)',offset:.4},{transform:'none'}],{duration:480,easing:'ease-out'});
+ await wait(240);const bm=mk(`left:${a.x-17}px;top:${a.y-17}px;width:34px;height:34px;filter:drop-shadow(0 0 8px ${key=='bomb'?'#ff8a2a':'#b36cf0'})`);bm.innerHTML=icon(key);const s=bm.querySelector('svg,img');if(s){s.style.width='34px';s.style.height='34px'}
+ const dx=b.x-a.x,dy=b.y-a.y,up=Math.min(90,Math.hypot(dx,dy)*.4);
+ await run(bm,[{transform:'translate(0,0) rotate(0)'},{transform:`translate(${dx*.5}px,${dy*.5-up}px) rotate(360deg)`,offset:.5},{transform:`translate(${dx}px,${dy}px) rotate(720deg)`}],{duration:620,easing:'ease-in'})}
+function fxBoom(e,mixed){const c=ctr(e);sparks(c.x,c.y,mixed?30:22,mixed?'#b36cf0':'#ff8a2a');if(mixed)sparks(c.x,c.y,12,'#b6ff5a');if(RM)return;
+ const o=mk(`left:${c.x-60}px;top:${c.y-60}px;width:${mixed?170:120}px;height:${mixed?170:120}px;margin:${mixed?'-25px 0 0 -25px':'0'};border-radius:50%;background:${mixed?'radial-gradient(circle,#f3e6ff 0%,#b36cf0 30%,#6a2fd0 55%,transparent 72%)':'radial-gradient(circle,#fff6c8 0%,#ffb13a 28%,#ff6a1a 55%,transparent 72%)'};mix-blend-mode:screen`);
+ run(o,[{transform:'scale(.2)',opacity:1},{transform:'scale(1.25)',opacity:.95,offset:.35},{transform:'scale(1.9)',opacity:0}],{duration:620,easing:'ease-out'});
+ const r=mk(`left:${c.x-50}px;top:${c.y-50}px;width:100px;height:100px;border-radius:50%;border:4px solid ${mixed?'#b6ff5a':'#ff8a2a'}`);
+ run(r,[{transform:'scale(.3)',opacity:1},{transform:'scale(2.2)',opacity:0}],{duration:700,easing:'ease-out'})}
+
+async function fxMix(e,k1,k2){const c=ctr(e);if(RM)return;
+ const mkf=(k,dx)=>{const f=mk(`left:${c.x-20+dx}px;top:${c.y-c.h/2-34}px;width:40px;height:40px`);f.innerHTML=icon(k);const s=f.querySelector('svg,img');if(s){s.style.width='40px';s.style.height='40px'}return f};
+ const f1=mkf(k1,-44),f2=mkf(k2,44);
+ const sw=mk(`left:${c.x-45}px;top:${c.y-45}px;width:90px;height:90px;border-radius:50%;background:conic-gradient(${COL[k1]},${COL[k2]},${COL[k1]});filter:blur(6px);mix-blend-mode:screen`);
+ run(sw,[{opacity:0,transform:'scale(.3) rotate(0)'},{opacity:.9,transform:'scale(1) rotate(360deg)',offset:.5},{opacity:0,transform:'scale(1.4) rotate(720deg)'}],{duration:1300,easing:'ease-in-out'});
+ await Promise.all([run(f1,[{transform:'translate(0,0) rotate(0)',opacity:1},{transform:'translate(44px,40px) rotate(200deg)',opacity:1,offset:.7},{transform:'translate(44px,50px) rotate(360deg) scale(.3)',opacity:0}],{duration:900,easing:'ease-in'}),
+  run(f2,[{transform:'translate(0,0) rotate(0)',opacity:1},{transform:'translate(-44px,40px) rotate(-200deg)',opacity:1,offset:.7},{transform:'translate(-44px,50px) rotate(-360deg) scale(.3)',opacity:0}],{duration:900,easing:'ease-in'})]);
+ e.animate([{filter:'none'},{filter:'hue-rotate(40deg) brightness(1.4)',offset:.3},{filter:'none'}],{duration:700});sparks(c.x,c.y,16,'#b36cf0');await wait(400)}
+async function fxBlast(e){const c=ctr(e);fxBoom(e,true);if(!RM)e.animate([{transform:'none'},{transform:'translateX(-7px)'},{transform:'translateX(7px)'},{transform:'none'}],{duration:350});await wait(450)}
+/* ---------- cierre del turno: igual que cualquier otra acción del héroe ---------- */
+async function endAction(sq){
+ if(sq){
+  if(SQ.m.every(m=>m.hp<=0)){await wait(500);if(SQ.adv.waves&&SQ.wi<SQ.adv.waves.length-1)return await sqWave();return await sqWin()}
+  await sqAdvance()}
+ else{
+  if(B.m.every(m=>m.hp<=0)&&B.waves&&B.wi<B.waves.length-1){await waveNext();return}
+  if(B.m.every(m=>m.hp<=0)){B.over=true;if(B.adv){S.done[B.adv.lv?'L'+B.adv.lv:'c'+ADV.indexOf(B.adv)]=1;save()}bossTome();banner('VICTORIA');B.log.push('Aventura completada.');busy=false;bupd();const bf=g('bf');if(bf)bf.classList.remove('hide');return}
+  if(B.m[B.t]&&B.m[B.t].hp<=0){const f=B.m.findIndex(x=>x.hp>0);if(f>=0)B.t=f}
+  await mturn()}}
+/* ---------- combinar dos pociones (solo el héroe Alquimista) ---------- */
+function mixUI(count,go){const old=g('alqmix');if(old)old.remove();let sel=[];const o=document.createElement('div');o.id='alqmix';o.className='alqmix';
+ const paint=()=>{const left=k=>count(k)-sel.filter(x=>x==k).length,p=sel.length==2?mixPct(sel[0],sel[1]):null;
+  o.innerHTML=`<div class="alqmp"><h3>Combinar pociones</h3><p class="m">Elige dos pociones, iguales o distintas. Se consumen al mezclar y usan el turno del alquimista.</p>
+  <div class="alqpots">${KEYS.map(k=>`<button type="button" class="supic" data-k="${k}" ${left(k)<1||sel.length>=2?'disabled':''}>${icon(k)}<span>${NAME[k]}</span><b>${left(k)}</b></button>`).join('')}</div>
+  <div class="alqslots">${[0,1].map(i=>`<button type="button" class="alqslot" data-s="${i}">${sel[i]?icon(sel[i])+'<span>'+NAME[sel[i]]+' · '+cfg.pct[sel[i]]+'</span>':'<span class="m">Vacío</span>'}</button>`).join('')}</div>
+  <div class="note">${p==null?'Elige dos pociones.':`(${cfg.pct[sel[0]]} + ${cfg.pct[sel[1]]}) × ${fmt(cfg.mixBonus)} = <b>${Math.max(1,Math.round(p))} de daño</b> (no depende de la vida del objetivo). Es inestable: hay que lanzarla en los ${cfg.mixTurns} turnos siguientes o explota sobre el alquimista.`}</div>
+  <div class="alqbtns"><button type="button" class="pri" data-go ${p==null?'disabled':''}>Mezclar</button><button type="button" data-no>Cancelar</button></div></div>`};
+ o.onclick=e=>{if(e.target===o){o.remove();return}const b=e.target.closest('button');if(!b)return;
+  if(b.dataset.k&&!b.disabled)sel.push(b.dataset.k);else if(b.dataset.s!=null)sel.splice(+b.dataset.s,1);else if('no' in b.dataset){o.remove();return}else if('go' in b.dataset&&sel.length==2){o.remove();go(sel[0],sel[1]);return}paint()};
+ paint();document.body.appendChild(o)}
+window.alqMixUI=mixUI;
+function openMix(){const al=heroes()[inSq()?SQ.ai:0];
+ if(!al||al.cls!='alquimista'){toast('Solo el héroe Alquimista puede combinar pociones.');return}
+ if(prepOf()){toast('Ya hay una mezcla inestable activa.');return}
+ if(cnt('vida')+cnt('bomb')+cnt('mana')<2){toast('Necesitas al menos dos pociones en la mochila.');return}
+ mixUI(cnt,(a,b)=>doMix(a,b))}
+async function doMix(k1,k2){if(AQ.busy||!canAct())return;const sq=inSq(),ai=sq?SQ.ai:0,al=heroes()[ai];
+ if(!al||al.cls!='alquimista'||prepOf()||alqBlock())return;
+ const need={};need[k1]=(need[k1]||0)+1;need[k2]=(need[k2]||0)+1;
+ if(Object.keys(need).some(k=>cnt(k)<need[k])){toast('No tienes esas dos pociones en la mochila.');return}
+ AQ.busy=1;if(sq)SQ.busy=true;else busy=true;
+ for(const k in need)S.bot.inv[k]=cnt(k)-need[k];alqBump(al);save();          /* las dos unidades se consumen una sola vez */
+ const pct=mixPct(k1,k2);btn();
+ try{
+  B.log.push(`${al.n} combina ${NAME[k1]} y ${NAME[k2]}: ¡mezcla inestable de ${Math.max(1,Math.round(pct))} de daño!`);if(sq)sqUpd();else bupd();
+  await fxMix(heroEl(ai),k1,k2);
+  setPrep({pct,left:cfg.mixTurns+1,who:ai,n:[k1,k2]});         /* el turno de la creación no cuenta: quedan 2 turnos completos */
+  B.log.push(`La mezcla se vuelve inestable: tienes ${cfg.mixTurns} turnos para lanzarla.`);if(sq)sqUpd();else bupd();
+  await wait(300);await endAction(sq)
+ }catch(e){console.error('[ALQUIMIA mezcla]',e);try{if(sq)SQ.busy=false;else busy=false}catch(x){}}
+ finally{AQ.busy=0;try{sq&&SQ?sqUpd():bupd()}catch(x){}btn()}}
+/* cuenta de turnos: al final de cada turno del jugador. Si llega a 0 sin lanzarla, explota sobre el alquimista */
+async function tickPrep(sq){const o=sq?SQ:B,p=o&&o.prep;if(!p||o.over)return;p.left--;
+ if(p.left>0){B.log.push(`La mezcla inestable se agita: ${p.left==1?'queda 1 turno':'quedan '+p.left+' turnos'}.`);sq?sqUpd():bupd();return}
+ o.prep=null;const hs=heroes(),u=hs[p.who]&&hs[p.who].hp>0?hs[p.who]:hs.find(x=>x.hp>0);if(!u)return;
+ const el=heroEl(hs.indexOf(u)),d=dmgOf(p.pct,u);
+ B.log.push(`¡La mezcla inestable explota sobre ${u.n}! -${d} HP.`);sq?sqUpd():bupd();
+ await fxBlast(el);u.hp=Math.max(0,u.hp-d);try{impact(el,'-'+d)}catch(x){}sq?sqUpd():bupd();await wait(500)}
+{const _m=sqMonsters;sqMonsters=async function(){try{if(typeof SQ!=='undefined'&&SQ&&SQ.prep&&!SQ.over){SQ.busy=true;await tickPrep(true);if(!sqAlive().length)return sqLose()}}catch(e){console.error('[ALQUIMIA tick]',e)}return _m.apply(this,arguments)}}
+{const _t=mturn;mturn=async function(){try{if(B&&B.prep&&!B.over&&!B.tut&&inCl()){busy=true;await tickPrep(false);const H=B.h;if(H.hp<=0){B.over=true;H.dead=Date.now()+15000;save();banner('DERROTA');B.log.push(`Aventura fallida. ${H.n} queda inhabilitado 15 s.`);busy=false;bupd();const bf=g('bf');if(bf)bf.classList.remove('hide');return}}}catch(e){console.error('[ALQUIMIA tick]',e)}return _t.apply(this,arguments)}}
+/* ---------- uso real ---------- */
+window.alqConfirm=async()=>{if(AQ.busy||!AQ.item||AQ.tg==null)return;const k=AQ.item,sq=inSq(),idx=AQ.tg;
+ if(!canAct()){alqCancel();return}
+ if(k=='zap'?!prepOf():cnt(k)<1){toast(k=='zap'?'No hay ninguna mezcla activa.':'No te quedan '+NAME[k].toLowerCase()+'s en la mochila.');alqCancel();return}
+ const t=tgList()[idx],w=why(k,t);if(w){toast(w);AQ.tg=null;paint();bar();return}
+ const pr0=k=='zap'?prepOf():null;AQ.busy=1;const ai=sq?SQ.ai:0,a=heroes()[ai],ae=heroEl(ai),te=tgEl(idx),n=k=='zap'?dmgOf(pr0.pct,t):amount(k,t);
+ if(sq)SQ.busy=true;else busy=true;
+ const pr=k=='zap'?prepOf():null;if(k=='zap')setPrep(null);else{S.bot.inv[k]=cnt(k)-1;alqBump(a)}save();               /* se consume una sola vez, al confirmar */
+ AQ.item=null;AQ.tg=null;paint();bar();btn();
+ try{
+  if(k=='zap'){
+   B.log.push(`${a.n} lanza la mezcla inestable a ${t.n}.`);if(sq)sqUpd();else bupd();
+   await fxThrow(ae,te,'zap');
+   t.hp-=n;fxBoom(te,true);B.log.push(`La mezcla explota: ${t.n} recibe ${n} de daño.`);
+   try{impact(te,'-'+n)}catch(x){}
+   if(t.hp<=0)try{drops(te,t)}catch(x){}
+   if(cfg.selfPct>0){const sd=Math.max(1,Math.round(n*cfg.selfPct/100));a.hp=Math.max(0,a.hp-sd);B.log.push(`${a.n} sufre ${sd} de daño por la mezcla.`)}
+   if(sq){sqPhase();sqUpd()}else bupd();
+   await wait(500)}
+  else if(k=='bomb'){
+   B.log.push(`${a.n} lanza una Bombacitadora a ${t.n}.`);if(sq)sqUpd();else bupd();
+   await fxThrow(ae,te);
+   t.hp-=n;fxBoom(te);B.log.push(`La Bombacitadora explota: ${t.n} recibe ${n} de daño.`);
+   try{impact(te,'-'+n)}catch(x){}
+   if(t.hp<=0)try{drops(te,t)}catch(x){}
+   if(sq){sqPhase();sqUpd()}else bupd();
+   await wait(500)}
+  else{
+   B.log.push(`${a.n} usa ${NAME[k]} sobre ${t.n}.`);if(sq)sqUpd();else bupd();
+   await fxDrink(k,te);slowBars(te);
+   if(k=='vida')t.hp=Math.min(t.mhp,t.hp+n);else t.mp=Math.min(t.mmp,t.mp+n);
+   B.log.push(k=='vida'?`${t.n} recupera ${n} HP.`:`${t.n} recupera ${n} de maná.`);
+   fxAura(k,te,k=='vida'?'+'+n+' HP':'+'+n+' maná');
+   if(sq)sqUpd();else bupd();
+   await wait(900)}
+  await endAction(sq)
+ }catch(e){console.error('[ALQUIMIA]',e);try{if(sq)SQ.busy=false;else busy=false}catch(x){}}
+ finally{AQ.busy=0;try{sq&&SQ?sqUpd():bupd()}catch(x){}btn()}};
+
+/* ---------- botón ALQUIMIA ---------- */
+function pill(){const p=(inSq()||inCl())&&!over()?prepOf():null;let e=g('alqpill');
+ document.querySelectorAll('.alq-unst').forEach(x=>{if(!p||x!==heroEl(p.who))x.classList.remove('alq-unst')});
+ if(!p){if(e)e.remove();return}
+ if(!e){e=document.createElement('div');e.id='alqpill';document.body.appendChild(e)}
+ const n=Math.min(p.left,cfg.mixTurns);e.innerHTML=`<span class="alqpi">${MIXSV}</span><span><b>Mezcla inestable</b> ${Math.max(1,Math.round(p.pct))} de daño · ${n==1?'último turno':'quedan '+n+' turnos'}</span>`;
+ const he=heroEl(p.who);if(he)he.classList.add('alq-unst')}
+function btn(){try{pill()}catch(x){}let b=g('alqb');const host=inSq()?g('sqa'):inCl()?(g('b3')&&g('b3').parentNode):null;
+ if(!host||!hasBag()||over()){if(b)b.remove();return}
+ if(!b||b.parentNode!==host){if(b)b.remove();b=document.createElement('button');b.id='alqb';b.onclick=()=>alqOpen();
+  const s=g('supb');if(s&&s.parentNode===host)s.after(b);else if(inCl())g('b3').after(b);else host.appendChild(b)}
+ const tot=cnt('vida')+cnt('bomb')+cnt('mana');
+ b.innerHTML=`<span class="alqi">${icon('vida')}</span> ALQUIMIA (${cnt('vida')} · ${cnt('bomb')} · ${cnt('mana')})${prepOf()?' ⚗'+Math.min(prepOf().left,cfg.mixTurns):''}`;
+ b.disabled=!canAct()||!!AQ.busy||(tot<1&&!prepOf())}
+{const _a=sqUpd;sqUpd=function(){const r=_a.apply(this,arguments);try{btn()}catch(e){}return r}}
+{const _b=bupd;bupd=function(){const r=_b.apply(this,arguments);try{btn()}catch(e){}return r}}
+
+/* elegir objetivo con un toque */
+const idIn=(el,re)=>{for(let e=el;e&&e!==document.body;e=e.parentElement){if(e.id&&re.test(e.id))return e}return null};
+document.addEventListener('click',e=>{if(!AQ.item)return;if(e.target.closest('#alqbar,#alqw,.supt'))return;
+ if(e.target.closest('#alqb')){e.stopPropagation();e.preventDefault();alqCancel();return}
+ const bomb=isFoe(AQ.item),sq=inSq(),re=bomb?(sq?/^sqm\d+$/:/^m\d+$/):(sq?/^sqh\d+$/:/^hc$/),c=idIn(e.target,re);
+ if(c){e.stopPropagation();e.preventDefault();if(AQ.busy)return;const i=bomb?+c.id.replace(/\D/g,''):(sq?+c.id.replace(/\D/g,''):0),u=tgList()[i],w=why(AQ.item,u);
+  if(w){toast(w);return}AQ.tg=i;paint();bar();return}
+ if(e.target.closest('#sqa,#sqM,#sqH,#mrow,#b1,#b2,#b3,.skb,#supb,#bf')){e.stopPropagation();e.preventDefault()}},true);
+document.addEventListener('keydown',e=>{if(e.key=='Escape'&&(AQ.item||g('alqw')))alqCancel()});
+setInterval(()=>{if((AQ.item||g('alqw'))&&!AQ.busy&&!canAct())alqCancel();if(AQ.item&&!AQ.busy&&!inSq()&&!inCl())alqCancel()},400);
+
+/* estilos */
+const st=document.createElement('style');
+st.textContent='#alqb{display:inline-flex;align-items:center;gap:6px;border-color:#ff8a2a}#alqb .alqi svg,#alqb .alqi img{width:18px;height:18px;object-fit:contain;vertical-align:middle}'
++'.alqw{border-color:#ff8a2a}.alqw .supic svg,.alqw .supic img{width:30px;height:30px;object-fit:contain}'
++'.cd.alq-ok{outline:2px solid var(--ac,#ff8a2a)!important;box-shadow:0 0 14px var(--ac,#ff8a2a)!important;cursor:pointer;animation:alqPulse 1s ease-in-out infinite}'
++'.cd.alq-sel{outline:3px solid var(--ac,#ff8a2a)!important;box-shadow:0 0 26px var(--ac,#ff8a2a)!important;animation:none}'
++'@keyframes alqPulse{0%,100%{filter:brightness(1)}50%{filter:brightness(1.25)}}'
++'#alqbar{position:fixed;top:calc(8px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);z-index:85;display:flex;gap:10px;align-items:center;padding:8px 10px;border-radius:18px;background:var(--s);border:1px solid var(--ac,#ff8a2a);color:var(--t);font-size:13px;box-shadow:0 6px 20px rgba(0,0,0,.45);max-width:94vw;flex-wrap:wrap;justify-content:center}'
++'#alqbar .ib svg,#alqbar .ib img{width:24px;height:24px;object-fit:contain}#alqbar button{border-radius:999px;padding:6px 12px}'
++'#alqpill{position:fixed;top:calc(52px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);z-index:80;display:flex;gap:8px;align-items:center;padding:5px 12px;border-radius:999px;background:var(--s);border:1px solid #b36cf0;color:var(--t);font-size:12px;box-shadow:0 0 18px rgba(179,108,240,.7);animation:alqUn 1.2s ease-in-out infinite}#alqpill .alqpi svg{width:20px;height:20px}'
++'.cd.alq-unst{box-shadow:0 0 18px 4px rgba(179,108,240,.85)!important;animation:alqUn 1.2s ease-in-out infinite}'
++'@keyframes alqUn{0%,100%{filter:hue-rotate(0) brightness(1)}50%{filter:hue-rotate(35deg) brightness(1.25)}}'
++'.alqmixb,.alqzapb{border-color:#b36cf0}.alqmixb svg,.alqzapb svg{width:30px;height:30px}'
++'.alqmix{position:fixed;inset:0;z-index:130;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.55);padding:12px}'
++'.alqmp{width:min(400px,94vw);max-height:92vh;overflow:auto;background:var(--s);color:var(--t);border:1px solid #b36cf0;border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:10px;box-shadow:0 10px 30px rgba(0,0,0,.6)}.alqmp h3{margin:0}'
++'.alqpots,.alqslots,.alqbtns{display:flex;gap:8px;flex-wrap:wrap}.alqpots .supic{flex:1 1 100px;flex-direction:column;gap:4px;min-width:96px}.alqpots .supic svg,.alqpots .supic img,.alqslot svg,.alqslot img{width:30px;height:30px;object-fit:contain}'
++'.alqslot{flex:1 1 140px;display:flex;align-items:center;gap:8px;justify-content:center;min-height:48px;border:1px dashed #b36cf0;border-radius:12px;font-size:12px}.alqbtns button{flex:1}';
+st.textContent+='#pvab{display:inline-flex;align-items:center;gap:6px;border-color:#ff8a2a}#pvab .alqi svg,#pvab .alqi img{width:18px;height:18px;object-fit:contain;vertical-align:middle}'
++'#pvb .cd[data-alq="qb"]{outline:2px solid #ff8a2a!important;box-shadow:0 0 16px #ff8a2a!important;cursor:pointer;animation:alqPulse 1s ease-in-out infinite}'
++'#pvb .cd[data-alq="qv"]{outline:2px solid #e0405a!important;box-shadow:0 0 16px #e0405a!important;cursor:pointer;animation:alqPulse 1s ease-in-out infinite}'
++'#pvb .cd[data-alq="qz"]{outline:2px solid #b36cf0!important;box-shadow:0 0 16px #b36cf0!important;cursor:pointer;animation:alqPulse 1s ease-in-out infinite}'
++'.alqpv{display:flex;align-items:center;gap:6px;font-size:12px;padding:4px 10px;border:1px solid #b36cf0;border-radius:999px;box-shadow:0 0 12px rgba(179,108,240,.6);animation:alqUn 1.2s ease-in-out infinite}.alqpv svg{width:18px;height:18px}'
++'#pvb .cd[data-alq="qm"]{outline:2px solid #4a90e8!important;box-shadow:0 0 16px #4a90e8!important;cursor:pointer;animation:alqPulse 1s ease-in-out infinite}';
+document.head.appendChild(st);
+window.aqFx=async(k,A,tg,n,sync,ev)=>{try{
+ if(k=='mix'){await fxMix(A,((ev&&ev.m)||[])[0]||'vida',((ev&&ev.m)||[])[1]||'mana');if(sync)sync();await wait(300)}
+ else if(k=='zap'){await fxThrow(A,tg,'zap');fxBoom(tg,true);try{impact(tg,'-'+n)}catch(x){}if(sync)sync();await wait(500)}
+ else if(k=='bomb'){await fxThrow(A,tg);fxBoom(tg);try{impact(tg,'-'+n)}catch(x){}if(sync)sync();await wait(500)}
+ else{await fxDrink(k,tg);slowBars(tg);if(sync)sync();fxAura(k,tg,k=='vida'?'+'+n+' HP':'+'+n+' maná');await wait(900)}
+ }catch(e){console.error('[ALQUIMIA PvP]',e)}};
+window.aqPx=async(e,d,sync)=>{try{if(e)await fxBlast(e);if(sync)sync();if(e)try{impact(e,'-'+d)}catch(x){}await wait(400)}catch(x){console.error(x)}};
+window.alqIcon=icon;window.ALQ_NAME=NAME;
+window.ALQ={cfg,use:()=>AQ,btn};
+})();
+</script>
 </body></html>
