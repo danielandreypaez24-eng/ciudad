@@ -3635,7 +3635,7 @@ function render(){const ov=document.getElementById('accov');if(!ov)return;const 
 <tr><td class="m">Contraseña</td><td>${pw?(showPw?esc(pw):'•'.repeat(Math.min(pw.length,12)))+'<button class="sm" onclick="accPw()">'+(showPw?'Ocultar':'Ver')+'</button>':'<span class="m">No guardada en este dispositivo</span>'}</td></tr></table>`;
  if(!m)h+=`<p class="nt er">No se pudo cargar tu perfil (ID y amigos). Revisa que las reglas de Firestore estén actualizadas.</p>`;
 h+=`<div style="margin-top:16px;text-align:right"><button onclick="cuentaSalir()">Cerrar sesión</button></div></div>`;
- const keep=document.getElementById('accq')===document.activeElement;ov.innerHTML=h;if(keep){const i=document.getElementById('accq');if(i){i.focus();i.setSelectionRange(i.value.length,i.value.length)}}}
+ const keep=document.getElementById('accq')===document.activeElement;const _op=ov.querySelector('.accp'),_st=_op?_op.scrollTop:0;ov.innerHTML=h;{const _np=ov.querySelector('.accp');if(_np&&_st)_np.scrollTop=_st}if(keep){const i=document.getElementById('accq');if(i){i.focus();i.setSelectionRange(i.value.length,i.value.length)}}}
 window.accOpen=t=>{if(!C()||!C().name)return;if(t)tab=t;isOpen=true;showPw=false;let o=document.getElementById('accov');if(!o){o=document.createElement('div');o.id='accov';o.onclick=e=>{if(e.target===o)accClose()};document.body.appendChild(o)}render();loadFriends()};
 window.accClose=()=>{isOpen=false;const o=document.getElementById('accov');if(o)o.remove()};
 window.accTab=t=>{tab=t;note='';res=null;render();if(t=='amigos')loadFriends()};
@@ -4251,7 +4251,7 @@ function arDraw(){const a=ensure(),o=arOv();let h=`<div class="panel arp"><div c
   else if(rows&&!rows.length)h+='<p class="m">Todavía no hay jugadores clasificados.</p>';
   else if(rows)h+=rows.map((d,i)=>{const A=d.arena,L=LV[A.lv]||LV[0],mine=C()&&d.nombre===C().name,pr=A.sn==seasonN()?A.pr:0;return `<div class="lbr ${mine?'me':''}" onclick="AR.row(${i})"><span class="lbp">${i+1}</span>${av(d.color,d.nombre,30)}<div class="gr"><b>${esc(d.nombre)}</b><div class="m" style="color:${L.c}">${badge(L.t,14)} ${L.name} <span class="sts s2">${stars(L.i)}</span></div></div><div class="lbv ${rk=='p'?'k':''}"><b>${A.p}</b><span>pts</span></div><div class="lbv ${rk=='pr'?'k':''}"><b>${pr}</b><span>prest.</span></div></div>`}).join('')}
  else{const d=me();h+=profile(d,'p')+`<label class="pvl2"><input type="checkbox" ${a.pv!==false?'checked':''} onchange="AR.pv(this.checked)" style="width:auto"> Permitir que mis amigos vean mi juego</label>`}
- o.innerHTML=h+'</div>'}
+ const _ap=o.querySelector('.arp'),_as=_ap?_ap.scrollTop:0;o.innerHTML=h+'</div>';if(_as){const _n=o.querySelector('.arp');if(_n)_n.scrollTop=_as}}
 async function loadRank(){const key=rk;rkBusy=true;rkMsg='';rows=null;arDraw();
  try{if(!C()||!C().top)throw new Error('Inicia sesión para ver la clasificación.');let r=await C().top(key,100);r=r.filter(d=>d.arena&&Number.isFinite(d.arena.lv));if(key=='pr')r=r.filter(d=>d.arena.sn==seasonN()&&d.arena.pr>0);if(rk==key)rows=r.slice(0,50)}
  catch(e){rkMsg=(e&&e.code=='permission-denied')?'Sin permiso para leer la clasificación: revisa las reglas de Firestore.':(e&&e.message)||'No se pudo cargar la clasificación.'}
@@ -4315,7 +4315,7 @@ function fDraw(){let o=$$('frp');if(!fOpen){if(o)o.remove();const k=$$('frbk');i
  else if(!C()||!C().name)h+='<p class="m">Necesitas una cuenta para tener amigos.</p>';
  else h+=fTabs()+(fmode=='req'?fReq():fmode=='add'?fAdd():fList());
   h+='</div>';
-  o.innerHTML=h;if(fchat){chatPaint();const l=$$('chl');if(l)l.scrollTop=l.scrollHeight}}
+  const _ob=o.querySelector('.frb2'),_sb=(_ob&&!fchat)?_ob.scrollTop:0;o.innerHTML=h;if(fchat){chatPaint();const l=$$('chl');if(l)l.scrollTop=l.scrollHeight}else if(_sb){const _nb=o.querySelector('.frb2');if(_nb)_nb.scrollTop=_sb}}
 async function fLoad(){if(!C()||!C().name){fDraw();return}fload=true;try{fl=await C().friends();fl.sort((x,y)=>(online(y)?1:0)-(online(x)?1:0)||String(x.nombre).localeCompare(String(y.nombre)))}catch(e){}fload=false;if(fOpen&&!fchat)fDraw();sLoad()}
 window.FR={
  toggle:()=>fOpen?FR.close():FR.open(),
