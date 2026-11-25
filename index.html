@@ -6709,18 +6709,53 @@ setInterval(()=>{try{if(!S||$('game').classList.contains('hide'))return;const n=
 }catch(e){console.error(e)}},1000);
 })();
 </script>
+<style id="exp-css">
+#expp{position:fixed;inset:0;z-index:140;display:none;align-items:flex-end;justify-content:center;background:rgba(10,6,24,.58);backdrop-filter:blur(4px)}
+#expp.on{display:flex}
+#expp .ex{width:min(520px,100%);max-height:86vh;display:flex;flex-direction:column;gap:10px;background:var(--s);border:1px solid var(--l);border-radius:22px 22px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom,0px));box-shadow:0 -10px 34px rgba(0,0,0,.5)}
+#expp .exh{display:flex;align-items:center;justify-content:space-between;gap:10px}
+#expp .exh h2{margin:0;font-size:17px}
+#expp .exn{font-size:12px;color:var(--m);margin:0}
+#expp .exl{overflow:auto;display:flex;flex-direction:column;gap:8px;padding-right:2px}
+#expp .exg{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--a);margin:8px 0 0}
+#expp .exr{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--l);border-radius:14px;background:linear-gradient(170deg,color-mix(in srgb,var(--a) 7%,transparent),transparent 60%)}
+#expp .exr span{flex:1;min-width:0}#expp .exr b{display:block;font-size:14px}#expp .exr small{display:block;color:var(--m);font-size:11.5px;margin-top:2px}
+#expp .exr button{flex:none;width:auto!important;min-width:0;padding:9px 14px;white-space:nowrap}#expp .exh button{width:auto!important;padding:8px 14px}
+</style>
+<script id="exp-js">
+/* ===== Experimentaciones (solo administrador): repite diálogos y eventos sin tocar la partida =====
+   Para añadir un evento nuevo desde cualquier parte del juego:  EXP.add('Grupo','Título','Descripción',()=>{...reproducir...})  */
+(function(){
+const EXP={items:[],add(g,t,d,run){this.items.push({g,t,d,run})}};window.EXP=EXP;
+let p=null;
+const esc2=x=>String(x).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]);
+function render(){if(!p)return;const gs=[];EXP.items.forEach((it,i)=>{let g=gs.find(x=>x.n==it.g);if(!g)gs.push(g={n:it.g,l:[]});g.l.push([it,i])});
+ p.innerHTML=`<div class="ex" role="dialog" aria-label="Experimentaciones"><div class="exh"><h2>Experimentaciones</h2><button type="button" data-x>Cerrar</button></div>
+ <p class="exn">Solo administrador. Reproduce eventos y diálogos para revisarlos: no consume recursos ni cambia tu partida.</p>
+ <div class="exl">${gs.length?gs.map(g=>`<div class="exg">${esc2(g.n)}</div>`+g.l.map(([it,i])=>`<div class="exr"><span><b>${esc2(it.t)}</b><small>${esc2(it.d||'')}</small></span><button type="button" class="pri" data-i="${i}">Reproducir</button></div>`).join('')).join(''):'<p class="exn">Aún no hay eventos registrados.</p>'}</div></div>`}
+function close(){if(p)p.classList.remove('on')}
+window.expOpen=function(){if(typeof ADM=='undefined'||!ADM)return;if(!p){p=document.createElement('div');p.id='expp';document.body.appendChild(p);
+  p.onclick=e=>{if(e.target===p){close();return}const b=e.target.closest('button');if(!b)return;if('x' in b.dataset){close();return}
+   const it=EXP.items[+b.dataset.i];if(it){try{it.run()}catch(x){console.error('[EXP]',x)}}};
+  new MutationObserver(()=>{p.style.visibility=document.querySelector('.bdl')?'hidden':'visible'}).observe(document.body,{childList:true});
+  document.addEventListener('keydown',e=>{if(e.key=='Escape')close()})}
+ render();p.classList.add('on')};
+setInterval(()=>{if(p&&p.classList.contains('on')&&(typeof ADM=='undefined'||!ADM))close()},800);
+})();
+</script>
 <script id="hub-menu">(function(){var d=document,e=d.documentElement;
 var FS=!!(e.requestFullscreen||e.webkitRequestFullscreen);
 var cur=function(){return d.fullscreenElement||d.webkitFullscreenElement};
 var SV=function(p){return '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+p+'</svg>'};
-var IC={menu:'<path d="M4 7h16M4 12h16M4 17h16"/>',x:'<path d="M6 6l12 12M18 6L6 18"/>',fsIn:'<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>',fsOut:'<path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/>',cfg:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"/>',mus:'<path d="M9 18V5l11-2v13"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="17.5" cy="16" r="2.5"/>',fx:'<path d="M12 3l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/>'};
+var IC={menu:'<path d="M4 7h16M4 12h16M4 17h16"/>',x:'<path d="M6 6l12 12M18 6L6 18"/>',fsIn:'<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>',fsOut:'<path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/>',cfg:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"/>',mus:'<path d="M9 18V5l11-2v13"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="17.5" cy="16" r="2.5"/>',fx:'<path d="M12 3l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/>',exp:'<path d="M9 3h6M10 3v6L5 19a2 2 0 002 2h10a2 2 0 002-2l-5-10V3M8 15h8"/>'};
 var st=d.createElement('style');st.textContent='#mfab,#epb,#cfgf{visibility:hidden!important;pointer-events:none!important}#hubb{position:fixed;right:10px;bottom:calc(10px + env(safe-area-inset-bottom,0px));z-index:95;width:42px;height:42px;padding:0;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(20,20,30,.78);color:#fff;border:1px solid rgba(255,255,255,.28);box-shadow:0 4px 14px rgba(0,0,0,.45);cursor:pointer;opacity:.8}#hubb:hover,#hubb:focus-visible,#hubb.on{opacity:1}#hubm{position:fixed;right:10px;bottom:calc(60px + env(safe-area-inset-bottom,0px));z-index:95;display:none;flex-direction:column;gap:4px;min-width:200px;padding:8px;border-radius:14px;background:rgba(20,20,30,.95);border:1px solid rgba(255,255,255,.22);box-shadow:0 8px 24px rgba(0,0,0,.55)}#hubm.on{display:flex}#hubm button{display:flex;align-items:center;gap:10px;width:100%;padding:11px 12px;border-radius:10px;background:transparent;color:#fff;border:0;box-shadow:none;font-size:14px;font-weight:600;text-align:left;cursor:pointer}#hubm button:hover,#hubm button:focus-visible{background:rgba(255,255,255,.12)}';d.head.appendChild(st);
 var orig=function(id){return function(){var x=d.getElementById(id);return !!x&&getComputedStyle(x).display!=='none'}};
 var ITEMS=[
  {ic:function(){return cur()?IC.fsOut:IC.fsIn},t:function(){return cur()?'Salir de pantalla completa':'Pantalla completa'},show:function(){return FS},run:function(){try{if(cur()){(d.exitFullscreen||d.webkitExitFullscreen).call(d)}else{(e.requestFullscreen||e.webkitRequestFullscreen).call(e)}}catch(x){}}},
  {ic:function(){return IC.cfg},t:function(){return 'Configuración'},show:orig('cfgf'),run:function(){var x=d.getElementById('cfgf');x&&x.click()}},
  {ic:function(){return IC.mus},t:function(){return 'Música'},show:orig('mfab'),run:function(){var x=d.getElementById('mfab');x&&x.click()}},
- {ic:function(){return IC.fx},t:function(){return 'Efectos'},show:orig('epb'),run:function(){var x=d.getElementById('epb');x&&x.click()}}];
+ {ic:function(){return IC.fx},t:function(){return 'Efectos'},show:orig('epb'),run:function(){var x=d.getElementById('epb');x&&x.click()}},
+ {ic:function(){return IC.exp},t:function(){return 'Experimentaciones'},show:function(){try{var g=d.getElementById('game');return !!(typeof ADM!=='undefined'&&ADM&&typeof S!=='undefined'&&S&&g&&!g.classList.contains('hide'))}catch(x){return false}},run:function(){window.expOpen&&window.expOpen()}}];
 var b=d.createElement('button');b.id='hubb';b.type='button';var m=d.createElement('div');m.id='hubm';
 var close=function(){m.classList.remove('on');b.classList.remove('on');b.innerHTML=SV(IC.menu);b.setAttribute('aria-label','Menú');b.setAttribute('aria-expanded','false')};
 var open=function(){m.innerHTML='';var n=0;ITEMS.forEach(function(it){var ok=false;try{ok=it.show()}catch(x){}if(!ok)return;n++;var k=d.createElement('button');k.type='button';k.innerHTML=SV(it.ic())+'<span>'+it.t()+'</span>';k.onclick=function(){close();it.run()};m.appendChild(k)});if(!n)return;m.classList.add('on');b.classList.add('on');b.innerHTML=SV(IC.x);b.setAttribute('aria-label','Cerrar menú');b.setAttribute('aria-expanded','true')};
@@ -7109,15 +7144,23 @@ close();d.body.appendChild(m);d.body.appendChild(b)})();</script>
 .bdl.on .bpt{transform:none;opacity:1}
 .bdl .bpt img,.bdl .bpt svg{display:block;width:100%;height:auto;max-height:46vh;object-fit:contain;background:none;animation:bfl 3.4s ease-in-out infinite alternate;filter:drop-shadow(0 6px 10px rgba(0,0,0,.35))}
 @keyframes bfl{from{transform:translateY(0)}to{transform:translateY(-8px)}}
-.bdl .bbb{flex:1;max-width:460px;background:var(--s);color:var(--t);border:1px solid var(--l);border-radius:16px;padding:10px 14px 12px;box-shadow:0 8px 28px rgba(0,0,0,.4);cursor:pointer;transform:translateY(16px);opacity:0;transition:transform .45s ease .15s,opacity .45s ease .15s;margin-bottom:4px}
+.bdl .bpt{position:relative}
+.bdl .bpt::before{content:'';position:absolute;left:-8%;right:-8%;bottom:-2%;height:62%;background:radial-gradient(closest-side,color-mix(in srgb,var(--a) 42%,transparent),transparent);filter:blur(8px);z-index:-1}
+.bdl .bbb{position:relative;flex:1;max-width:480px;background:linear-gradient(170deg,color-mix(in srgb,var(--a) 11%,var(--s)),var(--s) 70%);color:var(--t);border:1.5px solid var(--a);border-radius:20px;padding:20px 18px 12px;box-shadow:0 10px 30px rgba(0,0,0,.45),inset 0 0 0 1px color-mix(in srgb,var(--a) 18%,transparent);cursor:pointer;transform:translateY(16px);opacity:0;transition:transform .45s ease .15s,opacity .45s ease .15s;margin-bottom:6px}
+.bdl .bbb::before{content:'';position:absolute;left:-9px;bottom:26px;width:16px;height:16px;background:color-mix(in srgb,var(--a) 9%,var(--s));border-left:1.5px solid var(--a);border-bottom:1.5px solid var(--a);transform:rotate(45deg);border-bottom-left-radius:4px}
 .bdl.on .bbb{transform:none;opacity:1}
-.bdl .bnm{font-weight:700;color:var(--a);font-size:13px;letter-spacing:.03em}
-.bdl .bsb{font-size:11px;color:var(--m);margin-bottom:6px}
-.bdl .btx{font-size:14px;line-height:1.45;min-height:3.9em}
-.bdl .bhn{font-size:10px;color:var(--m);text-align:right;margin-top:4px;opacity:.8}
-.bdl .bch{display:flex;gap:8px;margin-top:10px}.bdl .bch button{flex:1}
+.bdl .bhd{position:absolute;top:-13px;left:14px;display:flex;align-items:center;gap:8px;max-width:calc(100% - 28px)}
+.bdl .bnm{font-weight:700;background:var(--a);color:#1b1230;font-size:12px;letter-spacing:.05em;padding:3px 12px;border-radius:99px;white-space:nowrap;box-shadow:0 3px 8px rgba(0,0,0,.35)}
+.bdl .bsb{font-size:11px;color:var(--a);background:var(--s);border:1px solid var(--l);border-radius:99px;padding:2px 9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bdl .btx{font-size:14.5px;line-height:1.5;min-height:4.4em}
+.bdl .bdt{display:flex;gap:4px;margin-top:8px}.bdl .bdt i{width:6px;height:6px;border-radius:50%;background:var(--l)}.bdl .bdt i.on{background:var(--a)}
+.bdl .bhn{display:flex;align-items:center;justify-content:flex-end;gap:6px;font-size:10.5px;color:var(--m);margin-top:-8px;opacity:.9}
+.bdl .bhn::after{content:'';width:7px;height:7px;border-right:2px solid var(--a);border-bottom:2px solid var(--a);transform:rotate(45deg);animation:bnx 1s ease-in-out infinite alternate}
+@keyframes bnx{from{translate:0 -2px;opacity:.5}to{translate:0 2px;opacity:1}}
+@media(prefers-reduced-motion:reduce){.bdl .bhn::after{animation:none}}
+.bdl .bch{display:flex;gap:8px;margin-top:12px}.bdl .bch button{flex:1}
 @media(prefers-reduced-motion:reduce){.bdl,.bdl .bpt,.bdl .bbb{transition:none}.bdl .bpt img,.bdl .bpt svg{animation:none}}
-.bmx{display:flex;gap:12px;align-items:center;margin:4px 0 10px}.bmx .bpt{width:84px;flex:none}.bmx .bpt img,.bmx .bpt svg{width:100%;height:auto;display:block}
+.bmx{display:flex;gap:14px;align-items:center;margin:4px 0 12px}.bmx .bpt{width:84px;flex:none}.bmx .bpt img,.bmx .bpt svg{width:100%;height:auto;display:block}
 .bed textarea{width:100%;min-height:54px;box-sizing:border-box;margin:4px 0}.bed .brw{border:1px solid var(--l);border-radius:10px;padding:8px;margin:8px 0}.bed img.th{height:38px;vertical-align:middle;margin-left:6px}
 </style>
 <script>
@@ -7148,14 +7191,14 @@ const mainScr=()=>{try{const o=$('ov');return !place&&!SCR&&!SQ&&!(o&&o.firstEle
 function dlg(id,done,choices,extra){
  const sc=SC[id],c=cfg();let i=0,tm=null,words=[],k=0,typing=false;
  const o=document.createElement('div');o.className='bdl';
- o.innerHTML='<div class="bpt"></div><div class="bbb"><div class="bnm"></div><div class="bsb"></div><div class="btx"></div><div class="bxt"></div><div class="bch"></div><div class="bhn">Toca para continuar</div></div>';
- document.body.appendChild(o);const BX=o.querySelector('.bxt'),P=o.querySelector('.bpt'),B=o.querySelector('.bbb'),T=o.querySelector('.btx'),H=o.querySelector('.bhn'),CH=o.querySelector('.bch');
+ o.innerHTML='<div class="bpt"></div><div class="bbb"><div class="bhd"><span class="bnm"></span><span class="bsb"></span></div><div class="btx"></div><div class="bxt"></div><div class="bch"></div><div class="bdt"></div><div class="bhn">Toca para continuar</div></div>';
+ document.body.appendChild(o);const DT=o.querySelector('.bdt'),BX=o.querySelector('.bxt'),P=o.querySelector('.bpt'),B=o.querySelector('.bbb'),T=o.querySelector('.btx'),H=o.querySelector('.bhn'),CH=o.querySelector('.bch');
  o.querySelector('.bnm').textContent=c.name;o.querySelector('.bsb').textContent=sc.sub;
  const rm=typeof RM!='undefined'&&RM;
  const last=()=>i>=sc.ln.length-1;
  const fin=()=>{clearInterval(tm);typing=false;T.textContent=line(id,i);H.style.display=last()&&choices?'none':'';
   if(last()&&extra)BX.innerHTML=extra();if(last()&&choices&&!CH.children.length)choices.forEach(([lb,fn,cls,dis])=>{const b=document.createElement('button');b.textContent=lb;if(cls)b.className=cls;if(dis&&dis())b.disabled=true;b.onclick=e=>{e.stopPropagation();close(fn)};CH.appendChild(b)})};
- const show=()=>{P.innerHTML=pic(id,i);CH.innerHTML='';BX.innerHTML='';words=line(id,i).split(' ');k=0;T.textContent='';typing=true;H.style.display='none';
+ const show=()=>{P.innerHTML=pic(id,i);CH.innerHTML='';DT.innerHTML=sc.ln.length>1?sc.ln.map((_,j)=>`<i class="${j<=i?'on':''}"></i>`).join(''):'';BX.innerHTML='';words=line(id,i).split(' ');k=0;T.textContent='';typing=true;H.style.display='none';
   if(rm){fin();return}clearInterval(tm);tm=setInterval(()=>{k++;T.textContent=words.slice(0,k).join(' ');if(k>=words.length){fin();H.style.display=last()&&choices?'none':''}},55)};
  const close=fn=>{clearInterval(tm);o.classList.remove('on');setTimeout(()=>{o.remove();try{fn&&fn()}catch(e){console.warn(e)}try{done&&done()}catch(e){}},rm?0:420)};
  B.onclick=()=>{if(typing){fin();return}if(!last()){i++;show();return}if(!choices)close()};
@@ -7167,7 +7210,30 @@ window.botDlg=dlg;window.BOTSC=SC;window.botCfg=cfg;window.botPic=pic;
 SH.bot={n:'Boticario',d:'Pociones y objetos alquímicos para el combate.',cost:{},t:20000,e:'Pociones y mochila alquímica'};NM.bot='Boticario';LV.bot=[{}];
 DECL.bot=()=>S&&S.bot&&S.bot.ok?1:0;
 window.STN=window.STN||{};
-window.STN.bot=(s=18)=>`<svg class="ic bs" width="${s}" height="${s}" viewBox="0 0 100 100" style="stroke:none;fill:none" aria-hidden="true"><path d="M12 94H92l-6 6H6z" fill="#1b1230" opacity=".25"/><rect x="14" y="46" width="68" height="46" rx="3" fill="#a8794a" stroke="#1b1230" stroke-width="2"/><rect x="14" y="70" width="68" height="22" fill="#8c6238"/><path d="M8 50L48 18l40 32z" fill="#6b4a9a" stroke="#1b1230" stroke-width="2.4" stroke-linejoin="round"/><path d="M8 50L48 18v32z" fill="#fff" fill-opacity=".18"/><rect x="62" y="22" width="9" height="14" fill="#8c6238" stroke="#1b1230" stroke-width="1.8"/><rect x="40" y="62" width="16" height="30" rx="2" fill="#2a1a3c" stroke="#1b1230" stroke-width="1.8"/><rect x="20" y="56" width="14" height="12" rx="2" fill="#ffe08a" stroke="#1b1230" stroke-width="1.6"/><rect x="62" y="56" width="14" height="12" rx="2" fill="#ffe08a" stroke="#1b1230" stroke-width="1.6"/><path d="M85 60h10v8l4 8c1 4-1 7-5 7h-8c-4 0-6-3-5-7l4-8z" fill="#e0683e" stroke="#1b1230" stroke-width="1.8" stroke-linejoin="round" transform="translate(-6 8) scale(.85)"/><circle cx="48" cy="38" r="6" fill="#8fe0cf" stroke="#1b1230" stroke-width="1.8"/></svg>`;
+(function(){
+const O='#1b1230',FR='#5b4268',FR2='#49345a',TP='#b09aa8',HI='#e0cdcd',DK='#120a26',GO='#9B6CD8',GO2='#66409a',GOL='#cdb3f0',SHD='rgba(8,4,20,.30)';
+const n=v=>+v.toFixed(1);
+const shadow=(a,b)=>`<path d="M${a+6} 92H${b+8}l-6 6H${a-2}z" fill="${SHD}"/>`;
+function blk(x,y,w,h,t=7){const fy=y+t,fh=h-t,mid=fy+fh/2;
+ let s=`<rect x="${n(x-1.6)}" y="${n(y-1.6)}" width="${n(w+3.2)}" height="${n(h+3.2)}" rx="1.6" fill="${O}"/><rect x="${x}" y="${fy}" width="${w}" height="${n(fh)}" fill="${FR}"/><rect x="${x}" y="${n(mid)}" width="${w}" height="${n(fh/2)}" fill="${FR2}"/>`;
+ let d=`M${x} ${n(mid)}H${x+w}`;for(let k=x+7;k<x+w-1;k+=14)d+=`M${k} ${fy}V${n(mid)}`;for(let k=x+14;k<x+w-1;k+=14)d+=`M${k} ${n(mid)}V${y+h}`;
+ s+=`<path d="${d}" stroke="${O}" stroke-opacity=".5" stroke-width="1" fill="none"/><rect x="${x}" y="${y}" width="${w}" height="${t}" fill="${TP}"/>`;
+ let j='';for(let k=x+10;k<x+w-3;k+=14)j+=`M${k} ${y}V${fy}`;
+ if(j)s+=`<path d="${j}" stroke="#231234" stroke-opacity=".3" stroke-width="1" fill="none"/>`;
+ return s+`<path d="M${x+1} ${y+1.2}H${x+w-1}" stroke="${HI}" stroke-opacity=".75" stroke-width="1.6" fill="none"/><path d="M${x} ${fy}H${x+w}" stroke="${O}" stroke-opacity=".45" stroke-width="1.2" fill="none"/>`}
+const door=(x,y,w,h)=>{const r=w/2;return `<path d="M${x} ${y+h}V${y+r}a${r} ${r} 0 0 1 ${w} 0V${y+h}z" fill="${DK}" stroke="${O}" stroke-width="1.4"/><path d="M${x+1.2} ${y+h}V${y+r}a${r-1.2} ${r-1.2} 0 0 1 ${w-2.4} 0V${y+h}" fill="none" stroke="${GO}" stroke-opacity=".6" stroke-width="1.3"/>`};
+function roof(x1,x2,yb,ya){const cx=(x1+x2)/2,a=x1-5,b=x2+5,L=k=>n(a+(cx-a)*k),R=k=>n(b-(b-cx)*k),Y=k=>n(yb-(yb-ya)*k);
+ return `<path d="M${a} ${yb}L${cx} ${ya}L${b} ${yb}z" fill="${GO}" stroke="${O}" stroke-width="2.6" stroke-linejoin="round"/><path d="M${a} ${yb}L${cx} ${ya}V${yb}z" fill="${GOL}" fill-opacity=".34"/><path d="M${b} ${yb}L${cx} ${ya}V${yb}z" fill="${GO2}" fill-opacity=".5"/>
+ <path d="M${L(.34)} ${Y(.34)}H${R(.34)}M${L(.67)} ${Y(.67)}H${R(.67)}" stroke="${O}" stroke-opacity=".35" stroke-width="1" fill="none"/><rect x="${a}" y="${yb}" width="${b-a}" height="5" fill="${GO2}" stroke="${O}" stroke-width="1.6"/><path d="M${a+1} ${yb+1.2}H${b-1}" stroke="${GOL}" stroke-opacity=".6" stroke-width="1.2" fill="none"/>`}
+const fl=(x,y,c)=>`<rect x="${x}" y="${y+3.4}" width="6" height="6.6" rx="2" fill="${c}" stroke="${O}" stroke-width="1"/><rect x="${x+1.7}" y="${y}" width="2.6" height="4.6" fill="${HI}" stroke="${O}" stroke-width=".9"/>`;
+const shelf=x=>`<rect x="${x}" y="60" width="20" height="22" rx="1.5" fill="${DK}" stroke="${GOL}" stroke-opacity=".55" stroke-width="1.2"/>`+fl(x+3,62,'#e0405a')+fl(x+11,62,'#4a90e8')+`<path d="M${x+1} 72.4H${x+19}" stroke="${GO2}" stroke-width="1.6"/>`+fl(x+7,72.6,'#ffd25a');
+const V=shadow(8,92)+blk(64,14,12,26,4)+`<circle cx="70" cy="9" r="3.4" fill="#8fe0cf" fill-opacity=".9" stroke="${O}" stroke-width="1.2"/><circle cx="76.5" cy="3.6" r="2.3" fill="#8fe0cf" fill-opacity=".75" stroke="${O}" stroke-width="1"/>`
+ +blk(10,52,80,40,7)+roof(14,86,52,28)
+ +`<rect x="42" y="33" width="16" height="16" rx="3.2" fill="${HI}" stroke="${O}" stroke-width="1.8"/><path d="M48 35.5h4v4.2l3.2 5.6a1.5 1.5 0 01-1.3 2.2h-7.8a1.5 1.5 0 01-1.3-2.2l3.2-5.6z" fill="#6fd6bf" stroke="${O}" stroke-width="1.2" stroke-linejoin="round"/><circle cx="51.6" cy="43.2" r="1.1" fill="#fff" fill-opacity=".85"/>`
+ +shelf(17)+shelf(63)+door(41,66,18,26);
+window.STN=window.STN||{};
+window.STN.bot=(s=18)=>`<svg class="ic bs" width="${s}" height="${s}" viewBox="0 0 100 100" style="stroke:none;fill:none" aria-hidden="true">${V}</svg>`;
+})();
 
 /* menú de la estructura (el contenido de pociones llega en la parte 2) */
 const _tw=tower;tower=function(b){if(b.type!='bot')return _tw(b);const c=cfg(),a=A();
@@ -7200,12 +7266,13 @@ window.botReset=()=>{if(!ADM)return;S.bot={ms:0};save();notice('Boticario','Even
 })();
 </script>
 <style id="bot-css2">
-.bcard{display:flex;gap:10px;align-items:center;border:1px solid var(--l);border-radius:12px;padding:8px;margin:6px 0;background:rgba(255,255,255,.04)}
-.bcard .bi{flex:none;width:46px;height:46px}.bcard .bi svg,.bcard .bi img{width:100%;height:100%;object-fit:contain;display:block}
-.bcard .bt{flex:1;min-width:0}.bcard .bt b{display:block}.bcard .bt .m{font-size:12px}
-.bcard .bs2{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:4px;font-size:12px}
-.bcard.lk{opacity:.55}.bglb{border:1px dashed var(--l);border-radius:12px;padding:8px 10px;font-size:13px;margin:4px 0 8px}
-.bxt .bcard{margin:8px 0 0}
+.ucard.lk{opacity:.6}.ucard+.ucard,.ucard+.note,.note+.ucard{margin-top:10px}
+.ib.bic{color:var(--bc,var(--a));background:color-mix(in srgb,var(--bc,var(--a)) 14%,transparent);border-radius:12px;flex:none}
+.ib.bic svg,.ib.bic img{width:26px;height:26px;object-fit:contain}
+.bmx .bglb{flex:1;position:relative;display:flex;flex-direction:column;gap:2px;padding:10px 12px;border:1.5px solid var(--a);border-radius:16px;background:linear-gradient(170deg,color-mix(in srgb,var(--a) 10%,var(--s)),var(--s) 75%);font-size:13px}
+.bmx .bglb b{color:var(--a);font-size:12px;letter-spacing:.04em}
+.bmx .bglb::before{content:'';position:absolute;left:-7px;top:50%;margin-top:-6px;width:12px;height:12px;background:color-mix(in srgb,var(--a) 9%,var(--s));border-left:1.5px solid var(--a);border-bottom:1.5px solid var(--a);transform:rotate(45deg)}
+.bxt .ucard{margin:10px 0 0;padding:10px}
 </style>
 <script>
 /* ===== BOTICARIO · PARTE 2: Mochila Alquímica, aldeanos, existencias y reposición ===== */
@@ -7223,15 +7290,18 @@ const res=(k,w)=>{let cap=0,rep=0,on=false;for(let i=2;i<=Math.min(w,5);i++){con
 const wOf=()=>{const b=S.b.find(x=>x.type=='bot'&&Date.now()>=x.end);return b?Math.min(b.w||0,BOT.slots):0};
 const strict=c=>Object.entries(c).every(([k,v])=>have(k)>=v);
 const payS=c=>{for(const k in c){if(S.coins[k]!==undefined)S.coins[k]-=c[k];else S.inv[k]-=c[k]}};
-const SV={
- bag:'<svg viewBox="0 0 48 48"><rect x="10" y="14" width="28" height="30" rx="8" fill="#a8794a" stroke="#1b1230" stroke-width="2"/><path d="M17 14c0-8 14-8 14 0" fill="none" stroke="#1b1230" stroke-width="2.4"/><rect x="15" y="26" width="18" height="12" rx="3" fill="#6b4a9a" stroke="#1b1230" stroke-width="1.8"/><circle cx="24" cy="32" r="3" fill="#8fe0cf" stroke="#1b1230" stroke-width="1.4"/></svg>',
- vida:'<svg viewBox="0 0 48 48"><rect x="19" y="4" width="10" height="9" rx="2" fill="#c9a566" stroke="#1b1230" stroke-width="1.8"/><path d="M19 13v6L9 36c-2 5 1 9 6 9h18c5 0 8-4 6-9L29 19v-6z" fill="#e0405a" stroke="#1b1230" stroke-width="2" stroke-linejoin="round"/><path d="M24 38c-6-4-8-7-8-10 0-3 5-4 8 0 3-4 8-3 8 0 0 3-2 6-8 10z" fill="#fff" fill-opacity=".85"/></svg>',
- bomb:'<svg viewBox="0 0 48 48"><circle cx="22" cy="29" r="15" fill="#e0683e" stroke="#1b1230" stroke-width="2"/><path d="M30 16l5-6M35 10l4-2" stroke="#1b1230" stroke-width="2.4" stroke-linecap="round"/><circle cx="41" cy="7" r="3" fill="#ffd25a"/><path d="M22 40c-5-2-7-6-6-10 3 2 5 1 6-3 2 3 6 5 6 9 0 3-3 5-6 4z" fill="#ffd25a" fill-opacity=".85"/></svg>',
- mana:'<svg viewBox="0 0 48 48"><rect x="19" y="4" width="10" height="9" rx="2" fill="#c9a566" stroke="#1b1230" stroke-width="1.8"/><path d="M19 13v6L9 36c-2 5 1 9 6 9h18c5 0 8-4 6-9L29 19v-6z" fill="#4a90e8" stroke="#1b1230" stroke-width="2" stroke-linejoin="round"/><circle cx="20" cy="34" r="3" fill="#fff" fill-opacity=".7"/><circle cx="29" cy="30" r="2" fill="#fff" fill-opacity=".6"/></svg>'};
-const ico=k=>{const u=cfg().img[k];return u?`<img src="${u}" alt="">`:SV[k]};
+/* iconos de línea (mismo estilo que Vendaje / Botiquín); un PNG subido por el administrador tiene prioridad */
+const GL={
+ bag:'<path d="M9 6a3 3 0 016 0M6.5 8h11A2.5 2.5 0 0120 10.5V19a2 2 0 01-2 2H6a2 2 0 01-2-2v-8.5A2.5 2.5 0 016.5 8zM8 15h8M10 15v2.5h4V15"/>',
+ vida:'<path d="M9.5 3h5M10.5 3v5.5L5.6 17.4A2.3 2.3 0 007.6 21h8.8a2.3 2.3 0 002-3.6L13.5 8.5V3"/><path d="M12 12.5v5M9.5 15h5"/>',
+ bomb:'<circle cx="10.5" cy="14.5" r="6.5"/><path d="M15.2 9.8L17.6 7.4M17.6 7.4c.5-1.7 2-2.5 3.4-2.3M18.6 3.2v1.7M21 7.4h-1.7"/><path d="M7.4 14.5a3.1 3.1 0 013.1-3.1"/>',
+ mana:'<path d="M9.5 3h5M10.5 3v5.5L5.6 17.4A2.3 2.3 0 007.6 21h8.8a2.3 2.3 0 002-3.6L13.5 8.5V3"/><path d="M12 12.2l1.3 2.4 2.4 1.3-2.4 1.3L12 19.6l-1.3-2.4-2.4-1.3 2.4-1.3z"/>'};
+const TINT={bag:'#c9a566',vida:'#e0405a',bomb:'#ff8a2a',mana:'#4a90e8'};
+const ico=k=>{const u=cfg().img[k];if(u)return `<img src="${u}" alt="">`;return GL[k]?`<svg class="ic" viewBox="0 0 24 24" style="color:${TINT[k]}" aria-hidden="true">${GL[k]}</svg>`:''};
+window.botTint=TINT;
 window.botIco=ico;window.botRes=res;window.botItems=ITEMS;
 const chips=c=>Object.entries(c).map(([k,v])=>{const sh=have(k)<v,I2=INV[k]||['Piedras','var(--m)'];return CN[k]?`<span class="cc${sh?' no':''}" style="color:var(--k-${k})">${ic(CN[k][0],14)}<b>${v}</b><em>${CN[k][1]}</em></span>`:`<span class="cc${sh?' no':''}" style="color:${I2[1]}">${ic(({cristal:'cri',polvo:'pol',nucleo:'nuc',piedra:'pie'})[k]||'cri',14)}<b>${v}</b><em>${I2[0]}</em></span>`}).join('');
-const bagCard=()=>`<div class="bcard"><div class="bi">${ico('bag')}</div><div class="bt"><b>Mochila Alquímica</b><span class="m">Herramienta especial · Objeto alquímico</span><div class="bs2">${chips(BAGC)}</div></div></div>`;
+const bagCard=()=>`<div class="ucard bgx"><div class="uct"><span style="display:flex;gap:10px;align-items:center"><span class="ib bic" style="--bc:${TINT.bag}">${ico('bag')}</span><b>Mochila Alquímica</b></span><span class="chip a">Herramienta especial</span></div><div class="cost">${chips(BAGC)}</div></div>`;
 
 /* ---- existencias y reposición (cada objeto con su propio temporizador) ---- */
 function refill(){const a=A(),w=wOf(),n=Date.now();if(!a.ok)return;a.st=a.st||{};a.t=a.t||{};a.inv=a.inv||{vida:0,bomb:0,mana:0};
@@ -7246,17 +7316,21 @@ function buyItem(k){const a=A(),it=ITEMS[k],r=res(k,wOf());refill();if(!a.bag||!
 window.botBuyItem=buyItem;
 window.botWk=function(id,d){const b=S.b.find(x=>x.id==id),w=b.w||0;if(d>0&&(w>=BOT.slots||S.pop-used()<1))return;if(d<0&&w<1)return;b.w=w+d;b.last=Date.now();refill();save();draw();menu()};
 
-/* ---- menú del Boticario ---- */
+/* ---- menú del Boticario (mismas tarjetas que Taller de Suministros) ---- */
 const LN=['¿Buscas algo en especial?','Cada frasco lleva su tiempo. No me apresures.','Los precios son los precios.','Con más manos, preparo más rápido.'];
 let curId=null;
 function menu(){const b=S.b.find(x=>x.type=='bot');if(!b)return;curId=b.id;refill();const a=A(),c=cfg(),w=Math.min(b.w||0,BOT.slots),free=S.pop-used();
  let sl='';for(let i=0;i<BOT.slots;i++)sl+=i<w?`<button class="cslot" onclick="botWk(${b.id},-1)" aria-label="Quitar">${ic('pop',26)}</button>`:`<button class="cslot" ${free>0?'':'disabled'} onclick="botWk(${b.id},1)" aria-label="Añadir">+</button>`;
- let it='';for(const k in ITEMS){const I=ITEMS[k],r=res(k,w),st=a.st&&a.st[k]|0,ok=a.bag&&r.on&&st>0&&strict(I.cost);
-  it+=`<div class="bcard${r.on?'':' lk'}"><div class="bi">${ico(k)}</div><div class="bt"><b>${I.n}</b><span class="m">${I.d}</span><div class="bs2">${chips(I.cost)}</div>
-  <div class="bs2">${r.on?`<span>Disponible: <b>${st}/${r.cap}</b></span>${st<r.cap?`<span class="m">próxima en <b data-bt="${k}">…</b></span>`:''}<span>En mochila: <b>${a.inv&&a.inv[k]|0}</b></span>`:`<span class="m">Requiere ${I.need} aldeanos (tienes ${w})</span>`}</div></div>
-  <button ${ok?'':'disabled'} onclick="botBuyItem('${k}')">${!a.bag?'Sin mochila':!r.on?'Bloqueada':st<1?'Agotada':'Comprar'}</button></div>`}
- modal(head(b,w<2?'Necesita ayudantes':'Boticario de '+c.name)+`<div id="btm"></div><div class="bmx"><div class="bpt">${botPic('intro',0)}</div><div class="bglb" style="flex:1">${esc(c.name)}: «${LN[Math.floor(Math.random()*LN.length)]}»</div></div>
-  ${a.bag?'<div class="note ok">Mochila Alquímica adquirida.</div>':`<div class="sx">Mochila Alquímica</div>${bagCard()}<button class="pri" ${strict(BAGC)?'':'disabled'} onclick="botBuyBag()">Comprar mochila</button>`}
+ const ttl=(k,t,r)=>`<div class="uct"><span style="display:flex;gap:10px;align-items:center"><span class="ib bic" style="--bc:${TINT[k]}">${ico(k)}</span><b>${t}</b></span>${r}</div>`;
+ const bag=a.bag?`<div class="note ok">Mochila Alquímica adquirida. Tus héroes alquimistas ya pueden llevar pociones al combate.</div>`
+  :`<div class="ucard">${ttl('bag','Mochila Alquímica','<span class="chip a">Herramienta especial</span>')}<span class="m">Permite llevar pociones y mezclas al combate. Se compra una sola vez.</span><div><span class="m">Precio</span><div class="cost">${chips(BAGC)}</div></div><button class="pri" ${strict(BAGC)?'':'disabled'} onclick="botBuyBag()">Comprar mochila</button></div>`;
+ const it=Object.keys(ITEMS).map(k=>{const I=ITEMS[k],r=res(k,w),st=(a.st&&a.st[k])|0,inv=(a.inv&&a.inv[k])|0,ok=a.bag&&r.on&&st>0&&strict(I.cost);
+  return `<div class="ucard${r.on?'':' lk'}">${ttl(k,I.n,r.on?`<span class="chip a">Existencias ${st}/${r.cap}</span>`:'<span class="chip">Bloqueada</span>')}<span class="m">${I.d}</span>
+  ${r.on?`<div class="uct"><span class="m">En tu mochila</span><b>${inv}</b></div>${st<r.cap?`<div class="uct"><span class="m">Próxima unidad en</span><b data-bt="${k}">…</b></div>`:''}`:`<div class="note">Requiere ${I.need} ayudantes (tienes ${w}).</div>`}
+  <div><span class="m">Precio por unidad</span><div class="cost">${chips(I.cost)}</div></div>
+  <button class="pri" ${ok?'':'disabled'} onclick="botBuyItem('${k}')">${!a.bag?'Necesitas la mochila':!r.on?'Bloqueada':st<1?'Agotada':'Comprar'}</button></div>`}).join('');
+ modal(head(b,w<2?'Necesita ayudantes':'Boticario de '+c.name)+`<div id="btm"></div><div class="bmx"><div class="bpt">${botPic('intro',0)}</div><div class="bglb"><b>${esc(c.name)}</b><span>${LN[Math.floor(Math.random()*LN.length)]}</span></div></div>
+  ${bag}
   <div class="sx">Ayudantes (${w}/${BOT.slots})</div><div class="slg">${sl}</div><p class="m hint">Más aldeanos desbloquean pociones y aceleran la reposición. Habitantes libres: ${free}. El precio de los objetos no cambia.</p>
   <div class="sx">Objetos</div>${it}${ADM?'<p><button onclick="botEdit()">Configurar a '+esc(c.name)+' (administrador)</button></p>':''}`);
  const sig=JSON.stringify([a.st,w,a.bag]);clearInterval(window.__bti);window.__bti=setInterval(()=>{if(!$('btm')){clearInterval(window.__bti);return}refill();const A2=A();
@@ -7266,14 +7340,22 @@ const _t=tower;tower=function(b){if(b.type!='bot')return _t(b);menu()};
 
 /* ---- 2.ª escena: reconoce al héroe alquimista y ofrece la mochila ---- */
 BOTSC.bag={sub:'Boticario',ln:['Espera un momento... ¿Ese héroe es alquimista?','Interesante. Hacía tiempo que no encontraba a alguien con esa especialidad.','Sabes, he estado trabajando en algo desde que llegué a tu ciudad. Una herramienta que podría facilitar bastante la preparación de mezclas durante los combates.','La llamo Mochila Alquímica.','No es precisamente barata, pero tampoco pienso regalar el trabajo de mis investigaciones.','Con ella, tu alquimista podrá llevar preparaciones especiales y experimentar con combinaciones que todavía no he conseguido perfeccionar.','¿Te interesa?']};
+BOTSC.bagno={sub:'Boticario',ln:['Está bien, no importa.','No es una decisión que deba tomarse a la ligera. Si cambias de opinión, la mochila seguirá esperándote en mi boticario.']};
 BOTSC.bagok={sub:'Boticario',ln:['¡Excelente! Cuida bien esa mochila. No encontrarás otra igual en cualquier mercado.','Ahora bien, debo advertirte algo: las mezclas alquímicas no siempre reaccionan como uno espera.','Por el momento, solo he conseguido desarrollar una combinación de dos pociones. La mezcla puede producir una inestabilidad de maná.','Si la preparas, tendrás que decidir cuándo utilizarla. No podrás conservarla indefinidamente: después de dos turnos, la inestabilidad terminará manifestándose.','Si consigues lanzarla, la mezcla explotará al alcanzar su objetivo y también dañará a quien la haya utilizado.','Si no la utilizas a tiempo... bueno, no te recomiendo descubrirlo por las malas.','Por ahora, eso es todo lo que puedo ofrecerte. Todavía tengo mucho trabajo pendiente.']};
 const hasAlq=()=>S.heroes.some(h=>h.cls=='alquimista');
+if(window.EXP){const g='Boticario · Maelis';
+ EXP.add(g,'Presentación de Maelis','Primer encuentro: ofrece instalar su boticario. Aceptar y rechazar muestran sus respuestas.',()=>botDlg('intro',null,[['Aceptar',()=>botDlg('yes'),'pri'],['No aceptar',()=>botDlg('no')]]));
+ EXP.add(g,'Maelis se instala','Respuesta cuando aceptas su propuesta.',()=>botDlg('yes'));
+ EXP.add(g,'Propuesta rechazada','Respuesta cuando no aceptas su propuesta.',()=>botDlg('no'));
+ EXP.add(g,'Oferta de la Mochila Alquímica','Aparece con el establecimiento en nivel 8 y un héroe alquimista.',()=>botDlg('bag',null,[['Comprar',()=>botDlg('bagok'),'pri'],['En otro momento',()=>botDlg('bagno')]],bagCard));
+ EXP.add(g,'Mochila comprada','Explicación de la mezcla inestable tras comprar la mochila.',()=>botDlg('bagok'));
+ EXP.add(g,'Mochila rechazada','Respuesta cuando eliges «En otro momento».',()=>botDlg('bagno'))}
 let tw=0;
 setInterval(()=>{try{if(!S||$('game').classList.contains('hide')||document.hidden)return;const a=A();if(!a.ok)return;
  const b=S.b.find(x=>x.type=='bot'&&Date.now()>=x.end);if(!b)return;refill();
  const main=!place&&!SCR&&!SQ&&!$('ov').firstElementChild&&!document.querySelector('.fx9-ylk,.bdl');
  if(main&&!a.bag&&!a.s2&&(ADM||(E()>=8&&hasAlq()))&&!S.b.some(x=>Date.now()<x.end)){a.s2=1;save();
-  botDlg('bag',null,[['Comprar',()=>{if(buyBag())botDlg('bagok');else notice('Boticario','Faltan recursos para la mochila.')},'pri',()=>!strict(BAGC)],['En otro momento',()=>{}]],bagCard)}
+  botDlg('bag',null,[['Comprar',()=>{if(buyBag())botDlg('bagok');else notice('Boticario','Faltan recursos para la mochila.')},'pri',()=>!strict(BAGC)],['En otro momento',()=>botDlg('bagno')]],bagCard)}
  else if(main&&wOf()<2&&++tw>=40){tw=0;const c=document.querySelector(`#grid .c[data-x="${b.x}"][data-y="${b.y}"]`);if(c)fl('Necesita ayudantes',c,'var(--a)')}}catch(e){}},1000);
 })();
 </script>
@@ -7551,5 +7633,9 @@ window.aqPx=async(e,d,sync)=>{try{if(e)await fxBlast(e);if(sync)sync();if(e)try{
 window.alqIcon=icon;window.ALQ_NAME=NAME;
 window.ALQ={cfg,use:()=>AQ,btn};
 })();
+</script>
+<script id="fix-als4">
+/* AJUSTE: el Almacén solar nv 4 pedía 240 filares, pero con el establecimiento en 3 el tope de filares es 204 (almacén filar nv 3) y el almacén filar nv 4 pide 400 solares (tope 360 con almacén solar nv 3): bloqueo circular que impedía llegar al establecimiento 4. Ahora pide 200 filares. */
+try{LV.als[3].cost.filar=200}catch(e){console.error('[fix-als4]',e)}
 </script>
 </body></html>
