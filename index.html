@@ -7639,4 +7639,166 @@ window.ALQ={cfg,use:()=>AQ,btn};
 /* AJUSTE: el Almacén solar nv 4 pedía 240 filares, pero con el establecimiento en 3 el tope de filares es 204 (almacén filar nv 3) y el almacén filar nv 4 pide 400 solares (tope 360 con almacén solar nv 3): bloqueo circular que impedía llegar al establecimiento 4. Ahora pide 200 filares. */
 try{LV.als[3].cost.filar=200}catch(e){console.error('[fix-als4]',e)}
 </script>
+<style id="patch-shop2-css">
+/* ===== TIENDA 2.0: secciones (Construcción / Intercambios / Decoraciones), fila lateral y tarjetas de tamaño fijo ===== */
+.sheet>.panel.bot.shp{padding:0!important;display:flex!important;flex-direction:column;overflow:hidden!important;max-height:min(88vh,calc(100dvh - 12px))!important;background:linear-gradient(180deg,color-mix(in srgb,var(--a) 9%,var(--s)),var(--s) 170px)!important}
+.shp .shtop{position:relative;flex:none;top:auto;padding:16px 18px 12px;background:none;border:0}
+.shp .shtop .shh{border:0;padding:0 0 12px;align-items:center}
+.shp .shh h2{margin:0;font-size:21px;letter-spacing:-.015em}
+.shp .shh .m{display:block;margin-top:2px;font-size:12px}
+.shp .shh .mx{width:34px;height:34px;border-radius:50%!important;font-size:13px}
+.shp .shw{display:flex;gap:6px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin:0 0 12px}.shp .shw::-webkit-scrollbar{display:none}
+.shp .wp{display:inline-flex;align-items:center;gap:6px;flex:none;white-space:nowrap;padding:3px 10px 3px 4px;border-radius:99px;background:color-mix(in srgb,var(--t) 6%,transparent);border:1px solid var(--l);font-size:12px;font-weight:700;font-variant-numeric:tabular-nums}
+.shp .wp i{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;color:var(--wc);background:color-mix(in srgb,var(--wc) 20%,transparent)}
+.shp .wp i svg{width:13px;height:13px}
+.shp .wp span{color:var(--m);font-weight:500;font-size:11px;margin-left:-2px}
+/* pestañas */
+.shp .shtabs{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:4px;padding:4px;border-radius:16px;background:color-mix(in srgb,var(--t) 7%,transparent)}
+.shp .shtab{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;margin:0;padding:8px 4px 7px!important;text-transform:none!important;letter-spacing:0!important;border:0!important;border-radius:12px!important;background:transparent!important;color:var(--m)!important;font-weight:700;font-size:11.5px;box-shadow:none!important;transition:background .18s,color .18s,box-shadow .18s;min-width:0}
+.shp .shtab svg{width:21px;height:21px;flex:none;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.shp .shtab b{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.shp .shtab.on{background:var(--s)!important;color:var(--t)!important;box-shadow:0 2px 10px rgba(0,0,0,.28),inset 0 0 0 1.5px var(--a)!important}
+.shp .shtab.on svg{color:var(--a)}
+.shp .shtab .sqb{position:absolute;top:4px;right:6px;margin:0;min-width:17px;height:17px;font-size:10px;padding:0 4px}
+/* cuerpo y fila lateral */
+.shp .shbody{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;padding:2px 0 calc(14px + env(safe-area-inset-bottom,0px));overscroll-behavior:contain}
+.shp .shrw{position:relative}
+.shp .shrw::before,.shp .shrw::after{content:"";position:absolute;top:0;bottom:0;width:18px;z-index:2;pointer-events:none;transition:opacity .2s}
+.shp .shrw::before{left:0;background:linear-gradient(90deg,var(--s),transparent)}
+.shp .shrw::after{right:0;background:linear-gradient(270deg,var(--s),transparent)}
+.shp .shrw.at-s::before,.shp .shrw.at-e::after{opacity:0}
+.shp .shrail{display:flex!important;flex-wrap:nowrap!important;justify-content:flex-start!important;align-items:stretch;gap:12px!important;overflow-x:auto!important;overflow-y:hidden!important;scroll-snap-type:x proximity!important;padding:8px 18px 16px!important;border:0!important;scroll-padding:0 18px;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;scrollbar-width:thin}
+.shp .shrail::after{content:"";flex:0 0 2px}
+.shp .shar{position:absolute;top:50%;transform:translateY(-50%);z-index:4;width:40px;height:40px;border-radius:50%!important;display:none;place-items:center;padding:0!important;font-size:20px;line-height:1;background:var(--s)!important;color:var(--t)!important;box-shadow:0 4px 14px rgba(0,0,0,.45),inset 0 0 0 1px var(--l)!important;transition:opacity .2s}
+.shp .shar.l{left:8px}.shp .shar.r{right:8px}
+.shp .shrw.at-s .shar.l,.shp .shrw.at-e .shar.r{opacity:0;pointer-events:none}
+@media(hover:hover) and (pointer:fine){.shp .shar{display:grid}}
+/* tarjetas: ancho FIJO, no se estiran nunca */
+.shp .card.sc{--tone:var(--a);flex:0 0 clamp(214px,64vw,256px)!important;width:clamp(214px,64vw,256px)!important;max-width:none!important;min-width:0;box-sizing:border-box;scroll-snap-align:start;position:relative;display:flex;flex-direction:column;gap:11px;padding:14px;border-radius:20px;overflow:hidden;
+ border:1px solid color-mix(in srgb,var(--tone) 38%,var(--l));
+ background:radial-gradient(130% 75% at 0 0,color-mix(in srgb,var(--tone) 17%,transparent),transparent 62%),color-mix(in srgb,var(--t) 3%,var(--s));
+ transition:transform .18s,border-color .18s,box-shadow .18s}
+.shp .card.sc::before{content:"";position:absolute;left:14px;right:14px;top:0;height:3px;border-radius:0 0 4px 4px;background:var(--tone);opacity:.85}
+@media(hover:hover){.shp .card.sc:hover{transform:translateY(-3px);border-color:var(--tone);box-shadow:0 10px 26px rgba(0,0,0,.35)}}
+.shp .sc .sct{display:flex;gap:11px;align-items:center;min-width:0}
+.shp .sc .ib{flex:none;width:48px;height:48px;border-radius:15px;color:var(--tone);background:color-mix(in srgb,var(--tone) 17%,transparent);border:1px solid color-mix(in srgb,var(--tone) 42%,transparent)}
+.shp .sc .ib svg{width:29px;height:29px}
+.shp .sc .scn{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.shp .sc .scn b{font-size:14.5px;line-height:1.2;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.shp .sc .sqb{align-self:flex-start;margin:0;color:var(--tone);background:color-mix(in srgb,var(--tone) 18%,transparent)}
+.shp .sc .shd{margin:0;font-size:11.5px;line-height:1.4;color:var(--m);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.shp .sc .scs{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.shp .sc .scs>div{min-width:0;padding:7px 9px;border-radius:11px;background:color-mix(in srgb,var(--t) 5%,transparent)}
+.shp .sc .scs .m{font-size:9px;letter-spacing:.1em;text-transform:uppercase}
+.shp .sc .scs b{font-size:11.5px;font-weight:600;line-height:1.25;overflow-wrap:anywhere}
+.shp .sc .cost{display:flex;flex-wrap:wrap;gap:5px;min-width:0}
+.shp .sc .cc{max-width:100%;padding:3px 8px;font-size:11.5px;gap:4px;border-radius:99px}
+.shp .sc .cc em{font-size:9.5px}
+.shp .cdx{display:inline-flex;align-items:center;gap:2px;margin-left:2px;padding:1px 6px;border-radius:99px;font-size:10px;font-weight:800;color:var(--k-diamantino);background:color-mix(in srgb,var(--k-diamantino) 20%,transparent)}
+.shp .cdx svg{width:10px;height:10px;color:var(--k-diamantino)}
+/* botones */
+.shp .sc button{margin-top:auto;display:flex;align-items:center;justify-content:center;gap:8px;min-height:42px;padding:10px 12px;border-radius:14px;font-weight:800;font-size:13px;line-height:1.15;text-align:center}
+.shp .sc button:not(:disabled){background:var(--tone)!important;border-color:transparent!important;color:#1b1230!important;box-shadow:0 6px 16px color-mix(in srgb,var(--tone) 35%,transparent)}
+.shp .sc button:disabled{background:color-mix(in srgb,var(--t) 6%,transparent)!important;color:var(--m)!important;box-shadow:none;opacity:1}
+.shp .sc button .bdq{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:99px;font-size:11px;font-weight:800;background:rgba(27,18,48,.86);color:var(--k-diamantino)}
+.shp .sc button .bdq svg{width:11px;height:11px;color:var(--k-diamantino)}
+.shp .sc.full{opacity:.72}
+.shp .shbt{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:auto}
+.shp .shbt button{margin:0}
+/* intercambios */
+.shp .sc .shpr{display:flex;align-items:center;gap:7px;font-size:12px}
+.shp .sc .shpr .cc{flex:none}
+.shp .sc.mk .shn{margin-left:auto;font-size:11px;font-weight:800;padding:2px 9px;border-radius:99px;color:var(--tone);background:color-mix(in srgb,var(--tone) 18%,transparent);white-space:nowrap}
+/* seto/caminos en el mapa: sin cambios */
+@media(max-height:520px){.shp .shtop{padding:10px 16px 8px}.shp .shh{padding-bottom:8px}.shp .shw{margin-bottom:8px}.shp .card.sc{gap:8px;padding:11px}.shp .sc .shd{-webkit-line-clamp:2}}
+@media(prefers-reduced-motion:reduce){.shp .card.sc,.shp .shtab{transition:none}}
+</style>
+<script id="patch-shop2-js">
+/* ===== TIENDA 2.0: no salta arriba al comprar/vender, recuerda sección y posición, filas laterales ===== */
+(function(){
+'use strict';
+const ST=window.__shopST={tab:'est',left:{est:0,mkt:0,dec:0},top:0};
+const TONE={sol:'var(--k-solar)',als:'var(--k-solar)',fil:'var(--k-filar)',alf:'var(--k-filar)',alr:'var(--k-recursos)',cam:'var(--k-recursos)',min:'var(--b)',mur:'#9aa0bb',chr:'var(--r)',hrr:'var(--r)',grm:'var(--a)',bib:'var(--b)',tal:'var(--a)',cmp:'var(--k-recursos)',rdt:'#c9945a',rdp:'#9aa0bb',lnt:'var(--k-solar)',bsr:'#e0405a',bsm:'#9a5ad8',bsa:'#c6d84a',bsd:'#6cb858'};
+const TAB={est:['Construcción','<svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9H3z"/><path d="M9 20v-6h6v6"/></svg>','Elige una estructura y colócala en el mapa'],
+ mkt:['Intercambios','<svg viewBox="0 0 24 24"><path d="M7 8h12l-3-3.5M17 16H5l3 3.5"/></svg>','Vende lo que te sobra o compra recursos'],
+ dec:['Decoraciones','<svg viewBox="0 0 24 24"><path d="M12 3l2 5.2L19.5 10 14 12l-2 5.5L10 12 4.5 10 10 8.2z"/><path d="M18.5 16.5v4M16.5 18.5h4"/></svg>','Embellece tu ciudad: se colocan una tras otra']};
+const dNeed=c=>{let d=0;for(const k in c){const h=have(k),v=c[k];if(h<v&&DQ[k])d+=Math.ceil((v-h)/DQ[k])}return d};
+const ico=(k,s)=>{try{if((typeof I!=='undefined'&&I[k])||(typeof CIC!=='undefined'&&CIC[k])||(window.STN&&STN[k]))return ic(k,s)}catch(_){}return ic('cri',s)};
+const avail=()=>{const t=['est'];if(E()>=2)t.push('mkt');if(S.step>=10)t.push('dec');return t};
+
+/* ---- tarjeta de estructura / decoración ---- */
+const card=k=>{
+ const s=SH[k],n=count(k),Lm=lim(k),lk=Lm==0,full=!lk&&n>=Lm,ok=can(s.cost),dn=dNeed(s.cost),go=ok&&!full&&!lk;
+ const lbl=lk?'Requiere establecimiento nivel '+(UNL[k]||2):full?'Límite alcanzado':ok?(dn?`Comprar<span class="bdq" title="El faltante se paga con ${dn} diamantino">${ic('cd',11)}${dn}</span>`:'Comprar'):'Faltan monedas';
+ return `<div class="card sc${full?' full':''}" style="--tone:${TONE[k]||'var(--a)'}"><div class="sct"><div class="ib">${ic(k,29)}</div><div class="scn"><b>${s.n}</b></div><span class="sqb" title="Tienes ${n} de ${Lm}">${lk?'—':n+'/'+Lm}</span></div>
+ <p class="shd">${s.d}</p>
+ <div class="scs"><div><span class="m">Efecto</span><br><b>${s.e}</b></div><div><span class="m">Construcción</span><br><b>${ft(s.t)}</b></div></div>
+ <div class="cost">${chipsCost(s.cost)}</div>
+ <button ${go?'':'disabled'} onclick="buy('${k}')">${lbl}</button></div>`};
+
+/* ---- tarjetas del mercado ---- */
+const solarChip=v=>`<span class="cc" style="color:var(--k-solar)">${ic('cs',14)}<b>${v}</b><em>Solar</em></span>`;
+const MTONE={recursos:'var(--k-recursos)',cristal:'var(--b)',polvo:'var(--a)',esencia:'var(--r)',nucleo:'var(--r)'};
+const mIcon={recursos:'cr',cristal:'cri',polvo:'pol',esencia:'ese',nucleo:'nuc'};
+const mSell=(k,p)=>{const h=have(k),nm=k=='recursos'?'Recursos':((typeof INV!=='undefined'&&INV[k]&&INV[k][0])||k);
+ return `<div class="card sc mk" style="--tone:${MTONE[k]||'var(--a)'}"><div class="sct"><div class="ib">${ico(mIcon[k]||'cri',29)}</div><div class="scn"><b>${nm}</b></div><span class="shn">Tienes ${h}</span></div>
+ <p class="shd">Véndelo al mercado y recibe solares al instante.</p>
+ <div class="shpr"><span class="m">Cada uno</span>${solarChip(p)}</div>
+ <div class="shbt"><button ${h<1?'disabled':''} onclick="mkSell('${k}',1)">Vender 1</button><button ${h<10?'disabled':''} onclick="mkSell('${k}',10)">Vender 10</button></div></div>`};
+const mBuy=()=>`<div class="card sc mk" style="--tone:var(--k-recursos)"><div class="sct"><div class="ib">${ic('cr',29)}</div><div class="scn"><b>Comprar recursos</b></div></div>
+ <p class="shd">Compra recursos con solares. Siempre cuesta más de lo que se paga al vender.</p>
+ <div class="shpr"><span class="m">Cada uno</span>${solarChip(MKB)}</div>
+ <div class="shbt"><button ${S.coins.solar<MKB?'disabled':''} onclick="mkBuy(1)">Comprar 1</button><button ${S.coins.solar<MKB*10?'disabled':''} onclick="mkBuy(10)">Comprar 10</button></div></div>`;
+
+const wallet=()=>`<div class="shw"><span class="wp" style="--wc:var(--k-diamantino)"><i>${ic('cd',13)}</i>${Math.floor(S.coins.diamantino||0)}<span>diamantino</span></span><span class="wp" style="--wc:var(--m)"><i>${ic('pie',13)}</i>${S.inv.piedra}<span>piedras</span></span><span class="wp" style="--wc:var(--b)"><i>${ic('cri',13)}</i>${S.inv.cristal}<span>cristales</span></span></div>`;
+
+/* ---- estado de scroll / pestañas ---- */
+const rails=p=>p?p.querySelectorAll('.shrail'):[];
+function capture(){
+ const ov=$('ov'),sh=ov&&ov.firstElementChild;
+ if(!sh||sh.classList.contains('out'))return false;
+ const p=sh.querySelector('.panel.shp');if(!p)return false;
+ rails(p).forEach(r=>{if(r.offsetWidth)ST.left[r.dataset.rail]=r.scrollLeft});
+ const b=p.querySelector('.shbody');if(b)ST.top=b.scrollTop;return true}
+function edge(rw){const r=rw&&rw.querySelector('.shrail');if(!r)return;rw.classList.toggle('at-s',r.scrollLeft<=2);rw.classList.toggle('at-e',r.scrollLeft+r.clientWidth>=r.scrollWidth-2)}
+function apply(){
+ const ov=$('ov'),p=ov.querySelector('.panel.shp');if(!p)return;
+ const av=avail();if(!av.includes(ST.tab))ST.tab='est';
+ p.querySelectorAll('[data-sht]').forEach(e=>{e.hidden=e.dataset.sht!=ST.tab});
+ p.querySelectorAll('.shtab').forEach(b=>{const on=b.dataset.t==ST.tab;b.classList.toggle('on',on);b.setAttribute('aria-selected',on?'true':'false')});
+ const sub=p.querySelector('.shsub');if(sub)sub.textContent=TAB[ST.tab][2];
+ p.querySelectorAll('[data-sht]:not([hidden]) .shrail').forEach(r=>{r.style.scrollBehavior='auto';r.scrollLeft=ST.left[r.dataset.rail]||0;edge(r.parentNode)})}
+window.shopTab=t=>{capture();if(!TAB[t])return;ST.tab=t;apply()};
+window.shopRail=d=>{const r=document.querySelector('.shp [data-sht]:not([hidden]) .shrail');if(r)r.scrollBy({left:d*Math.max(200,r.clientWidth*.78),behavior:'smooth'})};
+document.addEventListener('scroll',e=>{const t=e.target;if(t&&t.classList&&t.classList.contains('shrail')){ST.left[t.dataset.rail]=t.scrollLeft;edge(t.parentNode)}},true);
+
+/* ---- la tienda ---- */
+{const _s=window.shop;
+window.shop=function(){
+ let was=false;try{was=capture()}catch(_){}
+ const r=_s.apply(this,arguments);
+ try{
+  if(place||!S)return r;
+  const ov=$('ov'),p=ov.querySelector('.sheet>.panel.bot');
+  if(!p||!p.querySelector('.shh'))return r;
+  const it=['sol'];if(S.step>=5)it.push('fil');if(S.step>=9)it.push('als','alf');if(S.step>=10)it.push('cam');
+  if(E()>=2)it.push('min','mur','chr','bib','tal','cmp');if(E()>=3)it.push('hrr','grm');if(E()>=4)it.push('alr');
+  const av=avail();if(!av.includes(ST.tab))ST.tab='est';
+  const nS=it.reduce((a,k)=>a+count(k),0),nD=DECO.reduce((a,k)=>a+count(k),0);
+  const bad={est:nS,dec:nD};
+  const tabs=av.length>1?`<div class="shtabs" role="tablist">${av.map(t=>`<button class="shtab" role="tab" data-t="${t}" onclick="shopTab('${t}')">${TAB[t][1]}<b>${TAB[t][0]}</b>${bad[t]!=null?`<span class="sqb" title="${t=='est'?'Estructuras construidas':'Decoraciones colocadas'}">${bad[t]}</span>`:''}</button>`).join('')}</div>`:'';
+  const rail=(id,inner)=>`<div data-sht="${id}"${ST.tab==id?'':' hidden'}><div class="shrw"><button class="shar l" aria-label="Anterior" onclick="shopRail(-1)">‹</button><div class="row shr shrail" data-rail="${id}">${inner}</div><button class="shar r" aria-label="Siguiente" onclick="shopRail(1)">›</button></div></div>`;
+  let mk='';if(av.includes('mkt'))mk=Object.entries(MKS).map(([k,v])=>mSell(k,v)).join('')+mBuy();
+  p.classList.add('shp');
+  p.innerHTML=`<div class="shtop"><div class="shh"><div><h2>Tienda</h2><span class="m shsub">${TAB[ST.tab][2]}</span></div><button class="mx" aria-label="Cerrar" onclick="sheetClose()">✕</button></div>${wallet()}${tabs}</div>
+  <div class="shbody">${rail('est',it.map(card).join(''))}${av.includes('mkt')?rail('mkt',mk):''}${av.includes('dec')?rail('dec',DECO.map(card).join('')):''}</div>`;
+  apply();
+  const b=p.querySelector('.shbody');if(b&&was)b.scrollTop=ST.top;
+  /* si la tienda ya estaba abierta, no se vuelve a animar la entrada (evita el "salto") */
+  if(was)ov.querySelectorAll('.sheet,.sheet .panel').forEach(e=>e.style.animation='none');
+ }catch(e){console.error('tienda2',e)}
+ return r}}
+})();
+</script>
+
 </body></html>
