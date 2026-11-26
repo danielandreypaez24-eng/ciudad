@@ -5,7 +5,7 @@
   Si el nombre trae un número, quítalo antes de subirlo a GitHub; si no, GitHub Pages no lo muestra.
 -->
 <!--
-  VERSIÓN: 5.4.0   (se muestra en el juego, en la consola y en la configuración)
+  VERSIÓN: 5.5.0   (se muestra en el juego, en la consola y en la configuración)
   Formato  A.B.C
     A (primer número)  = contenido nuevo o contenido anterior renovado.
     B (segundo número) = cambios de dificultad, remodelaciones o estructuras nuevas (algo que no existía).
@@ -15,8 +15,8 @@
 <html lang="es"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Ciudad</title>
-<meta name="app-version" content="5.4.0">
-<script id="app-version">window.APP_VERSION="5.4.0";console.log("%cCiudad · versión "+window.APP_VERSION,"font-weight:bold");document.addEventListener("DOMContentLoaded",function(){var v=document.createElement("div");v.id="appver";v.textContent="v"+window.APP_VERSION;document.body.appendChild(v)});</script>
+<meta name="app-version" content="5.5.0">
+<script id="app-version">window.APP_VERSION="5.5.0";console.log("%cCiudad · versión "+window.APP_VERSION,"font-weight:bold");document.addEventListener("DOMContentLoaded",function(){var v=document.createElement("div");v.id="appver";v.textContent="v"+window.APP_VERSION;document.body.appendChild(v)});</script>
 <style>#appver{position:fixed;left:6px;bottom:calc(3px + env(safe-area-inset-bottom,0px));z-index:1;font:600 9px/1 Inter,system-ui,sans-serif;letter-spacing:.06em;color:var(--m);opacity:.55;pointer-events:none;user-select:none}.cfg-ver{margin:0 0 8px;font-size:11px;letter-spacing:.06em}</style>
 <style>
 :root{--bg:#f6f5f2;--s:#fff;--t:#1c1c1c;--m:#77746d;--l:#dcd9d2;--a:#7a6236;--r:#a33a3a;--b:#3a5a8a;--k-solar:#d4a017;--k-filar:#5b2a86;--k-recursos:#5f7f7a;--k-diamantino:#c9772a;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -3029,40 +3029,45 @@ const SUP={
   rules:['Almacenamiento máximo: 15.','Hasta 5 usos seguidos; después hay que atacar.','Requiere elegir un héroe aliado herido.','No sirve con vida completa ni con héroes caídos.']},
  botiquin:{id:'botiquin',n:'Botiquín',d:'Instrumental y reactivos arcanos para curaciones serias.',ic:'btq',cap:2,per:2,heal:10,tg:'aliado',fx:'cruces',
   eff:'Recupera 10 HP al héroe elegido.',cost:{solar:90,filar:60,recursos:20,cristal:4,polvo:2},
-  rules:['Almacenamiento máximo: 2 en total.','Hasta 2 usos por turno.','Requiere elegir un héroe aliado herido.','No sirve con vida completa ni con héroes caídos.']}};
+  rules:['Almacenamiento máximo: 2 en total.','Hasta 2 usos por turno.','Requiere elegir un héroe aliado herido.','No sirve con vida completa ni con héroes caídos.']},
+ grande:{id:'grande',n:'Botiquín grande',d:'Un botiquín reforzado con reactivos arcanos y un núcleo de jefe para curaciones mayores.',ic:'btg',cap:0,per:1,heal:25,tg:'aliado',fx:'cruces',
+  eff:'Recupera 25 HP al héroe elegido.',cost:{solar:300,filar:200,recursos:100,cristal:6,polvo:5,nucleo:1},
+  rules:['Se desbloquea con el Taller de Suministros en nivel 3.','Almacenamiento máximo: 1 (2 con el taller en nivel 5).','Hasta 1 uso por turno.','Requiere elegir un héroe aliado herido.','No sirve con vida completa ni con héroes caídos.']}};
 window.SUP=SUP;
 SH.tal={n:'Taller de Suministros',d:'Fabrica vendajes y botiquines para las aventuras.',cost:{solar:120,filar:60},t:45000,e:'Vendajes y botiquines'};NM.tal=SH.tal.n;LV.tal=[{vc:15,bc:2}];gen('tal',{solar:120,filar:60},45000,[{},{recursos:15},{recursos:40,cristal:3},{recursos:100,cristal:8}],[{vc:20,bc:3},{vc:25,bc:4},{vc:30,bc:5},{vc:40,bc:5}]);
 /* El almacenamiento máximo depende del nivel del taller (el resto del código sigue leyendo s.cap) */
 {const tier=()=>{try{return Math.max(1,...S.b.filter(b=>b.type=='tal'&&Date.now()>=b.end).map(L))}catch(e){return 1}};
  const lvv=(k)=>{const d=LV.tal[tier()-1]||LV.tal[0];return d[k]};
- Object.defineProperty(SUP.vendaje,'cap',{get:()=>lvv('vc'),configurable:true});Object.defineProperty(SUP.botiquin,'cap',{get:()=>lvv('bc'),configurable:true});
+ Object.defineProperty(SUP.vendaje,'cap',{get:()=>lvv('vc'),configurable:true});Object.defineProperty(SUP.botiquin,'cap',{get:()=>lvv('bc'),configurable:true});Object.defineProperty(SUP.grande,'cap',{get:()=>lvv('gc')|0,configurable:true});
  const rl=SUP.vendaje.rules.slice(),rb=SUP.botiquin.rules.slice();
  Object.defineProperty(SUP.vendaje,'rules',{get:()=>['Almacenamiento máximo: '+lvv('vc')+'.',...rl.slice(1)],configurable:true});
  Object.defineProperty(SUP.botiquin,'rules',{get:()=>['Almacenamiento máximo: '+lvv('bc')+' en total.',...rb.slice(1)],configurable:true});
- const _r=rowsOf;rowsOf=function(t,c,n){if(t=='tal')return [['Máx. vendajes',c.vc,n.vc],['Máx. botiquines',c.bc,n.bc]];return _r(t,c,n)}}
+ const _r=rowsOf;rowsOf=function(t,c,n){if(t=='tal')return [['Máx. vendajes',c.vc,n.vc],['Máx. botiquines',c.bc,n.bc],['Máx. botiquines grandes',c.gc|0,n.gc|0]];return _r(t,c,n)}}
 I.tal='<path d="M3 20V9l9-5 9 5v11zM12 10v6M9 13h6"/>';
 I.ven='<rect x="2.5" y="8.5" width="19" height="7" rx="3.5" transform="rotate(-35 12 12)"/><path d="M10.2 9.8l3.6 4.4M9.5 12.4h.01M14.5 11.6h.01"/>';
 I.bot='<path d="M4 8h16v12H4zM9 8V5h6v3M12 11v6M9 14h6"/>';
 /* Iconos propios de los suministros. La clave 'bot' es del edificio Boticario (una casita), por eso el botiquín usa 'btq'.
    Si se sube una imagen, sustituye al dibujo en todos los lugares donde aparece el suministro. */
 I.btq='<rect x="3" y="7.5" width="18" height="12.5" rx="2.5"/><path d="M9 7.5V6a2 2 0 012-2h2a2 2 0 012 2v1.5M12 11v5.5M9.25 13.75h5.5"/>';
+I.btg='<rect x="2.5" y="6.5" width="19" height="14" rx="2.5"/><path d="M8.5 6.5V5a2 2 0 012-2h3a2 2 0 012 2v1.5M12 9.5v7M8.5 13h7"/><path d="M5.5 9.5h.01M18.5 9.5h.01"/>';
 I.vnd=I.ven;
 window.SUPK='ciudad-supimg';
 window.supImg=id=>{try{return (JSON.parse(localStorage.getItem(window.SUPK)||'{}'))[id]||''}catch(e){return ''}};
 window.STN=window.STN||{};
 {const mkI=(key,id)=>(sz=18)=>{const u=window.supImg(id);return u?`<img class="supimg" src="${u}" alt="" style="width:${sz}px;height:${sz}px;object-fit:cover;border-radius:7px;display:block">`:`<svg class="ic" width="${sz}" height="${sz}" viewBox="0 0 24 24" aria-hidden="true">${I[key]}</svg>`};
- window.STN.btq=mkI('btq','botiquin');window.STN.vnd=mkI('vnd','vendaje')}
+ window.STN.btq=mkI('btq','botiquin');window.STN.btg=mkI('btg','grande');window.STN.vnd=mkI('vnd','vendaje')}
 document.head.insertAdjacentHTML('beforeend','<style id="patch-supimg-css">.ib.sup:has(>img.supimg){padding:0;overflow:hidden;border-radius:14px}.ib.sup>img.supimg{width:100%!important;height:100%!important;object-fit:cover;border-radius:inherit}.sup-ic{display:flex;align-items:center;justify-content:space-between;gap:10px}.sup-ic .row2{display:flex;gap:8px}.sup-ic button{padding:6px 12px;font-size:12px}</style>');
 /* inventario: S.sup (se crea vacío en partidas anteriores sin tocar nada más) */
 const sn=id=>Math.max(0,Math.floor((S&&S.sup&&S.sup[id])||0));
 const ssn=(id,v)=>{S.sup=S.sup||{};S.sup[id]=Math.max(0,Math.min(SUP[id].cap,Math.floor(v)))};
 {const _g=go;go=function(n,f){const r=_g(n,f);if(S&&!S.sup)S.sup={};return r}}
 const maxMake=id=>{const s=SUP[id];let m=s.cap-sn(id);for(const k in s.cost)m=Math.min(m,Math.floor(have(k)/s.cost[k]));return Math.max(0,m)};
-const TLQ={vendaje:1,botiquin:1};let TLK=0;
+const TLQ={vendaje:1,botiquin:1,grande:1};let TLK=0;
 const stt2=()=>{const pb=document.querySelector('#ov .pmb');return pb?pb.scrollTop:0};
 const stt3=t=>{const pb=document.querySelector('#ov .pmb');if(pb)pb.scrollTop=t};
 window.taller=function(b){b=b||S.b.find(x=>x.type=='tal'&&Date.now()>=x.end);if(!b)return;
- const cards=Object.values(SUP).map(s=>{const n=sn(s.id),sp=s.cap-n,mx=maxMake(s.id);let q=Math.max(1,Math.min(TLQ[s.id]||1,Math.max(1,sp)));TLQ[s.id]=q;
+ const cards=Object.values(SUP).map(s=>{const n=sn(s.id),sp=s.cap-n,mx=maxMake(s.id);
+  if(s.cap<1&&n<1)return `<div class="ucard lk"><div class="uct"><span style="display:flex;gap:10px;align-items:center"><span class="ib sup">${ic(s.ic,26)}</span><b>${s.n}</b></span><span class="chip">Bloqueado</span></div><span class="m">${s.d}</span><div class="note ok">${s.eff}</div><div class="note">Requiere el Taller de Suministros en nivel 3.</div><div><span class="m">Coste por unidad</span><div class="cost">${chipsCost(s.cost)}</div></div></div>`;let q=Math.max(1,Math.min(TLQ[s.id]||1,Math.max(1,sp)));TLQ[s.id]=q;
   const tot=Object.fromEntries(Object.entries(s.cost).map(([k,v])=>[k,v*q])),ok=sp>0&&q<=mx;
   return `<div class="ucard"><div class="uct"><span style="display:flex;gap:10px;align-items:center"><span class="ib sup">${ic(s.ic,26)}</span><b>${s.n}</b></span><span class="chip a">Existencias ${n}/${s.cap}</span></div>
   <span class="m">${s.d}</span><div class="note ok">${s.eff}</div>
@@ -3072,7 +3077,7 @@ window.taller=function(b){b=b||S.b.find(x=>x.type=='tal'&&Date.now()>=x.end);if(
   <div><span class="m">Total (×${q})</span><div class="cost">${chipsCost(tot)}</div></div>
   <div class="sup-ic"><span class="m">Icono</span><span class="row2"><button onclick="supUp('${s.id}')">${supImg(s.id)?'Cambiar imagen':'Subir imagen'}</button>${supImg(s.id)?`<button onclick="supDel('${s.id}')">Quitar</button>`:''}</span></div>
   <button class="pri" ${ok?'':'disabled'} onclick="tlMake('${s.id}')">${sp<=0?'Almacén lleno':mx<1?'Faltan materiales':'Fabricar ×'+q}</button></div>`}).join('');
- modal(head(b,'Fabrica consumibles para tus aventuras')+`<div class="note">En combate, usar un suministro cuenta como la acción del héroe que actúa. Botiquín: hasta 2 usos por turno. Vendaje: hasta 5 usos seguidos; después hay que atacar.</div>`+cards+upBlock(b))};
+ modal(head(b,'Fabrica consumibles para tus aventuras')+`<div class="note">En combate, un héroe que no es alquimista puede usar un solo objeto por turno (suministro o poción alquímica): el turno continúa y después solo puede atacar. Botiquín: hasta 2 usos por turno. Botiquín grande: 1 uso por turno. Vendaje: hasta 5 usos seguidos; después hay que atacar.</div>`+cards+upBlock(b))};
 window.tlQ=(id,d)=>{const s=SUP[id];if(!s)return;const sp=Math.max(1,s.cap-sn(id));let q=TLQ[id]||1;
  q=d==0?Math.max(1,Math.min(maxMake(id),sp)):q+d;TLQ[id]=Math.max(1,Math.min(sp,q));const t=stt2();taller();stt3(t)};
 /* subir / quitar la imagen del icono de un suministro (se recorta al centro en cuadrado y se reduce a 128 px, conserva transparencia) */
@@ -3099,7 +3104,7 @@ const elOf=i=>inSq()?$('sqh'+i):$('hc');
 const actor=()=>inSq()?SQ.hs[SQ.ai]:B.h;
 const canAct=()=>{if(!S)return false;if(inSq()){const u=SQ.hs[SQ.ai];return !SQ.busy&&!SQ.over&&!!u&&u.hp>0&&!(u.fz>0)}
  if(inCl())return !busy&&!B.over&&B.h.hp>0;return false};
-const turnSp=()=>{const o=inSq()?SQ:B,k=inSq()?SQ.round:(B.i||0);if(!o.sp||o.sp.r!==k)o.sp={r:k,vendaje:0,botiquin:0};return o.sp};
+const turnSp=()=>{const o=inSq()?SQ:B,k=inSq()?SQ.round:(B.i||0);if(!o.sp||o.sp.r!==k)o.sp={r:k,vendaje:0,botiquin:0,grande:0};return o.sp};
 const why=u=>!u?'Objetivo no válido.':u.hp<=0?u.n+' está caído y no puede recibir curación.':u.hp>=u.mhp?u.n+' ya tiene la vida completa.':null;
 const amt=(u,s)=>Math.max(0,Math.min(s.heal,u.mhp-u.hp));
 function supToast(m){const o=document.querySelector('.supt');if(o)o.remove();const d=document.createElement('div');d.className='supt';d.textContent=m;document.body.appendChild(d);
@@ -3115,12 +3120,17 @@ const vsOf=()=>{const o=inSq()?SQ:B;return o?(o.vs|0):0};
 try{const _sa=sqAct;sqAct=function(a){try{if(typeof SQ!='undefined'&&SQ&&!SQ.busy&&!SQ.over&&(a=='atk'||a=='gp'))SQ.vs=0}catch(e){}return _sa.apply(this,arguments)}}catch(e){}
 try{const _h=hit;hit=function(n){try{if(B&&!busy&&!B.over)B.vs=0}catch(e){}return _h.apply(this,arguments)}}catch(e){}
 /* ficha emergente de suministros: icono + total de cada uno. En celular va en fila; en computador, en columna */
+/* menú vertical que se abre al costado del botón cuadrado (a la derecha; si no cabe, a la izquierda) */
+window.supSide=(w,anchor)=>{w.classList.add('side');const r=anchor?anchor.getBoundingClientRect():null,pw=w.offsetWidth,ph=w.offsetHeight;
+ if(!r){w.style.left='8px';w.style.top=Math.max(8,innerHeight-ph-90)+'px';return}
+ let x=r.right+8;if(x+pw>innerWidth-8)x=r.left-pw-8;x=Math.max(8,Math.min(innerWidth-pw-8,x));
+ let y=r.bottom-ph;y=Math.max(8,Math.min(innerHeight-ph-8,y));
+ w.style.left=x+'px';w.style.top=y+'px';w.style.bottom='auto'};
 window.supPop=(anchor,items,cb,wid)=>{const old=document.getElementById(wid);if(old)old.remove();
  const w=document.createElement('div');w.id=wid;w.className='suppop';
  w.innerHTML=items.map(it=>`<button type="button" class="supic" ${it.off?'disabled':''} data-id="${it.id}" title="${it.tip}" aria-label="${it.tip}">${ic(it.ic,26)}<b>${it.count}</b></button>`).join('');
  w.onclick=e=>{const b=e.target.closest('.supic');if(!b||b.disabled)return;w.remove();cb(b.dataset.id)};
- document.body.appendChild(w);const r=anchor?anchor.getBoundingClientRect():null;
- w.style.left=r?Math.max(8,Math.min(innerWidth-w.offsetWidth-8,r.left))+'px':'8px';w.style.bottom=r?(innerHeight-r.top+8)+'px':'90px';
+ document.body.appendChild(w);supSide(w,anchor);
  const off=e=>{if(w.contains(e.target)||(anchor&&anchor.contains(e.target)))return;w.remove();document.removeEventListener('pointerdown',off,true)};
  setTimeout(()=>document.addEventListener('pointerdown',off,true),0)};
 /* curación: la barra de vida sube suave, se pone verde y vuelve a su color */
@@ -3128,13 +3138,13 @@ function hpFx(e){try{const b=e.querySelector('[id^="sqhb"],[id^="pvhb"],[id^="pv
  b.animate([{backgroundColor:'#4cdf7a',filter:'brightness(1.3)',offset:0},{backgroundColor:'#4cdf7a',filter:'brightness(1.15)',offset:.6},{backgroundColor:c,filter:'none',offset:1}],{duration:1500,easing:'ease-out'})}catch(x){}}
 window.supClose=()=>{const w=$('supw');if(w)w.remove()};
 window.supCancel=()=>{if(SU.busy)return;SU.item=null;SU.tg=null;supClose();supPaint();supBar()};
-window.supOpen=()=>{if(SU.busy||!canAct())return;supCancel();const sp=turnSp(),vs=vsOf();
- const items=Object.values(SUP).map(s=>{const n=sn(s.id);let off=n<1,tip=s.n+' (+'+s.heal+' HP) · en inventario: '+n;
+window.supOpen=()=>{if(SU.busy||!canAct())return;if(advLocked()){supToast(advMsg);return}supCancel();const sp=turnSp(),vs=vsOf();
+ const items=Object.values(SUP).filter(s=>s.id!='grande'||s.cap>0||sn('grande')>0).map(s=>{const n=sn(s.id);let off=n<1,tip=s.n+' (+'+s.heal+' HP) · en inventario: '+n;
   if(s.id=='vendaje'){tip+=' · seguidos: '+vs+'/'+VMAX;if(vs>=VMAX){off=true;tip+=' · ataca antes de seguir'}}
   else{const used=sp[s.id]|0;tip+=' · usos este turno: '+used+'/'+s.per;if(used>=s.per)off=true}
   return{id:s.id,ic:s.ic,count:n,off,tip}});
  supPop($('supb'),items,id=>supPick(id),'supw')};
-window.supPick=id=>{const s=SUP[id];if(!s||SU.busy||!canAct())return;const sp=turnSp();
+window.supPick=id=>{const s=SUP[id];if(!s||SU.busy||!canAct())return;if(advLocked()){supToast(advMsg);return}const sp=turnSp();
  if(sn(id)<1){supToast('No te quedan '+s.n.toLowerCase()+'s.');return}
  if(id=='vendaje'&&vsOf()>=VMAX){supToast('Ya usaste '+VMAX+' vendajes seguidos: ataca antes de usar otro.');return}
  if(sp[id]>=s.per){supToast('Límite de '+s.per+' por turno alcanzado.');return}
@@ -3143,17 +3153,17 @@ window.supPick=id=>{const s=SUP[id];if(!s||SU.busy||!canAct())return;const sp=tu
 function supTarget(i){const s=SUP[SU.item],u=units()[i],w=why(u);if(!s)return;if(w){supToast(w);return}SU.tg=i;supPaint();supBar()}
 function supFx(e,n,s){if(!e)return;hpFx(e);try{fl('+'+n+' HP',e,'#4cdf7a')}catch(x){}if(RM)return;
  e.animate([{boxShadow:'0 0 0 0 rgba(76,223,122,0)',filter:'none'},{boxShadow:'0 0 26px 8px rgba(76,223,122,.85)',filter:'brightness(1.35) saturate(1.3)',offset:.35},{boxShadow:'0 0 0 0 rgba(76,223,122,0)',filter:'none'}],{duration:800,easing:'ease-out'});
- const r=e.getBoundingClientRect();for(let i=0;i<(s.id=='botiquin'?12:7);i++){const d=document.createElement('i');d.textContent='+';d.className='supx';
+ const r=e.getBoundingClientRect();for(let i=0;i<(s.id=='botiquin'?12:s.id=='grande'?18:7);i++){const d=document.createElement('i');d.textContent='+';d.className='supx';
   d.style.cssText=`left:${r.left+Math.random()*r.width}px;top:${r.top+r.height*(.35+Math.random()*.5)}px;font-size:${10+Math.random()*10}px`;document.body.appendChild(d);
   d.animate([{opacity:0,transform:'translateY(0) scale(.5)'},{opacity:1,offset:.25},{opacity:0,transform:`translateY(${-30-Math.random()*40}px) scale(1.1)`}],{duration:700+Math.random()*500,easing:'ease-out',delay:Math.random()*150,fill:'both'}).finished.then(()=>d.remove(),()=>d.remove())}}
 window.supFx=supFx;window.hpFx=hpFx;
 window.supConfirm=async()=>{if(SU.busy||!SU.item||SU.tg==null)return;const s=SUP[SU.item],u=units()[SU.tg];
- if(!canAct()||!u){supCancel();return}const sp=turnSp(),w=why(u);
+ if(!canAct()||!u||advLocked()){supCancel();return}const sp=turnSp(),w=why(u);
  if(sn(s.id)<1){supToast('No te quedan '+s.n.toLowerCase()+'s.');supCancel();return}
  if(s.id=='vendaje'&&vsOf()>=VMAX){supToast('Ya usaste '+VMAX+' vendajes seguidos: ataca antes de usar otro.');supCancel();return}
  if(sp[s.id]>=s.per){supToast('Límite de '+s.per+' por turno alcanzado.');supCancel();return}
  if(w){supToast(w);SU.tg=null;supPaint();supBar();return}
- SU.busy=1;const sq=inSq(),a=actor(),n=amt(u,s),e=elOf(SU.tg);
+ SU.busy=1;const sq=inSq(),a=actor(),keep=!!a&&a.cls!='alquimista',n=amt(u,s),e=elOf(SU.tg);
  if(sq)SQ.busy=true;else busy=true;               /* bloquea el resto de acciones: esto es la acción del héroe */
  ssn(s.id,sn(s.id)-1);sp[s.id]++;if(s.id=='vendaje'){const o2=sq?SQ:B;o2.vs=(o2.vs|0)+1}u.hp+=n;save();
  B.log.push(`${a.n} usa ${s.n} sobre ${u.n}: +${n} HP.`);
@@ -3161,12 +3171,45 @@ window.supConfirm=async()=>{if(SU.busy||!SU.item||SU.tg==null)return;const s=SUP
  const ib=document.querySelector('#supbar .ib');if(ib&&!RM)ib.animate([{transform:'scale(1)'},{transform:'scale(1.55) rotate(-12deg)'},{transform:'scale(1)'}],{duration:420});
  await sl(RM?60:520);
  SU.item=null;SU.tg=null;supClose();supPaint();supBar();
- try{if(sq){if(SQ&&!SQ.over){SQ.busy=true;await sqAdvance()}}else if(B&&!B.over){await mturn()}}finally{SU.busy=0;try{sq?sqUpd():bupd()}catch(x){}}};
-function supBtn(){if(!S)return;let host=null;if(inSq())host=$('sqa');else if(inCl()){const b3=$('b3');host=b3&&b3.parentNode}
- let b=$('supb');const over=inSq()?SQ.over:(B&&B.over),show=host&&!over&&(count('tal')>0||sn('vendaje')+sn('botiquin')>0);
+ try{if(keep&&(sq?SQ&&!SQ.over:B&&!B.over)){advLock(1);if(sq)SQ.busy=false;else busy=false;supToast('Usaste un objeto: tu turno continúa, ahora solo puedes atacar.')}
+  else if(sq){if(SQ&&!SQ.over){SQ.busy=true;await sqAdvance()}}else if(B&&!B.over){await mturn()}}finally{SU.busy=0;try{sq?sqUpd():bupd()}catch(x){}}};
+/* ---- Aventuras: dos botones cuadrados (Suministros / Alquimia) bajo Ataque fuerte y Defender ---- */
+/* Un héroe que NO es alquimista solo puede usar un objeto por turno (suministro o poción): el turno continúa y solo puede atacar. */
+window.advLocked=()=>{const o=inSq()?SQ:inCl()?B:null;return !!(o&&o.lk)};
+window.advLock=on=>{const o=inSq()?SQ:inCl()?B:null;if(o)o.lk=on?1:0};
+window.advMsg='Ya usaste un objeto este turno: ahora solo puedes atacar.';
+{const _sa=sqAdvance;sqAdvance=function(){try{if(SQ)SQ.lk=0}catch(e){}return _sa.apply(this,arguments)}}
+{const _mt=mturn;mturn=function(){try{if(B)B.lk=0}catch(e){}return _mt.apply(this,arguments)}}
+window.ADVK='ciudad-advbtn';
+const advImg=k=>{try{return JSON.parse(localStorage.getItem(window.ADVK)||'{}')[k]||null}catch(e){return null}};
+window.advIc=(k,def,sz)=>{const u=advImg(k);return u?`<img src="${u}" alt="" width="${sz}" height="${sz}">`:def};
+window.advAdm=k=>(typeof ADM!=='undefined'&&ADM)?'<span class="qte" role="button" title="Cambiar icono (imagen)">✎</span>'+(advImg(k)?'<span class="qte q2" data-d="1" role="button" title="Quitar imagen">✕</span>':''):'';
+const advRef=()=>{try{inSq()?sqUpd():bupd()}catch(e){}};
+window.advUp=k=>{const f=document.createElement('input');f.type='file';f.accept='image/*';
+ f.onchange=()=>{const fl=f.files[0];if(!fl)return;if(!/^image\//.test(fl.type)){notice('Icono','Sube un archivo de imagen.');return}
+  const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const N=128,c=document.createElement('canvas');c.width=c.height=N;const x=c.getContext('2d'),m=Math.min(im.width,im.height);
+   x.drawImage(im,(im.width-m)/2,(im.height-m)/2,m,m,0,0,N,N);
+   try{const o=JSON.parse(localStorage.getItem(window.ADVK)||'{}');o[k]=c.toDataURL('image/png');localStorage.setItem(window.ADVK,JSON.stringify(o))}catch(e){notice('Icono','No se pudo guardar la imagen. Prueba con una más pequeña.');return}
+   advRef();notice('Icono','Imagen guardada para el botón de '+(k=='sup'?'Suministros':'Alquimia')+'.')};
+   im.onerror=()=>notice('Icono','No se pudo leer la imagen.');im.src=r.result};r.readAsDataURL(fl)};f.click()};
+window.advDel=k=>{try{const o=JSON.parse(localStorage.getItem(window.ADVK)||'{}');delete o[k];localStorage.setItem(window.ADVK,JSON.stringify(o))}catch(e){}advRef()};
+/* contenedor de los dos cuadrados: en escuadra, dentro de la columna central (bajo Ataque fuerte/Defender); en clásico, bajo la fila de botones */
+window.advHost=()=>{let host=null;const sq=inSq();
+ if(sq){const sa=$('sqa');if(!sa)return null;host=sa.querySelector('.qcc')||sa}
+ else if(inCl()){const b3=$('b3');host=b3&&b3.parentNode}
+ if(!host)return null;let t=$('qtools');
+ if(t&&(sq?t.parentNode!==host:t.previousElementSibling!==host)){t.remove();t=null}
+ if(!t){t=document.createElement('div');t.id='qtools';if(sq)host.appendChild(t);else host.insertAdjacentElement('afterend',t)}
+ return t};
+function supBtn(){if(!S)return;const t=advHost();
+ let b=$('supb');const over=inSq()?SQ.over:(B&&B.over),tot=sn('vendaje')+sn('botiquin')+sn('grande'),show=t&&!over&&(count('tal')>0||tot>0);
  if(!show){if(b)b.remove();return}
- if(!b||b.parentNode!==host){if(b)b.remove();b=document.createElement('button');b.id='supb';b.onclick=()=>supOpen();if(inCl())$('b3').after(b);else host.appendChild(b)}
- b.innerHTML=ic('ven',14)+' Suministros ('+sn('vendaje')+' · '+sn('botiquin')+')';b.disabled=!canAct()||!!SU.busy||sn('vendaje')+sn('botiquin')<1}
+ if(!b||b.parentNode!==t){if(b)b.remove();b=document.createElement('button');b.id='supb';b.type='button';b.className='qtb';
+  b.onclick=e=>{const x=e.target.closest('.qte');if(x){e.stopPropagation();x.dataset.d?advDel('sup'):advUp('sup');return}supOpen()};t.appendChild(b)}
+ const lk=advLocked(),det='Suministros · vendajes '+sn('vendaje')+' · botiquines '+sn('botiquin')+(SUP.grande.cap>0||sn('grande')>0?' · botiquines grandes '+sn('grande'):'');
+ b.title=lk?advMsg:det;b.setAttribute('aria-label',det);
+ const h=advIc('sup',ic('ven',30),30)+'<span class="qtn">'+tot+'</span>'+advAdm('sup');if(b.innerHTML!==h)b.innerHTML=h;
+ b.disabled=!canAct()||!!SU.busy||tot<1||lk}
 {const _a=sqUpd;sqUpd=function(){const r=_a.apply(this,arguments);try{supBtn()}catch(e){}return r}}
 {const _b=bupd;bupd=function(){const r=_b.apply(this,arguments);try{supBtn()}catch(e){}return r}}
 /* elegir objetivo: intercepta el toque en las cartas de héroe y bloquea otras acciones mientras se elige */
@@ -3186,7 +3229,14 @@ st.textContent='.cd.sup-ok{outline:2px solid #4cdf7a!important;box-shadow:0 0 14
 +'.supx{position:fixed;z-index:90;pointer-events:none;color:#4cdf7a;font-weight:800;text-shadow:0 0 6px rgba(76,223,122,.8)}'
 +'.supit{display:flex;gap:12px;align-items:center;width:100%;padding:10px 12px;border-radius:14px}.supit .ib{flex:none}'
 +'.supt{position:fixed;left:50%;bottom:calc(90px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:95;max-width:90vw;padding:9px 14px;border-radius:12px;background:var(--s);border:1px solid var(--r);color:var(--t);font-size:13px;text-align:center;box-shadow:0 6px 18px rgba(0,0,0,.45)}'
-+'#sqH .bar i,#hc .bar i{transition:width .45s ease}';
++'#sqH .bar i,#hc .bar i{transition:width .45s ease}'
++'#qtools{display:flex;gap:10px;justify-content:center;align-items:center;width:100%;margin-top:4px}'
++'.qtb{position:relative;display:inline-flex;align-items:center;justify-content:center;width:56px;height:56px;min-width:0;padding:0;border-radius:14px;flex:none}'
++'.qtb svg,.qtb img{width:30px;height:30px;object-fit:contain;pointer-events:none}'
++'.qtb .qtn{position:absolute;right:5px;bottom:3px;font-size:12px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums;pointer-events:none}'
++'.qtb .qte{position:absolute;top:2px;left:3px;font-size:11px;line-height:1;padding:1px 3px;border-radius:6px;background:var(--s);border:1px solid var(--l);cursor:pointer}.qtb .qte.q2{left:auto;right:3px}'
++'#supb{order:1;border-color:#4cdf7a}#alqb{order:2;border-color:#ff8a2a}'
++'.suppop.side{flex-direction:column}';
 document.head.appendChild(st);
 }
 
@@ -5521,7 +5571,7 @@ const V={
  mur:[{c:{solar:15},bt:1,hp:10,df:2},{c:{solar:30},bt:4,hp:18,df:3},{c:{solar:54},bt:6,hp:30,df:2},{c:{solar:96,filar:10},bt:11,hp:45,df:4},{c:{solar:165,filar:30},bt:18,hp:65,df:4}],
  chr:[{c:{solar:150},bt:60,cm:2},{c:{solar:305,filar:100},bt:90,cm:3},{c:{solar:385,filar:180,recursos:30},bt:153,cm:3},{c:{solar:450,filar:240,recursos:80,cristal:4},bt:252,cm:4},{c:{solar:490,filar:260,recursos:145,cristal:12},bt:405,cm:4}],
  bib:[{c:{solar:200,filar:120},bt:60},{c:{solar:300,filar:180},bt:60},{c:{solar:385,filar:204,recursos:50},bt:102},{c:{solar:450,filar:240,recursos:100,cristal:3},bt:168},{c:{solar:490,filar:260,recursos:150,cristal:10,nucleo:1},bt:270}],
- tal:[{c:{solar:120,filar:60},bt:45,vc:5,bc:1,vx:0,bx:0},{c:{solar:180,filar:80},bt:45,vc:10,bc:2,vx:0,bx:0},{c:{solar:256,filar:108,recursos:25},bt:76,vc:15,bc:3,vx:0,bx:0},{c:{solar:384,filar:192,recursos:80,cristal:3},bt:126,vc:18,bc:4,vx:0,bx:2},{c:{solar:660,filar:330,recursos:100,cristal:8},bt:202,vc:19,bc:4,vx:1,bx:3}],
+ tal:[{c:{solar:120,filar:60},bt:45,vc:5,bc:1,vx:0,bx:0,gc:0},{c:{solar:180,filar:80},bt:45,vc:10,bc:2,vx:0,bx:0,gc:0},{c:{solar:256,filar:108,recursos:25},bt:76,vc:15,bc:3,vx:0,bx:0,gc:1},{c:{solar:384,filar:192,recursos:80,cristal:3},bt:126,vc:18,bc:4,vx:0,bx:2,gc:1},{c:{solar:660,filar:330,recursos:100,cristal:8},bt:202,vc:19,bc:4,vx:1,bx:3,gc:2}],
  cmp:[{c:{solar:250,recursos:15},bt:60,df:3},{c:{solar:200},bt:50,df:6},{c:{solar:360,recursos:20},bt:85,df:15},{c:{solar:450,recursos:50,cristal:3},bt:140,df:25},{c:{solar:490,recursos:85,cristal:8},bt:225,df:32}],
  hrr:[{c:{solar:300,filar:80,recursos:20},bt:90},{c:{solar:200,filar:60},bt:60},{c:{solar:360,filar:108,recursos:25},bt:102},{c:{solar:450,filar:192,recursos:60,cristal:4},bt:168},{c:{solar:490,filar:260,recursos:85,cristal:12},bt:270}],
  grm:[{c:{solar:350,filar:100},bt:90},{c:{solar:300,filar:100},bt:70},{c:{solar:385,filar:180,recursos:30},bt:119},{c:{solar:450,filar:240,recursos:70,cristal:5},bt:196},{c:{solar:490,filar:260,recursos:85,cristal:12},bt:315}]
@@ -7330,6 +7380,11 @@ window.botReset=()=>{if(!ADM)return;S.bot={ms:0};save();notice('Boticario','Even
 @media(prefers-reduced-motion:reduce){.bfw{animation:none}}
 .bmx .bglb::before{content:'';position:absolute;left:-7px;top:50%;margin-top:-6px;width:12px;height:12px;background:color-mix(in srgb,var(--a) 9%,var(--s));border-left:1.5px solid var(--a);border-bottom:1.5px solid var(--a);transform:rotate(45deg)}
 .bxt .ucard{margin:10px 0 0;padding:10px}
+/* Alquimista (menú del Boticario) en pantallas anchas: Maelis a la izquierda, fuera de la ventana y centrada en vertical (según boceto) */
+@media(min-width:760px){
+.sheet.bfx{padding-top:0}
+.bfw{--bh:clamp(180px,52vh,430px);--bw:min(calc(var(--bh)*.68),calc(50vw - 224px));right:auto;top:50%;margin:calc(var(--bh)/-2) 0 0 0;height:var(--bh);width:var(--bw);left:calc(50% - 200px - 16px - var(--bw))}
+}
 </style>
 <script>
 /* ===== BOTICARIO · PARTE 2: Mochila Alquímica, aldeanos, existencias y reposición ===== */
@@ -7464,7 +7519,7 @@ const setPrep=p=>{if(inSq())SQ.prep=p;else if(inCl())B.prep=p};
 const fmt=x=>String(Number(x.toFixed(2))).replace('.',',');
 const mixPct=(a,b)=>(cfg.pct[a]+cfg.pct[b])*cfg.mixBonus;
 const alqObj=()=>inSq()?SQ:inCl()?B:null;
-const alqBlock=()=>{const al=heroes()[inSq()?SQ.ai:0],o=alqObj();if(!al||al.cls!='alquimista'||!o)return false;const L=window.alqLimOf(al.lv),N=o.alqN|0;if(N>=L){toast('El alquimista ya usó sus '+L+' pociones de este combate.');return true}return false};
+const alqBlock=()=>{const al=heroes()[inSq()?SQ.ai:0],o=alqObj();if(al&&o&&al.cls!='alquimista'&&advLocked()){toast(advMsg);return true}if(!al||al.cls!='alquimista'||!o)return false;const L=window.alqLimOf(al.lv),N=o.alqN|0;if(N>=L){toast('El alquimista ya usó sus '+L+' pociones de este combate.');return true}return false};
 const alqBump=a=>{const o=alqObj();if(o&&a&&a.cls=='alquimista')o.alqN=(o.alqN|0)+1};
 const dmgOf=(pct,t)=>Math.max(1,Math.round(pct));   /* daño plano: no depende de la vida del objetivo */
 window.alqMixPct=mixPct;window.alqDmgOf=dmgOf;
@@ -7494,6 +7549,7 @@ function pick(k){if(AQ.busy||!canAct())return;
  if(isFoe(k)){const cur=inSq()?SQ.t:B.t;if(foes()[cur]&&foes()[cur].hp>0)AQ.tg=cur}
  paint();bar()}
 window.alqOpen=()=>{if(AQ.busy||!canAct())return;const old=g('alqw');if(old){old.remove();return}
+ if(advLocked()){toast(advMsg);return}
  try{window.supCancel&&supCancel()}catch(e){}AQ.item=null;AQ.tg=null;paint();bar();
  const w=document.createElement('div');w.id='alqw';w.className='suppop alqw';
  const pr=prepOf(),al=heroes()[inSq()?SQ.ai:0],tot=cnt('vida')+cnt('bomb')+cnt('mana');
@@ -7501,8 +7557,7 @@ window.alqOpen=()=>{if(AQ.busy||!canAct())return;const old=g('alqw');if(old){old
   +(al&&al.cls=='alquimista'?`<button type="button" class="supic alqmixb" ${pr||tot<2?'disabled':''} data-k="mix" title="${pr?'Ya hay una mezcla inestable activa':tot<2?'Necesitas al menos dos pociones':'Combinar dos pociones (usa tu turno)'}" aria-label="Combinar pociones">${icon('mix')}<b>⚗</b></button>`:'')
   +(pr?`<button type="button" class="supic alqzapb" data-k="zap" title="Lanzar la mezcla inestable (${pr.pct>0?Math.max(1,Math.round(pr.pct))+' de daño':''}) · quedan ${Math.min(pr.left,cfg.mixTurns)} turno(s)" aria-label="Lanzar mezcla inestable">${icon('zap')}<b>${Math.min(pr.left,cfg.mixTurns)}</b></button>`:'');
  w.onclick=e=>{const b=e.target.closest('.supic');if(!b||b.disabled)return;w.remove();pick(b.dataset.k)};
- document.body.appendChild(w);const an=g('alqb'),r=an?an.getBoundingClientRect():null;
- w.style.left=r?Math.max(8,Math.min(innerWidth-w.offsetWidth-8,r.left))+'px':'8px';w.style.bottom=r?(innerHeight-r.top+8)+'px':'90px';
+ document.body.appendChild(w);const an=g('alqb');supSide(w,an);
  const off=e=>{if(w.contains(e.target)||(an&&an.contains(e.target)))return;w.remove();document.removeEventListener('pointerdown',off,true)};
  setTimeout(()=>document.addEventListener('pointerdown',off,true),0)};
 
@@ -7599,7 +7654,7 @@ window.alqConfirm=async()=>{if(AQ.busy||!AQ.item||AQ.tg==null)return;const k=AQ.
  if(!canAct()){alqCancel();return}
  if(k=='zap'?!prepOf():cnt(k)<1){toast(k=='zap'?'No hay ninguna mezcla activa.':'No te quedan '+NAME[k].toLowerCase()+'s en la mochila.');alqCancel();return}
  const t=tgList()[idx],w=why(k,t);if(w){toast(w);AQ.tg=null;paint();bar();return}
- const pr0=k=='zap'?prepOf():null;AQ.busy=1;const ai=sq?SQ.ai:0,a=heroes()[ai],ae=heroEl(ai),te=tgEl(idx),n=k=='zap'?dmgOf(pr0.pct,t):amount(k,t);
+ const pr0=k=='zap'?prepOf():null;AQ.busy=1;const ai=sq?SQ.ai:0,a=heroes()[ai],keepT=!!a&&a.cls!='alquimista'&&k!='zap',ae=heroEl(ai),te=tgEl(idx),n=k=='zap'?dmgOf(pr0.pct,t):amount(k,t);
  if(sq)SQ.busy=true;else busy=true;
  const pr=k=='zap'?prepOf():null;if(k=='zap')setPrep(null);else{S.bot.inv[k]=cnt(k)-1;alqBump(a)}save();               /* se consume una sola vez, al confirmar */
  AQ.item=null;AQ.tg=null;paint();bar();btn();
@@ -7629,7 +7684,8 @@ window.alqConfirm=async()=>{if(AQ.busy||!AQ.item||AQ.tg==null)return;const k=AQ.
    fxAura(k,te,k=='vida'?'+'+n+' HP':'+'+n+' maná');
    if(sq)sqUpd();else bupd();
    await wait(900)}
-  await endAction(sq)
+  if(keepT&&!(sq?SQ.m:B.m).every(m=>m.hp<=0)){advLock(1);if(sq)SQ.busy=false;else busy=false;toast('Usaste una poción: tu turno continúa, ahora solo puedes atacar.')}
+  else await endAction(sq)
  }catch(e){console.error('[ALQUIMIA]',e);try{if(sq)SQ.busy=false;else busy=false}catch(x){}}
  finally{AQ.busy=0;try{sq&&SQ?sqUpd():bupd()}catch(x){}btn()}};
 
@@ -7640,13 +7696,15 @@ function pill(){const p=(inSq()||inCl())&&!over()?prepOf():null;let e=g('alqpill
  if(!e){e=document.createElement('div');e.id='alqpill';document.body.appendChild(e)}
  const n=Math.min(p.left,cfg.mixTurns);e.innerHTML=`<span class="alqpi">${mixIc()}</span><span><b>Mezcla inestable</b> ${Math.max(1,Math.round(p.pct))} de daño · ${n==1?'último turno':'quedan '+n+' turnos'}</span>`;
  const he=heroEl(p.who);if(he)he.classList.add('alq-unst')}
-function btn(){try{pill()}catch(x){}let b=g('alqb');const host=inSq()?g('sqa'):inCl()?(g('b3')&&g('b3').parentNode):null;
- if(!host||!hasBag()||over()){if(b)b.remove();return}
- if(!b||b.parentNode!==host){if(b)b.remove();b=document.createElement('button');b.id='alqb';b.onclick=()=>alqOpen();
-  const s=g('supb');if(s&&s.parentNode===host)s.after(b);else if(inCl())g('b3').after(b);else host.appendChild(b)}
- const tot=cnt('vida')+cnt('bomb')+cnt('mana');
- b.innerHTML=`<span class="alqi">${icon('vida')}</span> ALQUIMIA (${cnt('vida')} · ${cnt('bomb')} · ${cnt('mana')})${prepOf()?' ⚗'+Math.min(prepOf().left,cfg.mixTurns):''}`;
- b.disabled=!canAct()||!!AQ.busy||(tot<1&&!prepOf())}
+function btn(){try{pill()}catch(x){}let b=g('alqb');const t=advHost();
+ if(!t||!hasBag()||over()){if(b)b.remove();return}
+ if(!b||b.parentNode!==t){if(b)b.remove();b=document.createElement('button');b.id='alqb';b.type='button';b.className='qtb';
+  b.onclick=e=>{const x=e.target.closest('.qte');if(x){e.stopPropagation();x.dataset.d?advDel('alq'):advUp('alq');return}alqOpen()};t.appendChild(b)}
+ const tot=cnt('vida')+cnt('bomb')+cnt('mana'),lk=advLocked(),pp=prepOf(),
+  det=`Alquimia · vida ${cnt('vida')} · bombas ${cnt('bomb')} · maná ${cnt('mana')}`+(pp?' · mezcla activa: '+Math.min(pp.left,cfg.mixTurns)+' turno(s)':'');
+ b.title=lk?advMsg:det;b.setAttribute('aria-label',det);
+ const h=advIc('alq',icon('vida'),30)+`<span class="qtn">${tot}${pp?'⚗':''}</span>`+advAdm('alq');if(b.innerHTML!==h)b.innerHTML=h;
+ b.disabled=!canAct()||!!AQ.busy||(tot<1&&!pp)||lk}
 {const _a=sqUpd;sqUpd=function(){const r=_a.apply(this,arguments);try{btn()}catch(e){}return r}}
 {const _b=bupd;bupd=function(){const r=_b.apply(this,arguments);try{btn()}catch(e){}return r}}
 
@@ -7663,7 +7721,7 @@ setInterval(()=>{if((AQ.item||g('alqw'))&&!AQ.busy&&!canAct())alqCancel();if(AQ.
 
 /* estilos */
 const st=document.createElement('style');
-st.textContent='#alqb{display:inline-flex;align-items:center;gap:6px;border-color:#ff8a2a}#alqb .alqi svg,#alqb .alqi img{width:18px;height:18px;object-fit:contain;vertical-align:middle}'
+st.textContent='#alqb{border-color:#ff8a2a}'
 +'.alqw{border-color:#ff8a2a}.alqw .supic svg,.alqw .supic img{width:30px;height:30px;object-fit:contain}'
 +'.cd.alq-ok{outline:2px solid var(--ac,#ff8a2a)!important;box-shadow:0 0 14px var(--ac,#ff8a2a)!important;cursor:pointer;animation:alqPulse 1s ease-in-out infinite}'
 +'.cd.alq-sel{outline:3px solid var(--ac,#ff8a2a)!important;box-shadow:0 0 26px var(--ac,#ff8a2a)!important;animation:none}'
