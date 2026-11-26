@@ -1667,7 +1667,7 @@ function syncSk(h){h.sk=h.sk||{};h.sk.l=h.sk.l||[];if(window.eqNorm)eqNorm(h);re
 
 
 /* ===== ETAPA 4: invasiones y defensa de la ciudad (aviso previo, muros, héroes, informe, derrota recuperable) ===== */
-const IVC={first:600000,gap:[1200000,1800000],warn:120000,boostMax:3,boostCost:50,boostVal:10,wall:2,wallMax:40};
+const IVC={first:600000,gap:[1200000,1800000],warn:120000,boostMax:3,boostCost:50,boostVal:10,wall:2,wallMax:40,nMax:30,lvMax:40};
 const ivOn=()=>!!S&&(dnL()>=5||E()>=2);
 /* Bonus de muro del establecimiento central: nivel 3-4 = +15, nivel 5 = +20 (no se acumulan; se suma sobre los muros construidos) */
 const estWall=()=>{const e=E();return e>=5?20:e==4?10:e>=3?15:0};
@@ -1682,14 +1682,14 @@ function ivAtk(iv){return Math.round(iv.n*(3+iv.lv*2)*iv.roll)}
 function ivPlan(){if(!S||!ivOn()||S.iv)return;const n=Date.now();
  if(!S.ivnext){S.ivnext=n+IVC.first;save();return}
  if(n<S.ivnext)return;
- const d=dnL(),cnt=Math.min(10,2+Math.floor(d/4)+(Math.random()<.5?1:0)),lv=1+Math.floor(d/6);
+ const d=dnL(),c=(()=>{try{return cmpDf()}catch(e){return 0}})(),cnt=Math.min(IVC.nMax,2+Math.floor(d/4)+Math.floor(c/80)+(Math.random()<.5?1:0)),lv=Math.min(IVC.lvMax,1+Math.floor(d/6)+Math.floor(c/50));
  S.iv={at:n+IVC.warn,n:cnt,lv,roll:Math.round((.85+Math.random()*.3)*100)/100,boost:0,hero:false};save();
  notice('¡Invasión en camino!',`${cnt} enemigos (nivel ${lv}) llegarán en ${mmss(IVC.warn)}. Prepara las defensas.`);ivUI()}
 function ivResolve(){const iv=S.iv;if(!iv)return;const d=ivDef(iv),a=ivAtk(iv),win=d.t>=a,n=Date.now(),L=[];
  L.push(`Invasores: ${iv.n} de nivel ${iv.lv} · fuerza ${a}`);
  L.push(`Defensa: muros ${d.w} + milicia ${d.m} + héroes ${d.hs} + campo ${d.c||0} + refuerzos ${d.bo} = ${d.t}`);
- if(win){const rs=20+10*iv.lv,rf=5*iv.lv;S.coins.solar=Math.min(cap('solar'),S.coins.solar+rs);S.coins.filar=Math.min(cap('filar'),S.coins.filar+rf);
-  S.lastWin=n;L.push('La ciudad resistió el ataque.',`Botín recuperado: +${rs} solares, +${rf} filares (hasta el límite del almacén).`,'Sin bajas ni edificios dañados.')}
+ if(win){const rs=20+10*iv.lv,rf=5*iv.lv,cr=Math.floor(iv.lv/8),nu=iv.lv>=16&&Math.random()<.15?1:0;if(cr)S.inv.cristal=(S.inv.cristal||0)+cr;if(nu)S.inv.nucleo=(S.inv.nucleo||0)+nu;S.coins.solar=Math.min(cap('solar'),S.coins.solar+rs);S.coins.filar=Math.min(cap('filar'),S.coins.filar+rf);
+  S.lastWin=n;L.push('La ciudad resistió el ataque.',`Botín recuperado: +${rs} solares, +${rf} filares (hasta el límite del almacén).`,'Sin bajas ni edificios dañados.',...(cr||nu?['Botín raro: '+(cr?'+'+cr+' cristal'+(cr>1?'es':'')+' mágico'+(cr>1?'s':''):'')+(cr&&nu?', ':'')+(nu?'+1 núcleo de jefe':'')]:[]))}
  else{const ps=Math.min(S.coins.solar,Math.floor(S.coins.solar*.25)),pf=Math.min(S.coins.filar,Math.floor(S.coins.filar*.2));
   S.coins.solar-=ps;S.coins.filar-=pf;S.lastDefeat=n;
   L.push('Los invasores saquearon parte de las reservas.',`Pérdidas: ${ps} solares, ${pf} filares.`,'Ningún edificio ni habitante se pierde: la ciudad se recupera.');
@@ -1831,14 +1831,14 @@ const sqMk0=h=>({cls:h.cls||'guerrero'});
 
 /* ===== ETAPA 6: Herrería, Campo Heroico y Gremio (niveles 1–5) ===== */
 SH.hrr={n:'Herrería',d:'Forja armas y armaduras para tus héroes.',cost:{solar:300,filar:80,recursos:20},t:90000,e:'Equipo de hierro (hasta 5 niveles)'};
-SH.cmp={n:'Campo Heroico',d:'Entrena defensores para las invasiones.',cost:{solar:250,recursos:15},t:60000,e:'Defensores entrenados'};
+SH.cmp={n:'Campo Heroico',d:'Entrena aldeanos (hasta nivel 15) para defender la ciudad en las invasiones.',cost:{solar:250,recursos:15},t:60000,e:'Aldeanos entrenados'};
 SH.grm={n:'Gremio',d:'Contratos con recompensas de materiales.',cost:{solar:350,filar:100},t:90000,e:'Contratos con enfriamiento'};
 NM.hrr='Herrería';NM.cmp='Campo Heroico';NM.grm='Gremio';
 I.hrr='<path d="M4 8h13a3 3 0 01-3 4h-2v3h3v3H8v-3h3v-3H9a5 5 0 01-5-4z"/>';
 I.cmp='<path d="M4 20l8-14 8 14zM9 20v-5h6v5M12 6V2l4 1-4 1"/>';
 I.grm='<path d="M5 4h14v10c0 3-3 5-7 6-4-1-7-3-7-6zM9 9h6M9 13h6"/>';
 LV.hrr=[{tier:1}];gen('hrr',{solar:200,filar:60},60000,[{},{recursos:25},{recursos:60,cristal:4},{recursos:130,cristal:12}],[{tier:2},{tier:3},{tier:4},{tier:5}]);
-LV.cmp=[{df:3}];gen('cmp',{solar:200},50000,[{},{recursos:20},{recursos:50,cristal:3},{recursos:100,cristal:8}],[{df:6},{df:10},{df:15},{df:22}]);
+LV.cmp=[{mx:3}];gen('cmp',{solar:200},50000,[{},{recursos:20},{recursos:50,cristal:3},{recursos:100,cristal:8}],[{mx:6},{mx:9},{mx:12},{mx:15}]);
 LV.grm=[{ct:1}];gen('grm',{solar:300,filar:100},70000,[{},{recursos:30},{recursos:70,cristal:5},{recursos:140,cristal:12}],[{ct:2},{ct:3},{ct:4},{ct:5}]);
 /* ===== Ajuste de costes por capacidad =====
    Con el almacenamiento actual (máx. 2 almacenes por tipo) lo máximo que se puede acumular es:
@@ -1861,10 +1861,17 @@ LV.grm=[{ct:1}];gen('grm',{solar:300,filar:100},70000,[{},{recursos:30},{recurso
  // Cartas de héroe 5..8 (índices 3..6 de CARDS.cost): mismo criterio que los niveles 2..5
  CARDS.cost.forEach((c,i)=>{if(i>=3&&TOPE[i-1])low(c,TOPE[i-1])});
 }
-{const _r=rowsOf;rowsOf=function(t,c,n){if(t=='hrr')return [['Nivel de equipo',c.tier,n.tier]];if(t=='cmp')return [['Defensores',c.df,n.df]];if(t=='grm')return [['Contratos disponibles',c.ct,n.ct]];return _r(t,c,n)}}
+{const _r=rowsOf;rowsOf=function(t,c,n){if(t=='hrr')return [['Nivel de equipo',c.tier,n.tier]];if(t=='cmp')return [['Nivel máx. de aldeano',c.mx,n.mx]];if(t=='grm')return [['Contratos disponibles',c.ct,n.ct]];return _r(t,c,n)}}
 const bLv=t=>{const b=S&&S.b.find(x=>x.type==t&&Date.now()>=x.end);return b?L(b):0};
-const cmpDf=()=>{const l=bLv('cmp');return l?LV.cmp[l-1].df:0};
+/* Campo Heroico: aldeanos con nivel 0–15. Puntos de defensa por nivel de aldeano (nivel 0 = 0). */
+const CMPD=[0,2,3,5,6,7,8,9,10,11,12,14,15,16,18,20];
+/* Coste de entrenar a un aldeano para llegar a ese nivel (recursos y núcleos de jefe). Se puede ajustar aquí. */
+const CMPC=[null,{recursos:10},{recursos:15},{recursos:20,nucleo:1},{recursos:25,nucleo:1},{recursos:30,nucleo:1},{recursos:35,nucleo:2},{recursos:40,nucleo:2},{recursos:45,nucleo:2},{recursos:50,nucleo:3},{recursos:55,nucleo:3},{recursos:60,nucleo:3},{recursos:65,nucleo:4},{recursos:70,nucleo:4},{recursos:75,nucleo:5},{recursos:80,nucleo:5}];
+const cmpMx=()=>{const l=bLv('cmp');return l?LV.cmp[l-1].mx:0};
+const cmpDf=()=>{if(!bLv('cmp'))return 0;habSync();return (S.hab||[]).reduce((a,h)=>a+(CMPD[h.lv||0]||0),0)};
 {const _d=ivDef;ivDef=function(iv){const r=_d(iv),c=cmpDf();r.c=c;r.t+=c;return r}}
+/* Cuanta más defensa de aldeanos entrenados, más seguido llegan las invasiones (hasta un 45 % menos de espera; no afecta a las demoníacas) */
+{const _rv=ivResolve;ivResolve=function(){_rv.apply(this,arguments);try{if(S&&!S.iv&&S.ivnext&&!(window.demOn&&demOn())){const n=Date.now(),f=Math.max(.55,1-cmpDf()/700);S.ivnext=n+Math.max(60000,(S.ivnext-n)*f);save()}}catch(e){}}}
 /* Herrería: equipo permanente por héroe (arma: ataque, armadura: vida) */
 const WA=[0,1,2,3,4,5],HA=[0,2,4,6,9,12];
 const wcost=t=>({solar:60*t,recursos:5*t,...(t>=3?{cristal:t-1}:{}),...(t>=4?{esencia:t-3}:{})}),acost=t=>({solar:50*t,recursos:6*t,...(t>=4?{cristal:2,esencia:t-3}:{})});
@@ -1879,7 +1886,13 @@ function hrrDo(id,k){const h=S.heroes.find(x=>x.id==id),b=S.b.find(x=>x.type=='h
  if(k=='w'){h.atk+=WA[nx]-WA[nx-1]}else{const d=HA[nx]-HA[nx-1];h.mhp+=d;h.hp+=d}
  g[k]=nx;save();sparks(innerWidth/2,innerHeight/2,14,'var(--a)');draw();hrr(b)}
 /* Campo Heroico */
-function cmpH(b){modal(head(b,'Defensores entrenados: '+LV.cmp[L(b)-1].df)+`<div class="note ok">Estos defensores suman ${LV.cmp[L(b)-1].df} puntos de defensa en cada invasión. No son héroes: no combaten en aventuras.</div>`+upBlock(b))}
+function cmpH(b){b=b||S.b.find(x=>x.type=='cmp'&&Date.now()>=x.end);if(!b)return;habSync();const mx=LV.cmp[L(b)-1].mx,hb=S.hab||[],tot=hb.reduce((a,h)=>a+(CMPD[h.lv||0]||0),0),tr=hb.filter(h=>(h.lv||0)>0).length;
+ const rows=hb.map(h=>{const lv=h.lv||0,nx=lv+1,c=nx<=15?CMPC[nx]:null;
+  return `<div class="ucard"><div class="uct"><b>${h.n}</b><span class="m">Nivel ${lv}/15 · defensa +${CMPD[lv]}</span></div>`+
+  (lv>=15?'<span class="m">Nivel máximo</span>':nx>mx?'<span class="m">Mejora el Campo Heroico para entrenarlo más (máx. nivel '+mx+' ahora)</span>':`<div class="cost">${chipsCost(c)}</div><span class="m">Nivel ${nx}: defensa +${CMPD[nx]} (+${CMPD[nx]-CMPD[lv]})</span><button class="pri" ${can(c)?'':'disabled'} onclick="cmpTr(${h.id})">Entrenar a nivel ${nx}</button>`)+`</div>`}).join('');
+ modal(head(b,'Aldeanos entrenados: '+tr+'/'+hb.length+' · Defensa +'+tot)+`<div class="note ok">Cada aldeano nuevo empieza en nivel 0 con 0 puntos de defensa. Los puntos de todos tus aldeanos se suman a la defensa en cada invasión. Con este Campo Heroico puedes entrenar hasta el nivel ${mx}. Si un aldeano se convierte en héroe o se va, se usa primero al de menor nivel. Ojo: cuanta más defensa de aldeanos tengas, más enemigos, de más nivel y más seguidos, traen las invasiones.</div><div class="note">Defensa por nivel: ${CMPD.slice(1).map((d,i)=>(i+1)+':'+d).join(' · ')}</div>${rows||'<div class="note">Aún no tienes aldeanos.</div>'}${upBlock(b)}`)}
+function cmpTr(id){const b=S.b.find(x=>x.type=='cmp'&&Date.now()>=x.end);if(!b)return;habSync();const h=(S.hab||[]).find(x=>x.id==id);if(!h)return;const nx=(h.lv||0)+1;
+ if(nx>15||nx>LV.cmp[L(b)-1].mx)return;const c=CMPC[nx];if(!can(c))return;spend(c);h.lv=nx;save();sparks(innerWidth/2,innerHeight/2,14,'var(--a)');draw();notice('Aldeano entrenado',h.n+' ahora es nivel '+nx+' (defensa +'+CMPD[nx]+').');cmpH(b)}
 /* Gremio: contratos con coste, recompensa y enfriamiento */
 const CT=[{id:'g1',lv:1,n:'Suministros del mercader',need:{recursos:10},get:{polvo:1},cd:300000},
  {id:'g2',lv:2,n:'Encargo de cristales',need:{solar:80,filar:30},get:{cristal:1},cd:600000},
@@ -2016,7 +2029,7 @@ const HT={optimista:'Optimista',trabajador:'Trabajador',casero:'Hogareño',nervi
 const HN=['Aldo','Brisa','Cato','Dora','Elio','Fina','Gael','Hana','Iván','Jade','Kira','Lino','Mara','Nico','Olga','Pablo','Rosa','Saúl','Tina','Ulises','Vera','Wilo','Xena','Yago','Zoe'];
 function habSync(){if(!S)return;S.hab=S.hab||[];const ks=Object.keys(HT);
  while(S.hab.length<S.pop){const id=S.hid=(S.hid||0)+1;S.hab.push({id,n:HN[id%HN.length]+(id>HN.length?' '+Math.ceil(id/HN.length):''),t:ks[(id*7)%ks.length],o:((id*37)%13)-6})}
- while(S.hab.length>S.pop)S.hab.pop()}
+ while(S.hab.length>S.pop){let k=S.hab.length-1;for(let i=S.hab.length-1;i>=0;i--)if((S.hab[i].lv||0)<(S.hab[k].lv||0))k=i;S.hab.splice(k,1)}}
 function habMood(h){const mv=S.mv==null?50:S.mv,tot=S.pop+S.heroes.length,slack=popCap()-tot,wr=S.pop?work()/S.pop:0,why=[];let v=mv+h.o;
  if(h.t=='optimista'){v+=8;why.push('Carácter optimista +8')}
  else if(h.t=='trabajador'){if(wr>=.3&&wr<=.7){v+=4;why.push('Trabajo equilibrado +4')}else{v-=4;why.push(wr>.7?'Demasiado trabajo -4':'Poco trabajo -4')}}
