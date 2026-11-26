@@ -5,7 +5,7 @@
   Si el nombre trae un número, quítalo antes de subirlo a GitHub; si no, GitHub Pages no lo muestra.
 -->
 <!--
-  VERSIÓN: 5.3.0   (se muestra en el juego, en la consola y en la configuración)
+  VERSIÓN: 5.4.0   (se muestra en el juego, en la consola y en la configuración)
   Formato  A.B.C
     A (primer número)  = contenido nuevo o contenido anterior renovado.
     B (segundo número) = cambios de dificultad, remodelaciones o estructuras nuevas (algo que no existía).
@@ -15,8 +15,8 @@
 <html lang="es"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Ciudad</title>
-<meta name="app-version" content="5.3.0">
-<script id="app-version">window.APP_VERSION="5.3.0";console.log("%cCiudad · versión "+window.APP_VERSION,"font-weight:bold");document.addEventListener("DOMContentLoaded",function(){var v=document.createElement("div");v.id="appver";v.textContent="v"+window.APP_VERSION;document.body.appendChild(v)});</script>
+<meta name="app-version" content="5.4.0">
+<script id="app-version">window.APP_VERSION="5.4.0";console.log("%cCiudad · versión "+window.APP_VERSION,"font-weight:bold");document.addEventListener("DOMContentLoaded",function(){var v=document.createElement("div");v.id="appver";v.textContent="v"+window.APP_VERSION;document.body.appendChild(v)});</script>
 <style>#appver{position:fixed;left:6px;bottom:calc(3px + env(safe-area-inset-bottom,0px));z-index:1;font:600 9px/1 Inter,system-ui,sans-serif;letter-spacing:.06em;color:var(--m);opacity:.55;pointer-events:none;user-select:none}.cfg-ver{margin:0 0 8px;font-size:11px;letter-spacing:.06em}</style>
 <style>
 :root{--bg:#f6f5f2;--s:#fff;--t:#1c1c1c;--m:#77746d;--l:#dcd9d2;--a:#7a6236;--r:#a33a3a;--b:#3a5a8a;--k-solar:#d4a017;--k-filar:#5b2a86;--k-recursos:#5f7f7a;--k-diamantino:#c9772a;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -5048,6 +5048,7 @@ function hxCard(h){
    ${hxRow('Mejora de vida',up.hp||0,UPMAX.hp)}${hxRow('Mejora de ataque',up.atk||0,UPMAX.atk)}${hxRow('Rango de golpe',gr(h),5)}${hxRow('Habilidades',(sk.l||[]).length,la)}
    ${hrr||g.w||g.a?hxRow('Arma',g.w||0,5)+hxRow('Armadura',g.a||0,5):''}
    ${names?`<div class="hx-ch">${names}</div>`:''}
+   ${h.cls=='alquimista'&&window.alqHxPanel?window.alqHxPanel(h):''}
    <p>${c.d}</p>
    <div class="hx-ac"><button class="pri" onclick="${eqd?`uneqId(${h.id})`:`eqh(${h.id})`}">${eqd?'Quitar del equipo':'Equipar'}</button><button onclick="hxGo('mej',${h.id})">Mejorar</button><button onclick="hxGo('cal',${h.id})">Caldero</button><button onclick="hxGo('skm',${h.id})">Habilidades</button></div>
   </div></div>`;
@@ -7374,7 +7375,7 @@ const cfg=window.ALQ_CFG={vidaPct:.03,manaGain:2,bombDmg:10,
  selfPct:2};                    /* % del daño final de la mezcla que recibe el que la lanza (mín. 1) */
 window.alqLimOf=lv=>{lv=lv|0;return lv>=51?5:lv>=39?4:lv>=21?3:2};  /* usos de pociones por combate del héroe Alquimista según su nivel */
 /* ---- clase Alquimista (no existía): línea intermedia, se desbloquea al instalarse Maelis ---- */
-try{if(!CLS.alquimista){CLS.alquimista={n:'Alquimista',hp:5,atk:1,mp:4,g:{hp:1,a:3,m:4},pos:'Línea intermedia',d:'Línea intermedia: queda expuesto si caen los héroes delanteros. Combina dos pociones en una mezcla inestable.',unlock:()=>!!(S.bot&&S.bot.ok),ut:'Requiere que Maelis haya instalado el Boticario'}}
+try{if(!CLS.alquimista){CLS.alquimista={n:'Alquimista',hp:5,atk:1,mp:4,g:{hp:1,a:3,m:4},pos:'Línea intermedia',d:'Línea intermedia: queda expuesto si caen los héroes delanteros. Combina dos pociones en una mezcla inestable.',unlock:()=>!!(S.bot&&S.bot.ok)&&!S.heroes.some(h=>h.cls=='alquimista'),get ut(){return S.heroes.some(h=>h.cls=='alquimista')?'Solo puedes tener un héroe Alquimista':'Requiere que Maelis haya instalado el Boticario'}}}
  if(typeof CLSYM!=='undefined'&&!CLSYM.alquimista)CLSYM.alquimista={c:'#b36cf0',s:'<path d="M9.5 3h5v5l4.2 8.6c1 2-0.4 4.4-2.7 4.4H8c-2.3 0-3.7-2.4-2.7-4.4L9.5 8z" fill="currentColor" fill-opacity=".85"/><circle cx="10" cy="15.5" r="1.3" fill="#fff" fill-opacity=".8"/><circle cx="14" cy="13.5" r="1" fill="#fff" fill-opacity=".7"/>'};
  if(typeof STM!=='undefined'&&!STM.alquimista)STM.alquimista=4;if(typeof SPD!=='undefined'&&!SPD.alquimista)SPD.alquimista=3}catch(e){console.warn('[ALQUIMISTA] clase',e)}
 const MIXSV='<svg viewBox="0 0 48 48"><rect x="19" y="4" width="10" height="9" rx="2" fill="#c9a566" stroke="#1b1230" stroke-width="1.8"/><path d="M19 13v6L9 36c-2 5 1 9 6 9h18c5 0 8-4 6-9L29 19v-6z" fill="#9b5de5" stroke="#1b1230" stroke-width="2" stroke-linejoin="round"/><path d="M13 34l6-4 5 5 6-6 5 4" fill="none" stroke="#b6ff5a" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="18" cy="39" r="2.4" fill="#ff8a2a"/><circle cx="30" cy="40" r="2" fill="#4a90e8"/></svg>';
@@ -7633,6 +7634,52 @@ window.aqFx=async(k,A,tg,n,sync,ev)=>{try{
  else{await fxDrink(k,tg);slowBars(tg);if(sync)sync();fxAura(k,tg,k=='vida'?'+'+n+' HP':'+'+n+' maná');await wait(900)}
  }catch(e){console.error('[ALQUIMIA PvP]',e)}};
 window.aqPx=async(e,d,sync)=>{try{if(e)await fxBlast(e);if(sync)sync();if(e)try{impact(e,'-'+d)}catch(x){}await wait(400)}catch(x){console.error(x)}};
+
+/* ---------- ficha del Alquimista: mochila equipada + todas las combinaciones ---------- */
+{const st2=document.createElement('style');st2.textContent='.alqhp{border:1px solid #b36cf0;border-radius:12px;padding:10px;margin:8px 0;display:flex;flex-direction:column;gap:8px}.alqhh{display:flex;flex-direction:column;gap:2px}'
++'.alqbg{display:flex;gap:8px;flex-wrap:wrap}.alqbk{flex:1 1 90px;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 6px;border:1px solid var(--l);border-radius:10px;font-size:11px;text-align:center}.alqbk svg,.alqbk img{width:30px;height:30px;object-fit:contain}.alqbk b{font-size:16px}'
++'.alqct{width:100%;border-collapse:collapse;font-size:12px}.alqct th,.alqct td{padding:6px 4px;border-bottom:1px solid var(--l);text-align:left}.alqct th{color:var(--m);font-weight:600}.alqct tr.no td{opacity:.45}.alqct .ok{color:#3a8a4a;font-weight:600}'
++`.alqmc{position:relative;height:150px;border:1px solid #b36cf0;border-radius:14px;background:linear-gradient(180deg,transparent,rgba(179,108,240,.14));overflow:hidden;display:flex;align-items:flex-end;justify-content:center}
+.alqfl{width:84px;height:84px;margin-bottom:10px}.alqfl svg{width:100%;height:100%}.alqmc.run .alqfl{animation:alqShk .22s linear infinite}
+.alqsm{position:absolute;inset:0;pointer-events:none}.alqsm i{position:absolute;bottom:50px;width:34px;height:34px;border-radius:50%;background:radial-gradient(circle,rgba(230,215,255,.95),rgba(179,108,240,.5) 60%,transparent 72%);opacity:0;animation:alqSmk 1.5s ease-out infinite}
+.alqres{display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px;border:1px solid #b6ff5a;border-radius:12px;text-align:center;animation:alqPop .45s ease-out}.alqdm{font-size:24px;font-weight:700;color:#b36cf0}
+@keyframes alqSmk{0%{transform:translateY(0) scale(.4);opacity:0}20%{opacity:.85}100%{transform:translateY(-110px) scale(2);opacity:0}}
+@keyframes alqShk{0%,100%{transform:translateX(0) rotate(0)}25%{transform:translateX(-2px) rotate(-3deg)}75%{transform:translateX(2px) rotate(3deg)}}
+@keyframes alqPop{0%{transform:scale(.6);opacity:0}70%{transform:scale(1.06);opacity:1}100%{transform:scale(1)}}
+@media(prefers-reduced-motion:reduce){.alqsm i,.alqmc.run .alqfl,.alqres{animation:none}}`;
+ document.head.appendChild(st2)}
+window.alqHxPanel=function(h){try{
+ const bag=!!(S&&S.bot&&S.bot.bag),L=window.alqLimOf(h.lv);
+ const it=KEYS.map(k=>`<div class="alqbk">${icon(k)}<span>${NAME[k]}</span><b>${cnt(k)}</b></div>`).join('');
+ return `<div class="alqhp"><div class="alqhh"><b>Mochila Alquímica</b><span class="m">${bag?'Equipada':'Sin comprar'} · ${L} pociones por combate · mezcla activa ${cfg.mixTurns} turnos</span></div>`
+ +(bag?`<div class="alqbg">${it}</div>`:'<div class="note warn">Aún no tienes la Mochila Alquímica. Se compra en el Boticario.</div>')
+ +'<button type="button" class="pri" onclick="alqCombosOpen()">Ver combinaciones</button></div>'}catch(e){console.warn('[ALQ panel]',e);return ''}};
+window.alqCombosOpen=function(){const old=g('alqcmb');if(old)old.remove();
+ const o=document.createElement('div');o.id='alqcmb';o.className='alqmix';let sel=[],stage=0;
+ const sh=k=>NAME[k].replace('Poción de ','').replace('Bombacitadora','Bomba');
+ const dm=(a,b)=>Math.max(1,Math.round(mixPct(a,b))),sf=d=>cfg.selfPct>0?Math.max(1,Math.round(d*cfg.selfPct/100)):0;
+ const table=()=>{const rows=[];for(let i=0;i<KEYS.length;i++)for(let j=i;j<KEYS.length;j++){const a=KEYS[i],b=KEYS[j],d=dm(a,b),can=a==b?cnt(a)>=2:(cnt(a)>=1&&cnt(b)>=1);
+   rows.push(`<tr class="${can?'':'no'}"><td>${sh(a)} + ${sh(b)}</td><td>(${cfg.pct[a]}+${cfg.pct[b]})×${fmt(cfg.mixBonus)}</td><td><b>${d}</b></td><td>${sf(d)}</td><td class="${can?'ok':''}">${can?'Sí':'Faltan'}</td></tr>`)}
+  return `<div style="overflow-x:auto"><table class="alqct"><tr><th>Mezcla</th><th>Cálculo</th><th>Daño</th><th>Propio</th><th>¿Tienes?</th></tr>${rows.join('')}</table></div>`};
+ const paint=()=>{
+  const full=sel.length==2,d=full?dm(sel[0],sel[1]):0;
+  const slots=[0,1].map(i=>`<button type="button" class="alqslot" data-s="${i}" ${stage?'disabled':''}>${sel[i]?icon(sel[i])+'<span>'+sh(sel[i])+' · '+cfg.pct[sel[i]]+'</span>':'<span class="m">Vacío</span>'}</button>`).join('');
+  const pots=KEYS.map(k=>`<button type="button" class="supic" data-k="${k}" ${stage||sel.length>=2?'disabled':''}>${icon(k)}<span>${sh(k)}</span></button>`).join('');
+  const puffs=Array.from({length:8},(_,i)=>`<i style="left:${10+i*10}%;animation-delay:${(i*.16).toFixed(2)}s"></i>`).join('');
+  const res=stage==2?`<div class="alqres"><b>¡Mezcla inestable lista!</b><span>${sh(sel[0])} + ${sh(sel[1])}</span><div class="alqdm">${d} de daño</div><span class="m">Daño propio: ${sf(d)} · ${cfg.mixTurns} turnos para lanzarla</span></div>`:'';
+  o.innerHTML=`<div class="alqmp"><h3>Máquina alquímica</h3><p class="m">Elige dos pociones y activa la máquina para ver el resultado. Es una prueba: no gasta pociones ni turno. La mezcla real se hace en combate.</p>`
+  +`<div class="alqmc${stage==1?' run':''}"><div class="alqsm">${stage==1?puffs:''}</div><div class="alqfl">${MIXSV}</div></div>`
+  +(stage==0?`<div class="alqpots">${pots}</div>`:'')+`<div class="alqslots">${slots}</div>${res}`
+  +`<div class="alqbtns">${stage==2?'<button type="button" class="pri" data-new>Nueva mezcla</button>':`<button type="button" class="pri" data-go ${full&&!stage?'':'disabled'}>${stage==1?'Mezclando…':'Activar máquina'}</button>`}<button type="button" data-no>Cerrar</button></div>`
+  +`<h3 style="margin-top:6px">Todas las combinaciones</h3><p class="m">Daño plano, no depende de la vida del objetivo. Quien la lanza sufre el ${cfg.selfPct} % del daño (mín. 1).</p>${table()}</div>`};
+ o.onclick=e=>{if(e.target===o){o.remove();return}const b=e.target.closest('button');if(!b||b.disabled)return;
+  if(b.dataset.k&&!stage&&sel.length<2)sel.push(b.dataset.k);
+  else if(b.dataset.s!=null&&!stage)sel.splice(+b.dataset.s,1);
+  else if('no' in b.dataset){o.remove();return}
+  else if('new' in b.dataset){sel=[];stage=0}
+  else if('go' in b.dataset&&sel.length==2&&!stage){stage=1;paint();setTimeout(()=>{if(o.isConnected){stage=2;paint()}},RM?200:1900);return}
+  paint()};
+ paint();document.body.appendChild(o)};
 window.alqIcon=icon;window.ALQ_NAME=NAME;
 window.ALQ={cfg,use:()=>AQ,btn};
 })();
