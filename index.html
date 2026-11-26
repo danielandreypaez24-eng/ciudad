@@ -7704,7 +7704,7 @@ try{LV.als[3].cost.filar=200}catch(e){console.error('[fix-als4]',e)}
 .shp .sc button .bdq svg{width:11px;height:11px;color:var(--k-diamantino)}
 .shp .sc.full{opacity:.72}
 .shp .shbt{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:auto}
-.shp .shbt button{margin:0}
+.shp .shbt button{margin:0;white-space:nowrap;letter-spacing:.01em!important;font-size:12.5px;padding:10px 6px}
 /* intercambios */
 .shp .sc .shpr{display:flex;align-items:center;gap:7px;font-size:12px}
 .shp .sc .shpr .cc{flex:none}
@@ -7744,11 +7744,11 @@ const mSell=(k,p)=>{const h=have(k),nm=k=='recursos'?'Recursos':((typeof INV!=='
  return `<div class="card sc mk" style="--tone:${MTONE[k]||'var(--a)'}"><div class="sct"><div class="ib">${ico(mIcon[k]||'cri',29)}</div><div class="scn"><b>${nm}</b></div><span class="shn">Tienes ${h}</span></div>
  <p class="shd">Véndelo al mercado y recibe solares al instante.</p>
  <div class="shpr"><span class="m">Cada uno</span>${solarChip(p)}</div>
- <div class="shbt"><button ${h<1?'disabled':''} onclick="mkSell('${k}',1)">Vender 1</button><button ${h<10?'disabled':''} onclick="mkSell('${k}',10)">Vender 10</button></div></div>`};
+ <div class="shbt"><button ${h<1?'disabled':''} onclick="mkSell('${k}',1)">Vender 1</button><button ${h<10?'disabled':''} onclick="mkSell('${k}',10)">Vender ×10</button></div></div>`};
 const mBuy=()=>`<div class="card sc mk" style="--tone:var(--k-recursos)"><div class="sct"><div class="ib">${ic('cr',29)}</div><div class="scn"><b>Comprar recursos</b></div></div>
  <p class="shd">Compra recursos con solares. Siempre cuesta más de lo que se paga al vender.</p>
  <div class="shpr"><span class="m">Cada uno</span>${solarChip(MKB)}</div>
- <div class="shbt"><button ${S.coins.solar<MKB?'disabled':''} onclick="mkBuy(1)">Comprar 1</button><button ${S.coins.solar<MKB*10?'disabled':''} onclick="mkBuy(10)">Comprar 10</button></div></div>`;
+ <div class="shbt"><button ${S.coins.solar<MKB?'disabled':''} onclick="mkBuy(1)">Comprar 1</button><button ${S.coins.solar<MKB*10?'disabled':''} onclick="mkBuy(10)">Comprar ×10</button></div></div>`;
 
 const wallet=()=>`<div class="shw"><span class="wp" style="--wc:var(--k-diamantino)"><i>${ic('cd',13)}</i>${Math.floor(S.coins.diamantino||0)}<span>diamantino</span></span><span class="wp" style="--wc:var(--m)"><i>${ic('pie',13)}</i>${S.inv.piedra}<span>piedras</span></span><span class="wp" style="--wc:var(--b)"><i>${ic('cri',13)}</i>${S.inv.cristal}<span>cristales</span></span></div>`;
 
@@ -7801,4 +7801,143 @@ window.shop=function(){
 })();
 </script>
 
+<style id="patch-cfg2-css">
+/* ===== CONFIGURACIÓN 2.0: secciones en tarjetas, iconos de color, deslizadores con relleno ===== */
+#cfgw .cfg-p{width:min(460px,94vw)!important;padding:0!important;display:flex;flex-direction:column;overflow:hidden!important;border-radius:26px!important;max-height:min(90vh,calc(100dvh - 16px))!important;background:linear-gradient(180deg,color-mix(in srgb,var(--a) 9%,var(--s)),var(--s) 180px)!important}
+#cfgw .cfg-p.sk>.cfg-h{flex:none;padding:18px 20px 4px;margin:0}
+#cfgw .cfg-p.sk .cfg-h h1{font-size:22px;letter-spacing:-.015em}
+#cfgw .cfg-p.sk .cfg-x{width:36px;height:36px;padding:0!important;border-radius:50%!important}
+#cfgw .cfg-p.sk>.cfg-top{flex:none;padding:0 20px 12px;display:flex;flex-direction:column;gap:2px}
+#cfgw .cfg-p.sk .cfg-ver{display:inline-flex;align-self:flex-start;font-size:10.5px;font-weight:700;letter-spacing:.06em;padding:2px 9px;border-radius:99px;background:color-mix(in srgb,var(--a) 18%,transparent);color:var(--a)!important;margin-bottom:4px}
+#cfgw .cfg-p.sk .cfg-body{flex:1 1 auto;min-height:0;overflow-y:auto;padding:4px 16px 12px;display:flex;flex-direction:column;gap:12px;overscroll-behavior:contain}
+#cfgw .cfg-g{--ac:var(--a);border-radius:20px;border:1px solid color-mix(in srgb,var(--ac) 30%,var(--l));background:radial-gradient(120% 90% at 0 0,color-mix(in srgb,var(--ac) 12%,transparent),transparent 60%),color-mix(in srgb,var(--t) 3%,var(--s));padding:6px 14px 8px}
+#cfgw .cfg-g[data-g=fx]{--ac:var(--r)}#cfgw .cfg-g[data-g=vis]{--ac:var(--b)}
+#cfgw .cfg-gh{display:flex;align-items:center;gap:10px;padding:10px 0 6px;font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--t)}
+#cfgw .cfg-gh i{width:32px;height:32px;border-radius:11px;display:grid;place-items:center;color:var(--ac);background:color-mix(in srgb,var(--ac) 18%,transparent);border:1px solid color-mix(in srgb,var(--ac) 40%,transparent)}
+#cfgw .cfg-gh svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+#cfgw .cfg-g .cfg-r{padding:10px 0;border-top:1px solid color-mix(in srgb,var(--t) 8%,transparent)}
+#cfgw .cfg-g .cfg-gh+.cfg-r{border-top:0}
+#cfgw .cfg-g .cfg-t b{font-size:14px}
+#cfgw .cfg-g .cfg-t small{font-size:11.5px;margin-top:2px}
+#cfgw .cfg-g .cfg-v{margin-top:9px;gap:12px}
+#cfgw .cfg-g .cfg-v span{min-width:42px;font-weight:700;font-size:12.5px;color:var(--ac)}
+/* deslizador */
+#cfgw .cfg-g input[type=range]{--p:50%;appearance:none;-webkit-appearance:none;height:26px;background:none!important;border:0!important;box-shadow:none!important;outline:0;border-radius:0!important;padding:0!important;margin:0;cursor:pointer;accent-color:var(--ac)}
+#cfgw .cfg-g input[type=range]::-webkit-slider-runnable-track{height:8px;border-radius:99px;background:linear-gradient(90deg,var(--ac) var(--p),color-mix(in srgb,var(--t) 14%,transparent) var(--p))}
+#cfgw .cfg-g input[type=range]::-moz-range-track{height:8px;border-radius:99px;background:color-mix(in srgb,var(--t) 14%,transparent)}
+#cfgw .cfg-g input[type=range]::-moz-range-progress{height:8px;border-radius:99px;background:var(--ac)}
+#cfgw .cfg-g input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;margin-top:-7px;border-radius:50%;background:#fff;border:3px solid var(--ac);box-shadow:0 2px 8px rgba(0,0,0,.45);transition:transform .12s}
+#cfgw .cfg-g input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:#fff;border:3px solid var(--ac);box-shadow:0 2px 8px rgba(0,0,0,.45)}
+#cfgw .cfg-g input[type=range]:active::-webkit-slider-thumb{transform:scale(1.18)}
+#cfgw .cfg-g input[type=range]:disabled{opacity:.4;cursor:not-allowed}
+#cfgw .cfg-g input[type=range]:disabled::-webkit-slider-thumb{border-color:var(--m)}
+/* interruptor */
+#cfgw .cfg-g .cfg-sw{width:48px;height:28px;border-radius:99px;border:0!important;background:color-mix(in srgb,var(--t) 16%,transparent)!important;transition:background .18s}
+#cfgw .cfg-g .cfg-sw::after{top:3px;left:3px;width:22px;height:22px;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.4);transition:transform .18s cubic-bezier(.3,1.4,.5,1)}
+#cfgw .cfg-g .cfg-sw:checked{background:var(--ac)!important}
+#cfgw .cfg-g .cfg-sw:checked::after{transform:translateX(20px)}
+/* pie */
+#cfgw .cfg-p.sk>.cfg-f{flex:none;margin:0;padding:12px 16px calc(14px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--l);background:var(--s);display:grid;grid-template-columns:1fr 1.4fr;gap:10px}
+#cfgw .cfg-p.sk>.cfg-f button{padding:12px;border-radius:14px;font-weight:800}
+#cfgw .cfg-p.sk>.cfg-f .pri{background:var(--a)!important;border-color:transparent!important;color:#1b1230!important;box-shadow:0 6px 16px color-mix(in srgb,var(--a) 35%,transparent)}
+@media(prefers-reduced-motion:reduce){#cfgw .cfg-sw,#cfgw .cfg-sw::after{transition:none}}
+</style>
+<script id="patch-cfg2-js">
+(function(){
+'use strict';
+const IC={mus:'<svg viewBox="0 0 24 24"><path d="M9 18V6l11-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="17.5" cy="16" r="2.5"/></svg>',
+ fx:'<svg viewBox="0 0 24 24"><path d="M4 10v4h4l5 4V6L8 10z"/><path d="M16.5 9a4 4 0 010 6M19 6.5a8 8 0 010 11"/></svg>',
+ vis:'<svg viewBox="0 0 24 24"><path d="M12 3l2 5.2L19.5 10 14 12l-2 5.5L10 12 4.5 10 10 8.2z"/><path d="M18.5 16.5v4M16.5 18.5h4"/></svg>'};
+const KEY=t=>/m[uú]sica/i.test(t)?'mus':/efecto|sonido/i.test(t)?'fx':'vis';
+const fill=i=>{const mx=+i.max||100,mn=+i.min||0;i.style.setProperty('--p',((+i.value-mn)/(mx-mn)*100)+'%')};
+function skin(p){
+ if(!p||p.classList.contains('sk'))return;
+ p.classList.add('sk');
+ const kids=[...p.children],head=kids.find(e=>e.classList.contains('cfg-h')),foot=kids.find(e=>e.classList.contains('cfg-f'));
+ const top=document.createElement('div');top.className='cfg-top';
+ kids.filter(e=>e.classList.contains('cfg-ver')||(e.tagName=='SPAN'&&e.classList.contains('m'))).forEach(e=>top.appendChild(e));
+ const body=document.createElement('div');body.className='cfg-body';
+ let g=null;
+ kids.forEach(e=>{
+  if(e===head||e===foot||top.contains(e))return;
+  if(e.classList.contains('cfg-s')){const k=KEY(e.textContent);g=document.createElement('section');g.className='cfg-g';g.dataset.g=k;
+   g.innerHTML=`<div class="cfg-gh"><i>${IC[k]}</i><span>${e.textContent}</span></div>`;body.appendChild(g);e.remove();return}
+  if(g&&e.classList.contains('cfg-r'))g.appendChild(e)});
+ p.insertBefore(top,foot||null);p.insertBefore(body,foot||null);
+ p.querySelectorAll('input[type=range]').forEach(fill)}
+document.addEventListener('input',e=>{const t=e.target;if(t&&t.type=='range'&&t.closest&&t.closest('#cfgw'))fill(t)},true);
+new MutationObserver(()=>{const p=document.querySelector('#cfgw .cfg-p');if(p)skin(p)}).observe(document.body,{childList:true,subtree:true});
+{const p=document.querySelector('#cfgw .cfg-p');if(p)skin(p)}
+})();
+</script>
+
+<style id="patch-img2-css">
+/* ===== Imágenes subidas de objetos (Boticario): llenan el cuadrado completo ===== */
+.ib.bic{width:52px;height:52px;flex:none;overflow:hidden;position:relative}
+.ib.bic:has(>img){padding:0;background:none;border:0;border-radius:14px;box-shadow:0 0 0 1.5px color-mix(in srgb,var(--bc,var(--a)) 55%,transparent)}
+.ib.bic>img{display:block;width:100%!important;height:100%!important;max-width:none;object-fit:cover;border-radius:inherit}
+.ib.bic>svg{width:30px;height:30px}
+/* otros lugares donde aparecen (barra, chips, ranuras, pociones) */
+#alqbar .ib:has(>img){padding:0;overflow:hidden;border-radius:12px}
+#alqbar .ib>img{width:100%!important;height:100%!important;object-fit:cover;display:block}
+#alqb .alqi img,#pvab .alqi img{width:26px!important;height:26px!important;object-fit:cover;border-radius:7px}
+.alqw .supic img,.alqpots .supic img,.alqslot img{width:44px!important;height:44px!important;object-fit:cover;border-radius:10px}
+</style>
+<style id="patch-ev2-css">
+/* ===== EVENTOS en la barra de opciones (abajo), con animación de entrada y salida lateral ===== */
+#eva{display:none!important}
+#nav{display:flex!important;gap:8px}
+#nav>button{flex:1 1 0;min-width:0}
+#nav #nvE{position:relative;flex-direction:column;gap:3px;padding:0 2px;overflow:hidden;color:var(--t);cursor:pointer;
+ background:linear-gradient(160deg,color-mix(in srgb,var(--a) 26%,transparent),color-mix(in srgb,var(--a) 8%,transparent))!important;
+ box-shadow:inset 0 0 0 1.5px var(--a),0 6px 16px color-mix(in srgb,var(--a) 28%,transparent)!important;letter-spacing:0!important}
+#nav #nvE.off{display:none!important}
+#nav #nvE svg{width:26px;height:26px;fill:none!important;stroke:var(--a)!important;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;color:var(--a)}
+#nav #nvE .nvt{font-size:11px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1;letter-spacing:.02em}
+#nav #nvE::after{content:"";position:absolute;top:7px;right:9px;width:8px;height:8px;border-radius:50%;background:var(--a);box-shadow:0 0 0 0 color-mix(in srgb,var(--a) 60%,transparent);animation:nvPing 1.6s ease-out infinite}
+#nav #nvE.urg{box-shadow:inset 0 0 0 1.5px var(--r),0 6px 16px color-mix(in srgb,var(--r) 35%,transparent)!important}
+#nav #nvE.urg svg{stroke:var(--r)!important;color:var(--r)}#nav #nvE.urg .nvt{color:var(--r)}#nav #nvE.urg::after{background:var(--r)}
+@keyframes nvPing{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--a) 60%,transparent)}80%,100%{box-shadow:0 0 0 9px transparent}}
+@media(prefers-reduced-motion:reduce){#nav #nvE::after{animation:none}}
+</style>
+<script id="patch-ev2-js">
+(function(){
+'use strict';
+const SV='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.2 5.4 5.8.5-4.4 3.8 1.4 5.7L12 15.3 7 18.4l1.4-5.7L4 8.9l5.8-.5z"/></svg>';
+let btn=null,state='off',anim=null; /* off | in | out */
+const gameOn=()=>{const g=document.getElementById('game');return g&&!g.classList.contains('hide')};
+const want=()=>{try{return !!(S&&S.evp&&gameOn())}catch(_){return false}};
+function mk(){
+ const nav=document.getElementById('nav');if(!nav||!nav.children.length)return null;
+ if(btn&&btn.parentNode===nav)return btn;
+ btn=document.createElement('button');btn.id='nvE';btn.className='off';btn.setAttribute('aria-label','Evento pendiente');btn.title='Evento pendiente';
+ btn.innerHTML=SV+'<span class="nvt">0:00</span>';btn.onclick=()=>{try{evUI()}catch(_){}};
+ nav.appendChild(btn);state='off';return btn}
+const IN=[{flexGrow:0,opacity:0,transform:'translateX(70%) scale(.7)',marginLeft:'-8px'},{flexGrow:1,opacity:1,transform:'none',marginLeft:'0px'}];
+const OUT=[{flexGrow:1,opacity:1,transform:'none',marginLeft:'0px'},{flexGrow:0,opacity:0,transform:'translateX(70%) scale(.7)',marginLeft:'-8px'}];
+function show(){
+ const b=mk();if(!b)return;
+ if(anim){anim.cancel();anim=null}
+ b.classList.remove('off');state='in';
+ anim=b.animate(IN,{duration:520,easing:'cubic-bezier(.2,.9,.3,1.1)',fill:'none'});
+ anim.onfinish=()=>{anim=null;state='on'};anim.oncancel=()=>{}}
+function hide(){
+ if(!btn||state=='off'||state=='out')return;
+ if(anim){anim.cancel();anim=null}
+ state='out';
+ anim=btn.animate(OUT,{duration:420,easing:'cubic-bezier(.5,0,.8,.4)',fill:'forwards'});
+ const done=()=>{if(state!='out')return;anim=null;btn.classList.add('off');state='off'};
+ anim.onfinish=done}
+function tick(){
+ try{
+  const w=want();
+  if(w&&(state=='off'||state=='out'))show();
+  else if(!w&&(state=='in'||state=='on'))hide();
+  if(btn&&w&&S.evp){const ms=S.evp.exp-Date.now(),t=btn.querySelector('.nvt');
+   const txt=typeof mmss=='function'?mmss(ms):Math.ceil(ms/1000)+'s';if(t&&t.textContent!==txt)t.textContent=txt;
+   btn.classList.toggle('urg',ms<30000)}
+ }catch(e){}}
+setInterval(tick,400);
+})();
+</script>
 </body></html>
