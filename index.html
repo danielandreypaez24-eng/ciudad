@@ -7289,7 +7289,7 @@ const ITEMS={
  mana:{n:'Poción de maná',d:'Recupera 2 puntos de maná del héroe seleccionado.',cost:{solar:150,filar:100,diamantino:1},need:5}};
 /* Progresión por cantidad de aldeanos: [capacidad, reposición en segundos]. null = se conserva el valor anterior (los tiempos de 5 aldeanos para vida y bombas no están definidos: se editan aquí) */
 window.BOT={items:ITEMS,slots:5,prog:{2:{vida:[2,180]},3:{vida:[2,125],bomb:[3,360]},4:{vida:[3,40],bomb:[4,300]},5:{vida:[4,null],bomb:[5,null],mana:[3,600]}}};
-window.BOTIMG=[['bag','Mochila Alquímica'],['vida','Poción de vida'],['bomb','Bombacitadora'],['mana','Poción de maná']];
+window.BOTIMG=[['mix','Mezcla inestable (combinación)'],['bag','Mochila Alquímica'],['vida','Poción de vida'],['bomb','Bombacitadora'],['mana','Poción de maná']];
 const res=(k,w)=>{let cap=0,rep=0,on=false;for(let i=2;i<=Math.min(w,5);i++){const r=(BOT.prog[i]||{})[k];if(r){on=true;if(r[0]!=null)cap=r[0];if(r[1]!=null)rep=r[1]}}return{on,cap,rep}};
 const wOf=()=>{const b=S.b.find(x=>x.type=='bot'&&Date.now()>=x.end);return b?Math.min(b.w||0,BOT.slots):0};
 const strict=c=>Object.entries(c).every(([k,v])=>have(k)>=v);
@@ -7303,7 +7303,7 @@ const GL={
 const TINT={bag:'#c9a566',vida:'#e0405a',bomb:'#ff8a2a',mana:'#4a90e8'};
 const ico=k=>{const u=cfg().img[k];if(u)return `<img src="${u}" alt="">`;return GL[k]?`<svg class="ic" viewBox="0 0 24 24" style="color:${TINT[k]}" aria-hidden="true">${GL[k]}</svg>`:''};
 window.botTint=TINT;
-window.botIco=ico;window.botRes=res;window.botItems=ITEMS;
+window.botIco=ico;window.botImg=k=>cfg().img[k]||null;window.botSetImg=(k,u)=>{const x=cfg();if(u)x.img[k]=u;else delete x.img[k];return wr(x)};window.botRes=res;window.botItems=ITEMS;
 const chips=c=>Object.entries(c).map(([k,v])=>{const sh=have(k)<v,I2=INV[k]||['Piedras','var(--m)'];return CN[k]?`<span class="cc${sh?' no':''}" style="color:var(--k-${k})">${ic(CN[k][0],14)}<b>${v}</b><em>${CN[k][1]}</em></span>`:`<span class="cc${sh?' no':''}" style="color:${I2[1]}">${ic(({cristal:'cri',polvo:'pol',nucleo:'nuc',piedra:'pie'})[k]||'cri',14)}<b>${v}</b><em>${I2[0]}</em></span>`}).join('');
 const bagCard=()=>`<div class="ucard bgx"><div class="uct"><span style="display:flex;gap:10px;align-items:center"><span class="ib bic" style="--bc:${TINT.bag}">${ico('bag')}</span><b>Mochila Alquímica</b></span><span class="chip a">Herramienta especial</span></div><div class="cost">${chips(BAGC)}</div></div>`;
 
@@ -7402,7 +7402,8 @@ const why=(k,u)=>{if(!u)return 'Objetivo no válido.';
  if(k=='vida')return u.hp>=u.mhp?u.n+' ya tiene la vida completa.':null;
  return u.mp>=u.mmp?u.n+' ya tiene el maná completo.':null};
 const amount=(k,u)=>k=='vida'?Math.max(0,Math.min(Math.max(1,Math.round(u.mhp*cfg.vidaPct)),u.mhp-u.hp)):k=='mana'?Math.max(0,Math.min(cfg.manaGain,u.mmp-u.mp)):k=='zap'?dmgOf((prepOf()||{pct:0}).pct,u):cfg.bombDmg;
-const icon=k=>(k=='mix'||k=='zap')?MIXSV:(window.botIco?botIco(k):'');
+const mixIc=()=>{const u=window.botImg&&botImg('mix');return u?`<img src="${u}" alt="">`:MIXSV};
+const icon=k=>(k=='mix'||k=='zap')?mixIc():(window.botIco?botIco(k):'');
 const prepOf=()=>inSq()?SQ.prep:inCl()?B.prep:null;
 const setPrep=p=>{if(inSq())SQ.prep=p;else if(inCl())B.prep=p};
 const fmt=x=>String(Number(x.toFixed(2))).replace('.',',');
@@ -7481,9 +7482,11 @@ async function fxMix(e,k1,k2){const c=ctr(e);if(RM)return;
  const f1=mkf(k1,-44),f2=mkf(k2,44);
  const sw=mk(`left:${c.x-45}px;top:${c.y-45}px;width:90px;height:90px;border-radius:50%;background:conic-gradient(${COL[k1]},${COL[k2]},${COL[k1]});filter:blur(6px);mix-blend-mode:screen`);
  run(sw,[{opacity:0,transform:'scale(.3) rotate(0)'},{opacity:.9,transform:'scale(1) rotate(360deg)',offset:.5},{opacity:0,transform:'scale(1.4) rotate(720deg)'}],{duration:1300,easing:'ease-in-out'});
- await Promise.all([run(f1,[{transform:'translate(0,0) rotate(0)',opacity:1},{transform:'translate(44px,40px) rotate(200deg)',opacity:1,offset:.7},{transform:'translate(44px,50px) rotate(360deg) scale(.3)',opacity:0}],{duration:900,easing:'ease-in'}),
-  run(f2,[{transform:'translate(0,0) rotate(0)',opacity:1},{transform:'translate(-44px,40px) rotate(-200deg)',opacity:1,offset:.7},{transform:'translate(-44px,50px) rotate(-360deg) scale(.3)',opacity:0}],{duration:900,easing:'ease-in'})]);
- e.animate([{filter:'none'},{filter:'hue-rotate(40deg) brightness(1.4)',offset:.3},{filter:'none'}],{duration:700});sparks(c.x,c.y,16,'#b36cf0');await wait(400)}
+ await Promise.all([run(f1,[{transform:'translate(0,0) rotate(0) scale(1,1)',opacity:1},{transform:'translate(20px,16px) rotate(90deg) scale(1.35,.7)',opacity:1,offset:.35},{transform:'translate(44px,40px) rotate(200deg) scale(.75,1.3)',opacity:1,offset:.7},{transform:'translate(44px,50px) rotate(360deg) scale(.2)',opacity:0}],{duration:900,easing:'ease-in'}),
+  run(f2,[{transform:'translate(0,0) rotate(0) scale(1,1)',opacity:1},{transform:'translate(-20px,16px) rotate(-90deg) scale(1.35,.7)',opacity:1,offset:.35},{transform:'translate(-44px,40px) rotate(-200deg) scale(.75,1.3)',opacity:1,offset:.7},{transform:'translate(-44px,50px) rotate(-360deg) scale(.2)',opacity:0}],{duration:900,easing:'ease-in'})]);
+ e.animate([{filter:'none'},{filter:'hue-rotate(40deg) brightness(1.4)',offset:.3},{filter:'none'}],{duration:700});sparks(c.x,c.y,16,'#b36cf0');
+ const mm=mk(`left:${c.x-28}px;top:${c.y-c.h/2+8}px;width:56px;height:56px;transform-origin:50% 100%;filter:drop-shadow(0 0 10px #b36cf0)`);mm.innerHTML=mixIc();const ms=mm.querySelector('svg,img');if(ms){ms.style.width='56px';ms.style.height='56px';ms.style.objectFit='contain'}
+ await run(mm,[{transform:'scale(0,0)',opacity:1},{transform:'scale(.7,1.45)',opacity:1,offset:.2},{transform:'scale(1.35,.7)',opacity:1,offset:.4},{transform:'scale(.85,1.2)',opacity:1,offset:.6},{transform:'scale(1.1,.92)',opacity:1,offset:.8},{transform:'scale(1,1)',opacity:1,offset:.92},{transform:'scale(1,1)',opacity:0}],{duration:900,easing:'ease-out'});await wait(150)}
 async function fxBlast(e){const c=ctr(e);fxBoom(e,true);if(!RM)e.animate([{transform:'none'},{transform:'translateX(-7px)'},{transform:'translateX(7px)'},{transform:'none'}],{duration:350});await wait(450)}
 /* ---------- cierre del turno: igual que cualquier otra acción del héroe ---------- */
 async function endAction(sq){
@@ -7580,7 +7583,7 @@ function pill(){const p=(inSq()||inCl())&&!over()?prepOf():null;let e=g('alqpill
  document.querySelectorAll('.alq-unst').forEach(x=>{if(!p||x!==heroEl(p.who))x.classList.remove('alq-unst')});
  if(!p){if(e)e.remove();return}
  if(!e){e=document.createElement('div');e.id='alqpill';document.body.appendChild(e)}
- const n=Math.min(p.left,cfg.mixTurns);e.innerHTML=`<span class="alqpi">${MIXSV}</span><span><b>Mezcla inestable</b> ${Math.max(1,Math.round(p.pct))} de daño · ${n==1?'último turno':'quedan '+n+' turnos'}</span>`;
+ const n=Math.min(p.left,cfg.mixTurns);e.innerHTML=`<span class="alqpi">${mixIc()}</span><span><b>Mezcla inestable</b> ${Math.max(1,Math.round(p.pct))} de daño · ${n==1?'último turno':'quedan '+n+' turnos'}</span>`;
  const he=heroEl(p.who);if(he)he.classList.add('alq-unst')}
 function btn(){try{pill()}catch(x){}let b=g('alqb');const host=inSq()?g('sqa'):inCl()?(g('b3')&&g('b3').parentNode):null;
  if(!host||!hasBag()||over()){if(b)b.remove();return}
@@ -7640,13 +7643,17 @@ window.aqPx=async(e,d,sync)=>{try{if(e)await fxBlast(e);if(sync)sync();if(e)try{
 +'.alqbg{display:flex;gap:8px;flex-wrap:wrap}.alqbk{flex:1 1 90px;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 6px;border:1px solid var(--l);border-radius:10px;font-size:11px;text-align:center}.alqbk svg,.alqbk img{width:30px;height:30px;object-fit:contain}.alqbk b{font-size:16px}'
 +'.alqct{width:100%;border-collapse:collapse;font-size:12px}.alqct th,.alqct td{padding:6px 4px;border-bottom:1px solid var(--l);text-align:left}.alqct th{color:var(--m);font-weight:600}.alqct tr.no td{opacity:.45}.alqct .ok{color:#3a8a4a;font-weight:600}'
 +`.alqmc{position:relative;height:150px;border:1px solid #b36cf0;border-radius:14px;background:linear-gradient(180deg,transparent,rgba(179,108,240,.14));overflow:hidden;display:flex;align-items:flex-end;justify-content:center}
-.alqfl{width:84px;height:84px;margin-bottom:10px}.alqfl svg{width:100%;height:100%}.alqmc.run .alqfl{animation:alqShk .22s linear infinite}
+.alqfl{width:84px;height:84px;margin-bottom:10px}.alqfl svg,.alqfl img{width:100%;height:100%;object-fit:contain}.alqmixb img,.alqzapb img,#alqpill .alqpi img{width:30px;height:30px;object-fit:contain}#alqpill .alqpi img{width:20px;height:20px}.alqfl{transform-origin:50% 100%}.alqmc.run .alqfl{animation:alqJel 1.3s .85s both}.alqmc.done .alqfl{animation:alqIdle 2.2s ease-in-out infinite}.alqmg{position:absolute;bottom:42px;left:50%;width:56px;height:56px;margin-left:-28px}.alqmg svg,.alqmg img{width:100%;height:100%;object-fit:contain}.alqmg.a{animation:alqJa .9s ease-in both}.alqmg.b{animation:alqJb .9s ease-in both}
 .alqsm{position:absolute;inset:0;pointer-events:none}.alqsm i{position:absolute;bottom:50px;width:34px;height:34px;border-radius:50%;background:radial-gradient(circle,rgba(230,215,255,.95),rgba(179,108,240,.5) 60%,transparent 72%);opacity:0;animation:alqSmk 1.5s ease-out infinite}
 .alqres{display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px;border:1px solid #b6ff5a;border-radius:12px;text-align:center;animation:alqPop .45s ease-out}.alqdm{font-size:24px;font-weight:700;color:#b36cf0}
 @keyframes alqSmk{0%{transform:translateY(0) scale(.4);opacity:0}20%{opacity:.85}100%{transform:translateY(-110px) scale(2);opacity:0}}
 @keyframes alqShk{0%,100%{transform:translateX(0) rotate(0)}25%{transform:translateX(-2px) rotate(-3deg)}75%{transform:translateX(2px) rotate(3deg)}}
+@keyframes alqJa{0%{transform:translateX(-135px) scale(1,1);opacity:1}35%{transform:translateX(-95px) scale(1.3,.75)}65%{transform:translateX(-42px) scale(.8,1.3)}88%{transform:translateX(-6px) scale(1.25,.8);opacity:1}100%{transform:translateX(0) scale(.15,.15);opacity:0}}
+@keyframes alqJb{0%{transform:translateX(135px) scale(1,1);opacity:1}35%{transform:translateX(95px) scale(1.3,.75)}65%{transform:translateX(42px) scale(.8,1.3)}88%{transform:translateX(6px) scale(1.25,.8);opacity:1}100%{transform:translateX(0) scale(.15,.15);opacity:0}}
+@keyframes alqJel{0%{transform:scale(0,0)}18%{transform:scale(.7,1.45)}36%{transform:scale(1.35,.7)}54%{transform:scale(.85,1.2)}72%{transform:scale(1.12,.92)}88%{transform:scale(.97,1.04)}100%{transform:scale(1,1)}}
+@keyframes alqIdle{0%,100%{transform:scale(1,1)}50%{transform:scale(.95,1.06)}}
 @keyframes alqPop{0%{transform:scale(.6);opacity:0}70%{transform:scale(1.06);opacity:1}100%{transform:scale(1)}}
-@media(prefers-reduced-motion:reduce){.alqsm i,.alqmc.run .alqfl,.alqres{animation:none}}`;
+@media(prefers-reduced-motion:reduce){.alqsm i,.alqmc.run .alqfl,.alqmc.done .alqfl,.alqmg,.alqres{animation:none}.alqmg{display:none}}`;
  document.head.appendChild(st2)}
 window.alqHxPanel=function(h){try{
  const bag=!!(S&&S.bot&&S.bot.bag),L=window.alqLimOf(h.lv);
@@ -7668,16 +7675,21 @@ window.alqCombosOpen=function(){const old=g('alqcmb');if(old)old.remove();
   const puffs=Array.from({length:8},(_,i)=>`<i style="left:${10+i*10}%;animation-delay:${(i*.16).toFixed(2)}s"></i>`).join('');
   const res=stage==2?`<div class="alqres"><b>¡Mezcla inestable lista!</b><span>${sh(sel[0])} + ${sh(sel[1])}</span><div class="alqdm">${d} de daño</div><span class="m">Daño propio: ${sf(d)} · ${cfg.mixTurns} turnos para lanzarla</span></div>`:'';
   o.innerHTML=`<div class="alqmp"><h3>Máquina alquímica</h3><p class="m">Elige dos pociones y activa la máquina para ver el resultado. Es una prueba: no gasta pociones ni turno. La mezcla real se hace en combate.</p>`
-  +`<div class="alqmc${stage==1?' run':''}"><div class="alqsm">${stage==1?puffs:''}</div><div class="alqfl">${MIXSV}</div></div>`
+  +`<div class="alqmc${stage==1?' run':stage==2?' done':''}"><div class="alqsm">${stage==1?puffs:''}</div>${stage==1?`<span class="alqmg a">${icon(sel[0])}</span><span class="alqmg b">${icon(sel[1])}</span>`:''}<div class="alqfl">${mixIc()}</div></div>`
   +(stage==0?`<div class="alqpots">${pots}</div>`:'')+`<div class="alqslots">${slots}</div>${res}`
+  +(typeof ADM!=='undefined'&&ADM?`<div class="brw"><b>Imagen de la poción de combinación (PNG)</b><input type="file" accept="image/png" data-img>${window.botImg&&botImg('mix')?' <button type="button" data-imgx>Quitar</button>':''}</div>`:'')
   +`<div class="alqbtns">${stage==2?'<button type="button" class="pri" data-new>Nueva mezcla</button>':`<button type="button" class="pri" data-go ${full&&!stage?'':'disabled'}>${stage==1?'Mezclando…':'Activar máquina'}</button>`}<button type="button" data-no>Cerrar</button></div>`
   +`<h3 style="margin-top:6px">Todas las combinaciones</h3><p class="m">Daño plano, no depende de la vida del objetivo. Quien la lanza sufre el ${cfg.selfPct} % del daño (mín. 1).</p>${table()}</div>`};
+ o.onchange=e=>{const f=e.target;if(!f.matches||!f.matches('[data-img]'))return;const fl=f.files[0];if(!fl)return;
+  if(fl.type!='image/png'){toast('Sube una imagen PNG.');return}if(fl.size>450000){toast('El PNG pesa más de 450 KB. Redúcelo.');return}
+  const r=new FileReader();r.onload=()=>{if(window.botSetImg&&botSetImg('mix',r.result))paint()};r.readAsDataURL(fl)};
  o.onclick=e=>{if(e.target===o){o.remove();return}const b=e.target.closest('button');if(!b||b.disabled)return;
-  if(b.dataset.k&&!stage&&sel.length<2)sel.push(b.dataset.k);
+  if('imgx' in b.dataset){if(window.botSetImg)botSetImg('mix',null)}
+  else if(b.dataset.k&&!stage&&sel.length<2)sel.push(b.dataset.k);
   else if(b.dataset.s!=null&&!stage)sel.splice(+b.dataset.s,1);
   else if('no' in b.dataset){o.remove();return}
   else if('new' in b.dataset){sel=[];stage=0}
-  else if('go' in b.dataset&&sel.length==2&&!stage){stage=1;paint();setTimeout(()=>{if(o.isConnected){stage=2;paint()}},RM?200:1900);return}
+  else if('go' in b.dataset&&sel.length==2&&!stage){stage=1;paint();setTimeout(()=>{if(o.isConnected){stage=2;paint()}},RM?200:2300);return}
   paint()};
  paint();document.body.appendChild(o)};
 window.alqIcon=icon;window.ALQ_NAME=NAME;
