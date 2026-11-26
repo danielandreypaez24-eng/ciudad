@@ -865,7 +865,7 @@ const lvCap=b=>b.type=='alr'?(E()>=5?3:E()>=4?2:1):maxLv();
 const DECO=['rdt','rdp','lnt','bsr','bsm','bsa','bsd'],UNL={alr:4,lnt:3,bsr:2,bsm:2,bsa:2,bsd:2,rdt:1,rdp:1};
 const DECL={alr:()=>E()>=4?1:0,rdt:()=>10,rdp:()=>10,lnt:()=>E()>=3?3:0,bsr:()=>E()>=2?3:0,bsm:()=>E()>=2?3:0,bsa:()=>E()>=2?3:0,bsd:()=>E()>=2?10:0};
 /* Cantidades máximas por nivel del establecimiento. Nivel 4: +1 almacén solar. Nivel 5: +1 torre solar, torre filar, almacén filar, campamento, torre mineral, centro de héroes y almacén de recursos (y +15 muros, ver DECL.mur). */
-const lim=t=>DECL[t]?DECL[t]():t=='hrr'||t=='grm'?(E()>=3?1:0):t=='cmp'?(E()>=2?1:0):t=='chr'?(E()>=2?1+(E()>=5?1:0):0):t=='bib'||t=='tal'?(E()>=2?1:0):t=='min'?(E()>=2?2+(E()>=5?1:0):0):t=='mur'?(E()>=2?25:0):({sol:1,fil:1,als:1,alf:1,cam:3})[t]+(E()>=2?1:0)+(t=='als'?(E()>=4?1:0):(E()>=5?1:0));
+const lim=t=>DECL[t]?DECL[t]():t=='hrr'||t=='grm'?(E()>=3?1:0):t=='cmp'?(E()>=2?1:0):t=='chr'?(E()>=2?1+(E()>=5?1:0):0):t=='bib'||t=='tal'?(E()>=2?1:0):t=='min'?(E()>=2?2+(E()>=5?1:0):0):t=='mur'?(E()>=2?25:0):({sol:1,fil:1,als:1,alf:1,cam:3})[t]+(E()>=2?1:0)+(t=='als'?(E()>=4?1:0):(E()>=5?1:0))+(E()>=6&&(t=='als'||t=='alf')?1:0)+(E()>=7&&(t=='sol'||t=='fil')?1:0);
 let S=null,place=null,G=null,Z=1,prev={};
 const BASE=()=>{if(innerWidth<900)return 30;const v=$('view'),m=Math.floor(Math.min(v.clientWidth-28,v.clientHeight-44)/15);return Math.max(30,Math.min(m,90))};
 const L=b=>b.lv||1;
@@ -1041,7 +1041,8 @@ function sheetClose(){SCR=null;const o=$('ov'),el=o.firstElementChild;o._h=null;
  if(!el||RM){o.innerHTML='';return}
  if(el.classList.contains('out'))return;
  el.classList.add('out');setTimeout(()=>{if(o.firstElementChild===el)o.innerHTML=''},230)}
-const sheet=h=>$('ov').innerHTML=`<div class="sheet" onclick="if(event.target==this)sheetClose()"><div class="panel bot">${h}<p><button onclick="sheetClose()">Cerrar</button></p></div></div>`;
+const sheet=h=>{const ov=$('ov'),o0=ov.firstElementChild,op=o0&&!o0.classList.contains('out')?o0.querySelector('.panel.bot'):null,s1=op?op.scrollTop:0,mk0=ov._sk;ov.innerHTML=`<div class="sheet" onclick="if(event.target==this)sheetClose()"><div class="panel bot">${h}<p><button onclick="sheetClose()">Cerrar</button></p></div></div>`;
+ try{const np=ov.querySelector('.panel.bot'),t=np&&np.querySelector('h2'),mk=t?t.textContent:'';ov._sk=mk;if(op&&mk0===mk&&mk)np.scrollTop=s1}catch(e){}};
 function shop(){if(place)return;
  const it=['sol'];if(S.step>=5)it.push('fil');if(S.step>=9)it.push('als','alf');if(S.step>=10)it.push('cam');if(E()>=2)it.push('min','mur','chr','bib','tal','cmp');if(E()>=3)it.push('hrr','grm');if(E()>=4)it.push('alr');
  const scard=k=>{const s=SH[k],n=count(k),Lm=lim(k),full=n>=Lm,ok=can(s.cost),lk=Lm==0;
@@ -1056,7 +1057,9 @@ function shop(){if(place)return;
  <div class="chips"><span class="chip"><span class="gmi" style="color:var(--m)">${ic('pie',14)}</span>${S.inv.piedra} piedras mágicas</span><span class="chip"><span class="gmi" style="color:var(--b)">${ic('cri',14)}</span>${S.inv.cristal} cristales mágicos</span></div>
  <div class="row shr">${cards}</div>${S.step>=10?`<div class="sx">Decoración</div><div class="row shr">${DECO.map(scard).join('')}</div>`:''}`)}
 function buy(k){const s=SH[k];if(!can(s.cost)||count(k)>=lim(k))return;spend(s.cost);sheetClose();place=k;S.pend=k;save();draw();tut()}
-const modal=h=>{const k=h.indexOf('<!--E-->'),a=k<0?'':h.slice(0,k),b=k<0?h:h.slice(k+8);$('ov').innerHTML=`<div class="sheet" onclick="if(event.target==this)sheetClose()"><div class="panel pm" style="margin:auto;max-height:90%">${a}<div class="pmb">${b}</div><div class="pmf"><button onclick="sheetClose()">Cerrar</button></div></div></div>`};
+const modal=h=>{const k=h.indexOf('<!--E-->'),a=k<0?'':h.slice(0,k),b=k<0?h:h.slice(k+8),ov=$('ov'),o0=ov.firstElementChild,op=o0&&!o0.classList.contains('out')?o0.querySelector('.panel.pm'):null,ob=op&&op.querySelector('.pmb'),s1=ob?ob.scrollTop:0,s2=op?op.scrollTop:0,mk0=ov._mk;ov.innerHTML=`<div class="sheet" onclick="if(event.target==this)sheetClose()"><div class="panel pm" style="margin:auto;max-height:90%">${a}<div class="pmb">${b}</div><div class="pmf"><button onclick="sheetClose()">Cerrar</button></div></div></div>`;
+ /* misma ventana redibujada (comprar, fabricar, cambiar cantidad): se conserva el scroll para que no salte hacia arriba */
+ try{const np=ov.querySelector('.panel.pm'),t=np&&np.querySelector('h2'),ac=np&&np.querySelector('.hwa .pri'),mk=(t?t.textContent:'')+'|'+(ac?ac.textContent:'');ov._mk=mk;if(op&&mk0===mk&&mk!=='|'){const nb=np.querySelector('.pmb');if(nb)nb.scrollTop=s1;np.scrollTop=s2}}catch(e){}};
 const pipsN=(t,n)=>Array.from({length:t},(_,i)=>`<i class="${i<n?'on':''}"></i>`).join('');
 const chipsCost=c=>{const all=can(c);return Object.entries(c).map(([k,v])=>{const sh=have(k)<v,dd=sh&&all&&DQ[k]?Math.ceil((v-have(k))/DQ[k]):0,x=dd?`<span class="cdx" title="Cubierto con diamantino">${ic('cd',11)}${dd}</span>`:'',I2=INV[k]||['Piedras','var(--m)'];return CN[k]?`<span class="cc${!sh||all?'':' no'}" style="color:var(--k-${k})">${ic(CN[k][0],14)}<b>${v}</b><em>${CN[k][1]}</em>${x}</span>`:`<span class="cc${!sh||all?'':' no'}" style="color:${I2[1]}">${ic(({cristal:'cri',polvo:'pol',nucleo:'nuc',piedra:'pie'})[k]||'cri',14)}<b>${v}</b><em>${I2[0]}</em>${x}</span>`}).join('')};
 const reqRow=(t,ok,v='')=>`<div class="req${ok?' ok':''}"><i>${ok?'✓':'✕'}</i><span>${t}</span><em>${v}</em></div>`;
@@ -1095,7 +1098,7 @@ function est(b){if(S.step==2)S.step=3;
  if(S.step>=10){const l=L(b),nx=LV.est[l];
   if(!nx)up='<div class="sx">Mejora</div><div class="note ok">Nivel máximo alcanzado</div>';
   else{const rq=estReq(l+1),ok=rq.every(r=>r[1])&&can(nx.cost);
-   up=`<div class="sx">Mejorar a nivel ${l+1}</div><div class="reqs">${rq.map(r=>reqRow(r[0],r[1])).join('')}</div>${l+1>=3&&l+1<=5?'<div class="note ok">Al subir a nivel '+(l+1)+': +'+(l+1==5?20:l+1==4?10:15)+' de muro en la defensa de la ciudad.</div>':''}${l+1==4?'<div class="note ok">Al subir a nivel 4: +1 Almacén solar.</div>':''}${l+1==5?'<div class="note ok">Al subir a nivel 5: +1 Torre solar, Torre filar, Almacén filar, Campamento, Torre mineral, Centro de Héroes y Almacén de recursos, y +15 Muros.</div>':''}${l+1==2?'<div class="note">Al subir a nivel 2 se desbloquean: Aventuras y Batalla online (la Arena, con 8 rangos y temporadas).</div>':''}<div class="uc"><div><span class="m">Costo</span><div class="cost">${chipsCost(nx.cost)}</div></div><div><span class="m">Construcción</span><b>${ft(nx.bt)}</b></div></div><button class="pri" ${ok?'':'disabled'} onclick="upg(${b.id})">Mejorar a nivel ${l+1}</button>`}}
+   up=`<div class="sx">Mejorar a nivel ${l+1}</div><div class="reqs">${rq.map(r=>reqRow(r[0],r[1])).join('')}</div>${l+1>=3&&l+1<=5?'<div class="note ok">Al subir a nivel '+(l+1)+': +'+(l+1==5?20:l+1==4?10:15)+' de muro en la defensa de la ciudad.</div>':''}${l+1==4?'<div class="note ok">Al subir a nivel 4: +1 Almacén solar.</div>':''}${l+1==5?'<div class="note ok">Al subir a nivel 5: +1 Torre solar, Torre filar, Almacén filar, Campamento, Torre mineral, Centro de Héroes y Almacén de recursos, y +15 Muros.</div>':''}${l+1==6?'<div class="note ok">Al subir a nivel 6: +1 Almacén solar y +1 Almacén filar, muro del establecimiento +25 (hasta 70 muros), y el establecimiento luce estandartes dorados y un halo de luz.</div>':''}${l+1==7?'<div class="note ok">Al subir a nivel 7: +1 Torre solar y +1 Torre filar, muro del establecimiento +30 (hasta 80 muros), y el establecimiento luce un tejado de oro, estandartes y destellos.</div>':''}${l+1==2?'<div class="note">Al subir a nivel 2 se desbloquean: Aventuras y Batalla online (la Arena, con 8 rangos y temporadas).</div>':''}<div class="uc"><div><span class="m">Costo</span><div class="cost">${chipsCost(nx.cost)}</div></div><div><span class="m">Construcción</span><b>${ft(nx.bt)}</b></div></div><button class="pri" ${ok?'':'disabled'} onclick="upg(${b.id})">Mejorar a nivel ${l+1}</button>`}}
  $('ov').innerHTML=`<div class="sheet" onclick="if(event.target==this)sheetClose()"><div class="panel pm" style="margin:auto;max-height:90%">${head(b,'Estadísticas').replace('<!--E-->','')}<div class="pmb">${E()>=2?'<div class="note ok">Aventuras y Batalla online desbloqueadas</div>':''}<div class="sx">Estructuras</div><div class="mgrid">${tiles}</div><div class="mxl"><span class="m">Nivel máximo de mejora</span><b>${maxLv()}</b></div>${up}</div><div class="pmf two"><button onclick="shop()">Tienda</button><button onclick="sheetClose()">Cerrar</button></div></div></div>`}
 function mineral(id){const b=S.b.find(x=>x.id==id),sl=LV.min[L(b)-1].slots,w=Math.min(b.w||0,sl),free=S.pop-used();let h='';
  for(let i=0;i<sl;i++)h+=i<w?`<button class="cslot" onclick="wk(${id},-1)" aria-label="Quitar">${ic('pop',26)}</button>`:`<button class="cslot" ${free>0?'':'disabled'} onclick="wk(${id},1)" aria-label="Añadir">+</button>`;
@@ -1522,6 +1525,9 @@ LV.chr=[{cm:4}];gen('chr',{solar:400,filar:100},90000,[{},{recursos:30},{recurso
 LV.est[2]={cost:{solar:500,filar:200,recursos:50},bt:300000};
 LV.est[3]={cost:{solar:1500,filar:600,recursos:150,cristal:5},bt:1200000};
 LV.est[4]={cost:{solar:5000,filar:2000,recursos:500,cristal:20,nucleo:2},bt:3600000};
+/* nivel 6 (pedido): 800 solares, 300 filares, 5 cristales mágicos. nivel 7 (propuesto, editable aquí) */
+LV.est[5]={cost:{solar:800,filar:300,cristal:5},bt:600000};
+LV.est[6]={cost:{solar:1600,filar:600,cristal:10},bt:900000};
 const chrLv=()=>{const b=S&&S.b.find(x=>x.type=='chr'&&Date.now()>=x.end);return b?L(b):1};
 const blv=()=>{const b=S&&S.b.find(x=>x.type=='bib'&&Date.now()>=x.end);return b?L(b):1};
 Object.defineProperty(CARDS,'max',{get(){return LV.chr[chrLv()-1].cm},configurable:true});
@@ -1533,6 +1539,8 @@ function estReq(t=2){const n=Date.now(),f=x=>S.b.filter(y=>y.type==x&&n>=y.end);
  if(t<=2)return [['Torre solar',f('sol').length>=1],['Almacén solar',f('als').length>=1],['2 campamentos',f('cam').length>=2],['Torre solar nivel 2',f('sol').some(x=>L(x)>=2)],['Almacén solar nivel 2',f('als').some(x=>L(x)>=2)]];
  if(t==3)return [['Aventura 10 completada',!!S.done.L10],['Torre solar nivel 2',f('sol').some(x=>L(x)>=2)],['Almacén solar nivel 2',f('als').some(x=>L(x)>=2)],['Torre mineral operativa',f('min').some(x=>x.w>0)],['Academia de Héroes construida',f('chr').length>=1]];
  if(t==4)return [['Aventura 20 completada',!!S.done.L20],['Biblioteca Solar nivel 3',f('bib').some(x=>L(x)>=3)],['Herrería nivel 2',f('hrr').some(x=>L(x)>=2)],['Un héroe nivel 8',S.heroes.some(h=>h.lv>=8)]];
+ if(t==6)return [['Almacén solar nivel 5',f('als').some(x=>L(x)>=5)],['Almacén filar nivel 5',f('alf').some(x=>L(x)>=5)],['Almacén de recursos nivel 3',f('alr').some(x=>L(x)>=3)],['5 campamentos nivel 3 ('+Math.min(5,f('cam').filter(x=>L(x)>=3).length)+'/5)',f('cam').filter(x=>L(x)>=3).length>=5],['Aventura 60 superada',!!S.done.L60]];
+ if(t==7)return [['Aventura 100 completada',!!S.done.L100],['Almacén solar nivel 5',f('als').filter(x=>L(x)>=5).length>=2],['Torre mineral nivel 5',f('min').some(x=>L(x)>=5)],['Biblioteca Solar nivel 5',f('bib').some(x=>L(x)>=5)],['Academia de Héroes nivel 5',f('chr').some(x=>L(x)>=5)]];
  return [['Aventura 30 completada',!!S.done.L30],['Biblioteca Solar nivel 4',f('bib').some(x=>L(x)>=4)],['Herrería nivel 3',f('hrr').some(x=>L(x)>=3)],['Academia de Héroes nivel 3',f('chr').some(x=>L(x)>=3)],['Equipo de 2 héroes',eqH().length>=2]]}
 {const _r=rowsOf;rowsOf=function(t,c,n){
  if(t=='min')return [['Trabajadores',c.slots,n.slots],['Ciclo, 1 trabajador',c.c1+' s',n.c1+' s'],['Ciclo, 2+ trabajadores',c.c2+' s',n.c2+' s']];
@@ -1670,7 +1678,7 @@ function syncSk(h){h.sk=h.sk||{};h.sk.l=h.sk.l||[];if(window.eqNorm)eqNorm(h);re
 const IVC={first:600000,gap:[1200000,1800000],warn:120000,boostMax:3,boostCost:50,boostVal:10,wall:2,wallMax:40,nMax:30,lvMax:40};
 const ivOn=()=>!!S&&(dnL()>=5||E()>=2);
 /* Bonus de muro del establecimiento central: nivel 3-4 = +15, nivel 5 = +20 (no se acumulan; se suma sobre los muros construidos) */
-const estWall=()=>{const e=E();return e>=5?20:e==4?10:e>=3?15:0};
+const estWall=()=>{const e=E();return e>=7?30:e>=6?25:e>=5?20:e==4?10:e>=3?15:0};
 const decoDef=()=>S.b.filter(b=>b.type=='bsd'&&Date.now()>=b.end).length;
 const ivWalls=()=>Math.min(IVC.wallMax,S.b.filter(b=>b.type=='mur'&&Date.now()>=b.end).reduce((a,b)=>a+((LV.mur[L(b)-1]||{}).df||IVC.wall),0))+estWall()+decoDef();
 const ivHeroes=()=>eqH().filter(h=>!hd(h));
@@ -2739,13 +2747,17 @@ const slab=(x,y,w,h,c)=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="
 const torch=(x,c)=>`<rect x="${x-1.4}" y="78" width="2.8" height="19" fill="${ST}" stroke="${OL}" stroke-width="1"/><path d="M${x} 70.5c3 3 3.6 6 0 8.6-3.6-2.6-3-5.6 0-8.6z" fill="${c}" stroke="${OL}" stroke-width="1"/>`;
 window.icL=(k,l=1,s=18)=>{
  const f=window.STN&&STN[k];if(!f)return ic(k,s);
- const v=f(s);l=Math.min(5,Math.max(1,l|0));if(l<2)return v;
+ const v=f(s);l=Math.min(k=='est'?7:5,Math.max(1,l|0));if(l<2)return v;
  const c=AC[k]||DEF;let u='',o='';
  if(l>=5)u+=`<defs><radialGradient id="lvg${k}"><stop offset="0" stop-color="${c}" stop-opacity=".38"/><stop offset="1" stop-color="${c}" stop-opacity="0"/></radialGradient></defs><circle cx="50" cy="54" r="52" fill="url(#lvg${k})"/>`;
  u+=slab(10,93,80,4,c);
  if(l>=3)u+=slab(4,97,92,3,c);
  if(l>=4)u+=torch(4,c)+torch(96,c);
  if(l>=5)o+=`<path d="M50 94.4l3.2 3.6-3.2 3.6-3.2-3.6z" fill="${c}" stroke="${OL}" stroke-width="1"/>`;
+ if(k=='est'&&l>=6){const G='#ffd36b',G2='#c98a1c',pen=(x,d)=>`<rect x="${x-1.3}" y="25" width="2.6" height="23" fill="#b09aa8" stroke="${OL}" stroke-width="1.1"/><path d="M${x} 26.5l${d*13} 4.6-${d*13} 4.6z" fill="${G}" stroke="${OL}" stroke-width="1.4" stroke-linejoin="round"/><circle cx="${x}" cy="24.5" r="2.2" fill="${G}" stroke="${OL}" stroke-width="1"/>`,spk=(x,y,s)=>`<path d="M${x} ${y-s}L${x+s*.28} ${y-s*.28}L${x+s} ${y}L${x+s*.28} ${y+s*.28}L${x} ${y+s}L${x-s*.28} ${y+s*.28}L${x-s} ${y}L${x-s*.28} ${y-s*.28}z" fill="#fff6c9" stroke="${G2}" stroke-width=".8"/>`;
+ u=`<defs><radialGradient id="lvgE6"><stop offset="0" stop-color="${G}" stop-opacity=".5"/><stop offset=".7" stop-color="${G}" stop-opacity=".16"/><stop offset="1" stop-color="${G}" stop-opacity="0"/></radialGradient></defs><circle cx="50" cy="52" r="58" fill="url(#lvgE6)"/>`+u;
+ o+=pen(17.9,-1)+pen(82,1);
+ if(l>=7){o+=`<path d="M21 46L50 22L79 46z" fill="${G}" fill-opacity=".34" stroke="${G}" stroke-width="1.6" stroke-linejoin="round"/><path d="M50 28l5.4 6.4L50 43l-5.4-8.6z" fill="#fff0a8" stroke="${OL}" stroke-width="1.4" stroke-linejoin="round"/><path d="M50 28l-5.4 6.4h10.8z" fill="#fff" fill-opacity=".6"/>`+spk(10,16,4.5)+spk(90,16,4.5)+spk(30,6,3.2)+spk(70,6,3.2)}}
  return v.replace(/^(<svg[^>]*>)/,'$1'+u).replace(/<\/svg>$/,o+'</svg>')};
 const st=document.createElement('style');
 st.textContent='.c i.lv{min-width:0!important;height:auto!important;padding:0!important;border:0!important;background:transparent!important;color:#fff!important;opacity:.34!important;font:600 max(6px,calc(var(--cs)*.17))/1 Inter,system-ui,sans-serif!important;letter-spacing:.02em;right:max(2px,calc(var(--cs)*.06));bottom:max(1px,calc(var(--cs)*.04));text-shadow:none!important;box-shadow:none!important}';
@@ -3012,10 +3024,10 @@ document.addEventListener('keydown',e=>{if(e.key=='Escape'&&MV.b)mvEnd()});
 {
 /* Datos reutilizables: para añadir otro consumible basta con añadir una entrada aquí */
 const SUP={
- vendaje:{id:'vendaje',n:'Vendaje',d:'Tela limpia y ungüento básico para cerrar heridas leves.',ic:'ven',cap:15,per:99,heal:3,tg:'aliado',fx:'cruces',
+ vendaje:{id:'vendaje',n:'Vendaje',d:'Tela limpia y ungüento básico para cerrar heridas leves.',ic:'vnd',cap:15,per:99,heal:3,tg:'aliado',fx:'cruces',
   eff:'Recupera 3 HP al héroe elegido.',cost:{solar:20,filar:12,recursos:3,cristal:1},
   rules:['Almacenamiento máximo: 15.','Hasta 5 usos seguidos; después hay que atacar.','Requiere elegir un héroe aliado herido.','No sirve con vida completa ni con héroes caídos.']},
- botiquin:{id:'botiquin',n:'Botiquín',d:'Instrumental y reactivos arcanos para curaciones serias.',ic:'bot',cap:2,per:2,heal:10,tg:'aliado',fx:'cruces',
+ botiquin:{id:'botiquin',n:'Botiquín',d:'Instrumental y reactivos arcanos para curaciones serias.',ic:'btq',cap:2,per:2,heal:10,tg:'aliado',fx:'cruces',
   eff:'Recupera 10 HP al héroe elegido.',cost:{solar:90,filar:60,recursos:20,cristal:4,polvo:2},
   rules:['Almacenamiento máximo: 2 en total.','Hasta 2 usos por turno.','Requiere elegir un héroe aliado herido.','No sirve con vida completa ni con héroes caídos.']}};
 window.SUP=SUP;
@@ -3031,6 +3043,16 @@ SH.tal={n:'Taller de Suministros',d:'Fabrica vendajes y botiquines para las aven
 I.tal='<path d="M3 20V9l9-5 9 5v11zM12 10v6M9 13h6"/>';
 I.ven='<rect x="2.5" y="8.5" width="19" height="7" rx="3.5" transform="rotate(-35 12 12)"/><path d="M10.2 9.8l3.6 4.4M9.5 12.4h.01M14.5 11.6h.01"/>';
 I.bot='<path d="M4 8h16v12H4zM9 8V5h6v3M12 11v6M9 14h6"/>';
+/* Iconos propios de los suministros. La clave 'bot' es del edificio Boticario (una casita), por eso el botiquín usa 'btq'.
+   Si se sube una imagen, sustituye al dibujo en todos los lugares donde aparece el suministro. */
+I.btq='<rect x="3" y="7.5" width="18" height="12.5" rx="2.5"/><path d="M9 7.5V6a2 2 0 012-2h2a2 2 0 012 2v1.5M12 11v5.5M9.25 13.75h5.5"/>';
+I.vnd=I.ven;
+window.SUPK='ciudad-supimg';
+window.supImg=id=>{try{return (JSON.parse(localStorage.getItem(window.SUPK)||'{}'))[id]||''}catch(e){return ''}};
+window.STN=window.STN||{};
+{const mkI=(key,id)=>(sz=18)=>{const u=window.supImg(id);return u?`<img class="supimg" src="${u}" alt="" style="width:${sz}px;height:${sz}px;object-fit:cover;border-radius:7px;display:block">`:`<svg class="ic" width="${sz}" height="${sz}" viewBox="0 0 24 24" aria-hidden="true">${I[key]}</svg>`};
+ window.STN.btq=mkI('btq','botiquin');window.STN.vnd=mkI('vnd','vendaje')}
+document.head.insertAdjacentHTML('beforeend','<style id="patch-supimg-css">.ib.sup:has(>img.supimg){padding:0;overflow:hidden;border-radius:14px}.ib.sup>img.supimg{width:100%!important;height:100%!important;object-fit:cover;border-radius:inherit}.sup-ic{display:flex;align-items:center;justify-content:space-between;gap:10px}.sup-ic .row2{display:flex;gap:8px}.sup-ic button{padding:6px 12px;font-size:12px}</style>');
 /* inventario: S.sup (se crea vacío en partidas anteriores sin tocar nada más) */
 const sn=id=>Math.max(0,Math.floor((S&&S.sup&&S.sup[id])||0));
 const ssn=(id,v)=>{S.sup=S.sup||{};S.sup[id]=Math.max(0,Math.min(SUP[id].cap,Math.floor(v)))};
@@ -3042,16 +3064,26 @@ const stt3=t=>{const pb=document.querySelector('#ov .pmb');if(pb)pb.scrollTop=t}
 window.taller=function(b){b=b||S.b.find(x=>x.type=='tal'&&Date.now()>=x.end);if(!b)return;
  const cards=Object.values(SUP).map(s=>{const n=sn(s.id),sp=s.cap-n,mx=maxMake(s.id);let q=Math.max(1,Math.min(TLQ[s.id]||1,Math.max(1,sp)));TLQ[s.id]=q;
   const tot=Object.fromEntries(Object.entries(s.cost).map(([k,v])=>[k,v*q])),ok=sp>0&&q<=mx;
-  return `<div class="ucard"><div class="uct"><span style="display:flex;gap:10px;align-items:center"><span class="ib">${ic(s.ic,26)}</span><b>${s.n}</b></span><span class="chip a">Existencias ${n}/${s.cap}</span></div>
+  return `<div class="ucard"><div class="uct"><span style="display:flex;gap:10px;align-items:center"><span class="ib sup">${ic(s.ic,26)}</span><b>${s.n}</b></span><span class="chip a">Existencias ${n}/${s.cap}</span></div>
   <span class="m">${s.d}</span><div class="note ok">${s.eff}</div>
   <ul class="m" style="margin:0;padding-left:16px;text-align:left">${s.rules.map(r=>`<li>${r}</li>`).join('')}</ul>
   <div><span class="m">Coste por unidad</span><div class="cost">${chipsCost(s.cost)}</div></div>
   <div class="uct"><span class="m">Cantidad a fabricar</span><span style="display:flex;gap:8px;align-items:center"><button ${q<=1?'disabled':''} onclick="tlQ('${s.id}',-1)">−</button><b>${q}</b><button ${q>=sp?'disabled':''} onclick="tlQ('${s.id}',1)">+</button><button ${sp<1?'disabled':''} onclick="tlQ('${s.id}',0)">Máx</button></span></div>
   <div><span class="m">Total (×${q})</span><div class="cost">${chipsCost(tot)}</div></div>
+  <div class="sup-ic"><span class="m">Icono</span><span class="row2"><button onclick="supUp('${s.id}')">${supImg(s.id)?'Cambiar imagen':'Subir imagen'}</button>${supImg(s.id)?`<button onclick="supDel('${s.id}')">Quitar</button>`:''}</span></div>
   <button class="pri" ${ok?'':'disabled'} onclick="tlMake('${s.id}')">${sp<=0?'Almacén lleno':mx<1?'Faltan materiales':'Fabricar ×'+q}</button></div>`}).join('');
  modal(head(b,'Fabrica consumibles para tus aventuras')+`<div class="note">En combate, usar un suministro cuenta como la acción del héroe que actúa. Botiquín: hasta 2 usos por turno. Vendaje: hasta 5 usos seguidos; después hay que atacar.</div>`+cards+upBlock(b))};
 window.tlQ=(id,d)=>{const s=SUP[id];if(!s)return;const sp=Math.max(1,s.cap-sn(id));let q=TLQ[id]||1;
  q=d==0?Math.max(1,Math.min(maxMake(id),sp)):q+d;TLQ[id]=Math.max(1,Math.min(sp,q));const t=stt2();taller();stt3(t)};
+/* subir / quitar la imagen del icono de un suministro (se recorta al centro en cuadrado y se reduce a 128 px, conserva transparencia) */
+window.supUp=id=>{const f=document.createElement('input');f.type='file';f.accept='image/*';
+ f.onchange=()=>{const fl=f.files[0];if(!fl)return;if(!/^image\//.test(fl.type)){notice('Icono','Sube un archivo de imagen.');return}
+  const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const N=128,c=document.createElement('canvas');c.width=c.height=N;const x=c.getContext('2d'),m=Math.min(im.width,im.height);
+   x.drawImage(im,(im.width-m)/2,(im.height-m)/2,m,m,0,0,N,N);
+   try{const o=JSON.parse(localStorage.getItem(window.SUPK)||'{}');o[id]=c.toDataURL('image/png');localStorage.setItem(window.SUPK,JSON.stringify(o))}catch(e){notice('Icono','No se pudo guardar la imagen. Prueba con una más pequeña.');return}
+   const t=stt2();taller();stt3(t);notice('Icono','Imagen guardada para '+SUP[id].n.toLowerCase()+'.')};
+   im.onerror=()=>notice('Icono','No se pudo leer la imagen.');im.src=r.result};r.readAsDataURL(fl)};f.click()};
+window.supDel=id=>{try{const o=JSON.parse(localStorage.getItem(window.SUPK)||'{}');delete o[id];localStorage.setItem(window.SUPK,JSON.stringify(o))}catch(e){}const t=stt2();taller();stt3(t)};
 window.tlMake=id=>{if(TLK||!S)return;const s=SUP[id];if(!s)return;const q=Math.min(TLQ[id]||1,s.cap-sn(id));
  if(q<1||q>maxMake(id))return;TLK=1;setTimeout(()=>TLK=0,350);
  const tot={};for(const k in s.cost)tot[k]=s.cost[k]*q;if(!can(tot))return;
@@ -4817,7 +4849,7 @@ alq:()=>{if(!R||R.busy||R.cd||R.st.win||R.st.turn!=R.me||R.sup)return;const old=
  log:()=>{const l=$$('pvLog');if(l)l.classList.toggle('on')},
  sup:()=>{if(!R||R.busy||R.cd||R.st.win||R.st.turn!=R.me)return;R.alq=null;{const o2=$$('pvaw');if(o2)o2.remove()}const old=$$('pvsw');if(old){old.remove();return}
   const st=R.st,sp=st.sup[R.me],vs=(st.vs&&st.vs[R.me])|0,bt=(st.bt&&st.bt[R.me])|0;
-  const info=(id,k,n,off,extra)=>{const s0=typeof SUP!=='undefined'&&SUP[id]?SUP[id]:{n:id=='botiquin'?'Botiquín':'Vendaje',ic:id=='botiquin'?'bot':'ven',heal:HEAL[k]};return{id:'s'+k,ic:s0.ic,count:n,off,tip:s0.n+' (+'+s0.heal+' HP) · disponibles: '+n+extra}};
+  const info=(id,k,n,off,extra)=>{const s0=typeof SUP!=='undefined'&&SUP[id]?SUP[id]:{n:id=='botiquin'?'Botiquín':'Vendaje',ic:id=='botiquin'?'btq':'vnd',heal:HEAL[k]};return{id:'s'+k,ic:s0.ic,count:n,off,tip:s0.n+' (+'+s0.heal+' HP) · disponibles: '+n+extra}};
   const items=[info('vendaje','v',sp.v|0,(sp.v|0)<1||vs>=5,' · seguidos: '+vs+'/5'+(vs>=5?' · ataca antes de seguir':'')),info('botiquin','b',sp.b|0,(sp.b|0)<1||bt>=2,' · usos este turno: '+bt+'/2')];
   if(window.supPop)window.supPop($$('pvsb'),items,id=>PVB.useSup(id),'pvsw')},
  useSup:a=>{const w=$$('pvsw');if(w)w.remove();if(!R)return;R.sup=a;upd()},
@@ -5514,7 +5546,7 @@ try{
  CT.forEach(c=>{const o=CTV[c.id];if(o){if(o.need)c.need=o.need;if(o.get)c.get=o.get;if(o.lv)c.lv=o.lv}});
  SH.min.e='Extrae recursos con trabajadores';
  /* Límites por nivel de establecimiento (PDF, 'Qué te da cada nivel'): muros 25/35/45, arbusto defensivo 10/15/20, arbustos de frutos 3/4 */
- DECL.mur=()=>E()>=5?60:E()>=4?45:E()>=3?35:E()>=2?25:0;DECL.alr=()=>E()>=5?2:E()>=4?1:0;DECL.bsd=()=>E()>=4?20:E()>=3?15:E()>=2?10:0;
+ DECL.mur=()=>E()>=7?80:E()>=6?70:E()>=5?60:E()>=4?45:E()>=3?35:E()>=2?25:0;DECL.alr=()=>E()>=5?2:E()>=4?1:0;DECL.bsd=()=>E()>=4?20:E()>=3?15:E()>=2?10:0;
  ['bsr','bsm','bsa'].forEach(k=>DECL[k]=()=>E()>=3?4:E()>=2?3:0);
  /* Taller: curación extra acumulada por nivel (vx = vendaje, bx = botiquín) */
  const tt=()=>{try{const t=S.b.filter(b=>b.type=='tal'&&Date.now()>=b.end).map(L);return LV.tal[Math.max(1,...t)-1]||LV.tal[0]}catch(e){return LV.tal[0]}};
@@ -7288,6 +7320,14 @@ window.botReset=()=>{if(!ADM)return;S.bot={ms:0};save();notice('Boticario','Even
 .ib.bic svg,.ib.bic img{width:26px;height:26px;object-fit:contain}
 .bmx .bglb{flex:1;position:relative;display:flex;flex-direction:column;gap:2px;padding:10px 12px;border:1.5px solid var(--a);border-radius:16px;background:linear-gradient(170deg,color-mix(in srgb,var(--a) 10%,var(--s)),var(--s) 75%);font-size:13px}
 .bmx .bglb b{color:var(--a);font-size:12px;letter-spacing:.04em}
+.bmx.bnp .bglb::before{display:none}
+/* Maelis fuera de la ventana: flota arriba, centrada, sin tapar el contenido */
+.sheet.bfx{padding-top:clamp(92px,17vh,150px);box-sizing:border-box}
+.sheet.bfx>.panel.pm{max-height:100%!important}
+.bfw{position:absolute;left:0;right:0;margin:0 auto;top:clamp(6px,2vh,20px);width:clamp(78px,13vh,124px);height:clamp(78px,13vh,124px);pointer-events:none;z-index:2;animation:bflt 3.6s ease-in-out infinite}
+.bfw img,.bfw svg{display:block;width:100%;height:100%;object-fit:contain;background:none;filter:drop-shadow(0 8px 12px rgba(0,0,0,.45))}
+@keyframes bflt{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+@media(prefers-reduced-motion:reduce){.bfw{animation:none}}
 .bmx .bglb::before{content:'';position:absolute;left:-7px;top:50%;margin-top:-6px;width:12px;height:12px;background:color-mix(in srgb,var(--a) 9%,var(--s));border-left:1.5px solid var(--a);border-bottom:1.5px solid var(--a);transform:rotate(45deg)}
 .bxt .ucard{margin:10px 0 0;padding:10px}
 </style>
@@ -7335,7 +7375,7 @@ window.botWk=function(id,d){const b=S.b.find(x=>x.id==id),w=b.w||0;if(d>0&&(w>=B
 
 /* ---- menú del Boticario (mismas tarjetas que Taller de Suministros) ---- */
 const LN=['¿Buscas algo en especial?','Cada frasco lleva su tiempo. No me apresures.','Los precios son los precios.','Con más manos, preparo más rápido.'];
-let curId=null;
+let curId=null,lnI=-1;
 function menu(){const b=S.b.find(x=>x.type=='bot');if(!b)return;curId=b.id;refill();const a=A(),c=cfg(),w=Math.min(b.w||0,BOT.slots),free=S.pop-used();
  let sl='';for(let i=0;i<BOT.slots;i++)sl+=i<w?`<button class="cslot" onclick="botWk(${b.id},-1)" aria-label="Quitar">${ic('pop',26)}</button>`:`<button class="cslot" ${free>0?'':'disabled'} onclick="botWk(${b.id},1)" aria-label="Añadir">+</button>`;
  const ttl=(k,t,r)=>`<div class="uct"><span style="display:flex;gap:10px;align-items:center"><span class="ib bic" style="--bc:${TINT[k]}">${ico(k)}</span><b>${t}</b></span>${r}</div>`;
@@ -7346,10 +7386,12 @@ function menu(){const b=S.b.find(x=>x.type=='bot');if(!b)return;curId=b.id;refil
   ${r.on?`<div class="uct"><span class="m">En tu mochila</span><b>${inv}</b></div>${st<r.cap?`<div class="uct"><span class="m">Próxima unidad en</span><b data-bt="${k}">…</b></div>`:''}`:`<div class="note">Requiere ${I.need} ayudantes (tienes ${w}).</div>`}
   <div><span class="m">Precio por unidad</span><div class="cost">${chips(I.cost)}</div></div>
   <button class="pri" ${ok?'':'disabled'} onclick="botBuyItem('${k}')">${!a.bag?'Necesitas la mochila':!r.on?'Bloqueada':st<1?'Agotada':'Comprar'}</button></div>`}).join('');
- modal(head(b,w<2?'Necesita ayudantes':'Boticario de '+c.name)+`<div id="btm"></div><div class="bmx"><div class="bpt">${botPic('intro',0)}</div><div class="bglb"><b>${esc(c.name)}</b><span>${LN[Math.floor(Math.random()*LN.length)]}</span></div></div>
+ if(!$('btm')||lnI<0)lnI=Math.floor(Math.random()*LN.length);
+ modal(head(b,w<2?'Necesita ayudantes':'Boticario de '+c.name)+`<div id="btm"></div><div class="bmx bnp"><div class="bglb"><b>${esc(c.name)}</b><span>${LN[lnI]}</span></div></div>
   ${bag}
   <div class="sx">Ayudantes (${w}/${BOT.slots})</div><div class="slg">${sl}</div><p class="m hint">Más aldeanos desbloquean pociones y aceleran la reposición. Habitantes libres: ${free}. El precio de los objetos no cambia.</p>
   <div class="sx">Objetos</div>${it}${ADM?'<p><button onclick="botEdit()">Configurar a '+esc(c.name)+' (administrador)</button></p>':''}`);
+ {const sh=$('ov').firstElementChild;if(sh){sh.classList.add('bfx');if(!sh.querySelector('.bfw'))sh.insertAdjacentHTML('beforeend','<div class="bfw" style="animation-delay:-'+(Date.now()%3600)+'ms" aria-hidden="true">'+botPic('intro',0)+'</div>')}}
  const sig=JSON.stringify([a.st,w,a.bag]);clearInterval(window.__bti);window.__bti=setInterval(()=>{if(!$('btm')){clearInterval(window.__bti);return}refill();const A2=A();
   if(JSON.stringify([A2.st,wOf(),A2.bag])!=sig){menu();return}
   document.querySelectorAll('[data-bt]').forEach(e=>{const k=e.dataset.bt,r=res(k,wOf());e.textContent=A2.t&&A2.t[k]?mmss(A2.t[k]+r.rep*1000-Date.now()):'—'})},500)}
