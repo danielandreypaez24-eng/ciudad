@@ -2272,7 +2272,7 @@ sqWin=function(){const a=SQ&&SQ.adv,first=a&&a.lv==window.YLV&&!S.done['L'+windo
 }
 {
 /* ===== YLOKA parte 2: ruleta, Jinetes, fase 2, presentación y efectos (config en YLK2) ===== */
-const YLK2={rulCd:300000,jinCd:60000,jinTime:5000,jinDmgMul:1.5,jinKeys:3,jinPen:5,jinRes:'resistencia (st)',block:.07,steal:.15,stealPct:.5,
+const YLK2={rulCd:300000,jinCd:60000,jinTime:5000,jinDmgMul:1.5,jinKeys:3,jinPen:5,jinRes:'resistencia (st)',block:.02,steal:.05,stealPct:.5,
  rul:{si:{t:'SÍ: curación breve',f:()=>SQ.hs.forEach(u=>{if(u.hp>0)u.hp=Math.min(u.mhp,u.hp+2)})},no:{t:'NO: Yloka gana un escudo de 5',f:y=>{y.sh=(y.sh||0)+5}}}};
 {const st=document.createElement('style');st.textContent='@keyframes ylA{50%{box-shadow:0 0 30px #b070f0,0 0 10px #e0c0ff inset}}.yl-aura{animation:ylA 1.6s infinite;border-color:#9b4dff!important}.yl-p2{animation-duration:.7s}@keyframes ylS{to{transform:rotate(1080deg)}}@keyframes ylP{to{transform:translateY(-60px);opacity:0}}.yl-pt{position:fixed;width:6px;height:6px;border-radius:50%;background:#c080ff;z-index:98;pointer-events:none;animation:ylP 1.1s forwards}';document.head.appendChild(st)}
 const yIdx=()=>SQ.m.findIndex(m=>m.n=='Yloka'),yMs=n=>RM?Math.min(n,200):n;
@@ -7883,115 +7883,77 @@ new MutationObserver(()=>{const p=document.querySelector('#cfgw .cfg-p');if(p)sk
 #alqb .alqi img,#pvab .alqi img{width:26px!important;height:26px!important;object-fit:cover;border-radius:7px}
 .alqw .supic img,.alqpots .supic img,.alqslot img{width:44px!important;height:44px!important;object-fit:cover;border-radius:10px}
 </style>
-<style id="patch-ev2-css">
-/* ===== EVENTOS en la barra de opciones (abajo), con animación de entrada y salida lateral ===== */
-#eva{display:none!important}
-#nav{display:flex!important;gap:8px}
-#nav>button{flex:1 1 0;min-width:0}
-#nav #nvE{position:relative;flex-direction:column;gap:3px;padding:0 2px;overflow:hidden;color:var(--t);cursor:pointer;
- background:linear-gradient(160deg,color-mix(in srgb,var(--a) 26%,transparent),color-mix(in srgb,var(--a) 8%,transparent))!important;
- box-shadow:inset 0 0 0 1.5px var(--a),0 6px 16px color-mix(in srgb,var(--a) 28%,transparent)!important;letter-spacing:0!important}
-#nav #nvE.off{display:none!important}
-#nav #nvE svg{width:26px;height:26px;fill:none!important;stroke:var(--a)!important;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;color:var(--a)}
-#nav #nvE .nvt{font-size:11px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1;letter-spacing:.02em}
-#nav #nvE::after{content:"";position:absolute;top:7px;right:9px;width:8px;height:8px;border-radius:50%;background:var(--a);box-shadow:0 0 0 0 color-mix(in srgb,var(--a) 60%,transparent);animation:nvPing 1.6s ease-out infinite}
-#nav #nvE.urg{box-shadow:inset 0 0 0 1.5px var(--r),0 6px 16px color-mix(in srgb,var(--r) 35%,transparent)!important}
-#nav #nvE.urg svg{stroke:var(--r)!important;color:var(--r)}#nav #nvE.urg .nvt{color:var(--r)}#nav #nvE.urg::after{background:var(--r)}
-@keyframes nvPing{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--a) 60%,transparent)}80%,100%{box-shadow:0 0 0 9px transparent}}
-@media(prefers-reduced-motion:reduce){#nav #nvE::after{animation:none}}
+<style id="patch-side-css">
+/* ===== AVISOS LATERALES: evento, invasión, informe y reparar como notificaciones en el borde derecho ===== */
+#eva,#iva,#rpb{display:none!important}
+#sn{position:absolute;right:0;top:calc(var(--hh,64px) + 10px);z-index:12;display:flex;flex-direction:column;align-items:flex-end;gap:8px;pointer-events:none;max-width:70%}
+#sn .sna{--nc:var(--a);pointer-events:auto;display:flex;align-items:center;gap:9px;margin:0;width:auto;min-width:0;padding:8px 20px 8px 10px;border:0;border-radius:16px 0 0 16px;text-align:left;cursor:pointer;color:var(--t);
+ background:linear-gradient(90deg,color-mix(in srgb,var(--nc) 22%,var(--s)),var(--s) 70%);
+ box-shadow:-6px 6px 18px rgba(0,0,0,.4),inset 3px 0 0 var(--nc),inset 0 0 0 1px color-mix(in srgb,var(--nc) 35%,transparent);
+ letter-spacing:0;overflow:hidden;will-change:transform}
+#sn .sna.inv{--nc:var(--r);order:1}#sn .sna.evt{--nc:var(--a);order:2}#sn .sna.rep{--nc:var(--b);order:3}#sn .sna.rpr{--nc:var(--b);order:4}
+#sn .sna i{flex:none;width:30px;height:30px;border-radius:10px;display:grid;place-items:center;color:var(--nc);background:color-mix(in srgb,var(--nc) 18%,transparent)}
+#sn .sna svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+#sn .sna span{display:flex;flex-direction:column;gap:2px;min-width:0;line-height:1.1}
+#sn .sna small{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--m)}
+#sn .sna b{font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:.01em;white-space:nowrap}
+#sn .sna{position:relative}#sn .sna.ping::after{content:"";position:absolute;top:7px;right:9px;width:7px;height:7px;border-radius:50%;background:var(--nc);animation:snPing 1.6s ease-out infinite}#sn .sna.urg::after{background:#fff}
+#sn .sna.urg{background:var(--r);box-shadow:-6px 6px 20px color-mix(in srgb,var(--r) 55%,transparent);animation:snUrg .8s ease-in-out infinite}
+#sn .sna.urg i{background:rgba(255,255,255,.2);color:#fff}#sn .sna.urg small,#sn .sna.urg b{color:#fff}
+@keyframes snPing{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--nc) 60%,transparent)}80%,100%{box-shadow:0 0 0 9px transparent}}
+@keyframes snUrg{50%{transform:translateX(-4px)}}
+@media(prefers-reduced-motion:reduce){#sn .sna.ping::after,#sn .sna.urg{animation:none}}
+@media(min-width:900px){#sn .sna b{font-size:17px}#sn .sna small{font-size:11px}}
 </style>
-<script id="patch-ev2-js">
-(function(){
-'use strict';
-const SV='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.2 5.4 5.8.5-4.4 3.8 1.4 5.7L12 15.3 7 18.4l1.4-5.7L4 8.9l5.8-.5z"/></svg>';
-let btn=null,state='off',anim=null; /* off | in | out */
-const gameOn=()=>{const g=document.getElementById('game');return g&&!g.classList.contains('hide')};
-const want=()=>{try{return !!(S&&S.evp&&gameOn())}catch(_){return false}};
-function mk(){
- const nav=document.getElementById('nav');if(!nav||!nav.children.length)return null;
- if(btn&&btn.parentNode===nav)return btn;
- btn=document.createElement('button');btn.id='nvE';btn.className='off';btn.setAttribute('aria-label','Evento pendiente');btn.title='Evento pendiente';
- btn.innerHTML=SV+'<span class="nvt">0:00</span>';btn.onclick=()=>{try{evUI()}catch(_){}};
- nav.appendChild(btn);state='off';return btn}
-const IN=[{flexGrow:0,opacity:0,transform:'translateX(70%) scale(.7)',marginLeft:'-8px'},{flexGrow:1,opacity:1,transform:'none',marginLeft:'0px'}];
-const OUT=[{flexGrow:1,opacity:1,transform:'none',marginLeft:'0px'},{flexGrow:0,opacity:0,transform:'translateX(70%) scale(.7)',marginLeft:'-8px'}];
-function show(){
- const b=mk();if(!b)return;
- if(anim){anim.cancel();anim=null}
- b.classList.remove('off');state='in';
- anim=b.animate(IN,{duration:520,easing:'cubic-bezier(.2,.9,.3,1.1)',fill:'none'});
- anim.onfinish=()=>{anim=null;state='on'};anim.oncancel=()=>{}}
-function hide(){
- if(!btn||state=='off'||state=='out')return;
- if(anim){anim.cancel();anim=null}
- state='out';
- anim=btn.animate(OUT,{duration:420,easing:'cubic-bezier(.5,0,.8,.4)',fill:'forwards'});
- const done=()=>{if(state!='out')return;anim=null;btn.classList.add('off');state='off'};
- anim.onfinish=done}
-function tick(){
- try{
-  const w=want();
-  if(w&&(state=='off'||state=='out'))show();
-  else if(!w&&(state=='in'||state=='on'))hide();
-  if(btn&&w&&S.evp){const ms=S.evp.exp-Date.now(),t=btn.querySelector('.nvt');
-   const txt=typeof mmss=='function'?mmss(ms):Math.ceil(ms/1000)+'s';if(t&&t.textContent!==txt)t.textContent=txt;
-   btn.classList.toggle('urg',ms<30000)}
- }catch(e){}}
-setInterval(tick,400);
-})();
-</script>
-<style id="patch-iv2-css">
-/* ===== INVASIÓN, INFORME y REPARAR también en la barra de abajo ===== */
-#iva,#rpb{display:none!important}
-#nav .nva{--nc:var(--r);position:relative;flex-direction:column;gap:3px;padding:0 2px;overflow:hidden;color:var(--t);cursor:pointer;
- background:linear-gradient(160deg,color-mix(in srgb,var(--nc) 26%,transparent),color-mix(in srgb,var(--nc) 8%,transparent))!important;
- box-shadow:inset 0 0 0 1.5px var(--nc),0 6px 16px color-mix(in srgb,var(--nc) 28%,transparent)!important;letter-spacing:0!important}
-#nav .nva.off{display:none!important}
-#nav .nva svg{width:26px;height:26px;fill:none!important;stroke:var(--nc)!important;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;color:var(--nc)}
-#nav .nva .nvt{font-size:10.5px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1;letter-spacing:.01em;white-space:nowrap}
-#nav .nva.ping::after{content:"";position:absolute;top:7px;right:9px;width:8px;height:8px;border-radius:50%;background:var(--nc);animation:nvPing2 1.6s ease-out infinite}
-#nav .nva.urg{background:var(--r)!important;box-shadow:0 6px 18px color-mix(in srgb,var(--r) 55%,transparent)!important;animation:nvUrg .8s ease-in-out infinite}
-#nav .nva.urg svg{stroke:#fff!important;color:#fff}#nav .nva.urg .nvt{color:#fff}#nav .nva.urg::after{background:#fff}
-#nav .nva.rep{--nc:var(--b)}
-@keyframes nvPing2{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--nc) 60%,transparent)}80%,100%{box-shadow:0 0 0 9px transparent}}
-@keyframes nvUrg{50%{transform:scale(1.05)}}
-@media(prefers-reduced-motion:reduce){#nav .nva.ping::after,#nav .nva.urg{animation:none}}
-</style>
-<script id="patch-iv2-js">
+<script id="patch-side-js">
 (function(){
 'use strict';
 const $=id=>document.getElementById(id);
-const IN=[{flexGrow:0,opacity:0,transform:'translateX(70%) scale(.7)',marginLeft:'-8px'},{flexGrow:1,opacity:1,transform:'none',marginLeft:'0px'}];
-const OUT=[{flexGrow:1,opacity:1,transform:'none',marginLeft:'0px'},{flexGrow:0,opacity:0,transform:'translateX(70%) scale(.7)',marginLeft:'-8px'}];
 const gameOn=()=>{const g=$('game');return g&&!g.classList.contains('hide')};
-function navAlert(id,svg,read,click){
- let btn=null,state='off',anim=null;
- const mk=()=>{const nav=$('nav');if(!nav||!nav.children.length)return null;if(btn&&btn.parentNode===nav)return btn;
-  btn=document.createElement('button');btn.id=id;btn.className='nva off';btn.innerHTML=svg+'<span class="nvt"></span>';btn.onclick=click;nav.appendChild(btn);state='off';return btn};
- const show=()=>{const b=mk();if(!b)return;if(anim){anim.cancel();anim=null}b.classList.remove('off');state='in';
-  anim=b.animate(IN,{duration:520,easing:'cubic-bezier(.2,.9,.3,1.1)'});anim.onfinish=()=>{anim=null;state='on'}};
- const hide=()=>{if(!btn||state=='off'||state=='out')return;if(anim){anim.cancel();anim=null}state='out';
-  anim=btn.animate(OUT,{duration:420,easing:'cubic-bezier(.5,0,.8,.4)',fill:'forwards'});
-  anim.onfinish=()=>{if(state!='out')return;anim=null;btn.classList.add('off');state='off'}};
+let box=null;
+const getBox=()=>{const g=$('game');if(!g)return null;if(box&&box.parentNode===g)return box;box=$('sn')||document.createElement('div');box.id='sn';g.appendChild(box);return box};
+const SHIELD='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 3v5.5c0 4.3-3 7.7-7 9.5-4-1.8-7-5.2-7-9.5V6z"/><path d="M12 8v5M12 16v.01"/></svg>';
+const STAR='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.2 5.4 5.8.5-4.4 3.8 1.4 5.7L12 15.3 7 18.4l1.4-5.7L4 8.9l5.8-.5z"/></svg>';
+const WRENCH='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 6.5a4 4 0 005 5L10 21a2.1 2.1 0 01-3-3z"/><path d="M14.5 6.5l3-3a4 4 0 00-5 5z"/></svg>';
+const SCROLL='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h10a2 2 0 012 2v14l-3-2-2 2-2-2-2 2-2-2-3 2V5a2 2 0 012-2z"/><path d="M9 8h6M9 12h6"/></svg>';
+/* un aviso: entra deslizándose desde el borde y, al terminar, se va por el mismo lado */
+function note(cls,svg,read,click){
+ let el=null,state='off',anim=null;
+ const mk=()=>{const b=getBox();if(!b)return null;if(el&&el.parentNode===b)return el;
+  el=document.createElement('button');el.className='sna '+cls;el.innerHTML='<i>'+svg+'</i><span><small></small><b></b></span>';el.onclick=click;b.appendChild(el);return el};
+ const show=()=>{const e=mk();if(!e)return;if(anim){anim.cancel();anim=null}
+  e.style.display='';e.style.height='';e.style.marginBottom='';state='in';
+  anim=e.animate([{transform:'translateX(110%)',opacity:0},{transform:'translateX(-6px)',opacity:1,offset:.7},{transform:'none',opacity:1}],{duration:520,easing:'cubic-bezier(.2,.8,.3,1)'});
+  anim.onfinish=()=>{anim=null;state='on'}};
+ const hide=()=>{if(!el||state=='off'||state=='out')return;if(anim){anim.cancel();anim=null}state='out';
+  const e=el,h=e.offsetHeight;
+  anim=e.animate([{transform:'none',opacity:1},{transform:'translateX(115%)',opacity:0}],{duration:380,easing:'cubic-bezier(.5,0,.9,.4)',fill:'forwards'});
+  anim.onfinish=()=>{if(state!='out')return;
+   /* el hueco se cierra suavemente para que los demás avisos no den un salto */
+   anim=e.animate([{height:h+'px',marginBottom:'0px'},{height:'0px',marginBottom:'-8px'}],{duration:200,easing:'ease-out',fill:'forwards'});
+   anim.onfinish=()=>{if(state!='out')return;anim=null;e.style.display='none';state='off'}}};
  return ()=>{try{
   const r=gameOn()&&S?read():null;
   if(r&&(state=='off'||state=='out'))show();else if(!r&&(state=='in'||state=='on'))hide();
-  if(btn&&r){const t=btn.querySelector('.nvt');if(t&&t.textContent!==r.text)t.textContent=r.text;
-   btn.classList.toggle('urg',!!r.urg);btn.classList.toggle('ping',!!r.ping);btn.classList.toggle('rep',!!r.rep);btn.title=r.label||'';btn.setAttribute('aria-label',r.label||'')}
+  if(el&&r){const s=el.querySelector('small'),b=el.querySelector('b');
+   if(s.textContent!==r.label)s.textContent=r.label;if(b.textContent!==r.text)b.textContent=r.text;
+   el.classList.toggle('urg',!!r.urg);el.classList.toggle('ping',!!r.ping)}
  }catch(e){}}}
-const SHIELD='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 3v5.5c0 4.3-3 7.7-7 9.5-4-1.8-7-5.2-7-9.5V6z"/><path d="M12 8v5M12 16v.01"/></svg>';
-const SCROLL='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h10a2 2 0 012 2v14l-3-2-2 2-2-2-2 2-2-2-3 2V5a2 2 0 012-2z"/><path d="M9 8h6M9 12h6"/></svg>';
-const WRENCH='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 6.5a4 4 0 005 5L10 21a2.1 2.1 0 01-3-3z"/><path d="M14.5 6.5l3-3a4 4 0 00-5 5z" /></svg>';
-const inv=navAlert('nvI',SHIELD,()=>{
+const mmssF=ms=>typeof mmss=='function'?mmss(ms):Math.max(0,Math.ceil(ms/1000))+'s';
+const evt=note('evt',STAR,()=>{if(!S.evp)return null;const ms=S.evp.exp-Date.now();return{label:'Evento',text:mmssF(ms),urg:ms<30000,ping:true}},()=>{try{evUI()}catch(_){}});
+const inv=note('inv',SHIELD,()=>{
  const o=$('iva');if(!o||o.classList.contains('hide'))return null;
- const rep=!S.iv&&/Informe/.test(o.textContent);
+ if(!S.iv&&/Informe/.test(o.textContent))return null;
  const m=o.textContent.match(/\d+:\d+/);
- return {text:rep?'Informe':(m?m[0]:o.textContent),urg:o.classList.contains('ivurg'),ping:!rep,rep:rep,label:o.textContent}},
- ()=>{try{S.iv?ivUI():ivReport()}catch(_){}});
-const rpr=navAlert('nvR',WRENCH,()=>{
+ return{label:/Demon/i.test(o.textContent)?'Demoníaca':'Invasión',text:m?m[0]:o.textContent,urg:o.classList.contains('ivurg'),ping:true}},
+ ()=>{try{ivUI()}catch(_){}});
+const rep=note('rep',SCROLL,()=>{
+ const o=$('iva');if(!o||o.classList.contains('hide')||S.iv||!/Informe/.test(o.textContent))return null;
+ return{label:'Invasión',text:'Informe'}},()=>{try{ivReport()}catch(_){}});
+const rpr=note('rpr',WRENCH,()=>{
  const o=$('rpb');if(!o)return null;const m=o.textContent.match(/\d+/);
- return {text:'Reparar '+(m?m[0]:''),rep:true,label:o.textContent}},()=>{try{repairList()}catch(_){}});
-setInterval(()=>{inv();rpr()},350);
+ return{label:'Reparar',text:(m?m[0]:'')+' dañados'}},()=>{try{repairList()}catch(_){}});
+setInterval(()=>{evt();inv();rep();rpr()},350);
 })();
 </script>
 </body></html>
