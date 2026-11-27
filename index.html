@@ -3874,7 +3874,7 @@ setInterval(()=>{try{if(!S||S.slot==null||document.getElementById('game').classL
 /* ===== NUBE (Firebase): cuentas y guardado de partidas. Usuario -> correo interno usuario@ciudad-juego.app ===== */
 import {initializeApp} from "https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js";
 import {getAuth,createUserWithEmailAndPassword,signInWithEmailAndPassword,signOut,onAuthStateChanged,setPersistence,browserLocalPersistence} from "https://www.gstatic.com/firebasejs/13.1.0/firebase-auth.js";
-import {getFirestore,doc,getDoc,setDoc,deleteField,collection,query,where,getDocs,onSnapshot,updateDoc,deleteDoc,limit,orderBy,Bytes} from "https://www.gstatic.com/firebasejs/13.1.0/firebase-firestore.js";
+import {getFirestore,doc,getDoc,setDoc,deleteField,collection,query,where,getDocs,onSnapshot,updateDoc,deleteDoc,limit,orderBy,Bytes,runTransaction} from "https://www.gstatic.com/firebasejs/13.1.0/firebase-firestore.js";
 const firebaseConfig={apiKey:"AIzaSyCKxDVVyXXaZYSlw-cf1hc5LnrJWSi1KIA",authDomain:"ciudad-7f809.firebaseapp.com",projectId:"ciudad-7f809",storageBucket:"ciudad-7f809.firebasestorage.app",messagingSenderId:"855919527872",appId:"1:855919527872:web:1a31a3b9aa5cb9c1bcea25"};
 const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app);
 setPersistence(auth,browserLocalPersistence).catch(()=>{});
@@ -3988,6 +3988,9 @@ function onB(side){return sn=>sn.docChanges().forEach(async c=>{if(c.type=='remo
  if(r.estado=='activa'){if(inB)return;inB=true;await window.Cloud.stopSearch();dispatchEvent(new CustomEvent('cloudbattle',{detail:{r,me:uid}}))}
  else if(side=='b'&&r.estado=='pendiente'){
   if(r.tipo=='publica'){if(searching&&!inB){try{await window.Cloud.acceptBattle(r.id)}catch(e){}}else{try{await updateDoc(doc(db,'batallas',r.id),{estado:'rechazada',t:Date.now()})}catch(e){}}}
+  else if(r.tipo=='reto'){const w=window.Cloud._rw;
+   if(w&&w.from===r.a&&!inB){window.Cloud._rw=null;try{await window.Cloud.acceptBattle(r.id)}catch(e){console.warn(e)}}
+   else{try{await updateDoc(doc(db,'batallas',r.id),{estado:'rechazada',t:Date.now()})}catch(e){}}}
   else dispatchEvent(new CustomEvent('cloudchallenge',{detail:{r}}))}
  else if(side=='a'&&r.estado=='rechazada'){pend.delete(r.id);try{await deleteDoc(doc(db,'batallas',r.id))}catch(e){}}})}
 function listenB(){bun.forEach(f=>{try{f()}catch(e){}});const q=f=>query(collection(db,'batallas'),where(f,'==',uid));
@@ -4020,12 +4023,12 @@ onAuthStateChanged(auth,async u=>{
    window.__uid=nx;
    if(act&&vis){location.reload();return}}
   else window.__uid=nx}
- if(u){uid=u.uid;musicListen();try{const a=await getDoc(doc(db,'config','admin'));window.Cloud.admUid=a.exists()?a.data().uid:null;window.Cloud.admLoaded=true}catch(e){}window.Cloud.name=(u.email||'').split('@')[0];
+ if(u){uid=u.uid;musicListen();try{const a=await getDoc(doc(db,'config','admin'));window.Cloud.admUid=a.exists()?a.data().uid:null;window.Cloud.admLoaded=true}catch(e){}imgListen();window.Cloud.name=(u.email||'').split('@')[0];
   window.LD&&LD.set(45,'Cargando tu cuenta…');try{await setDoc(doc(db,'jugadores',uid),{nombre:window.Cloud.name},{merge:true});window.LD&&LD.set(60,'Cargando tus partidas…');await pull()}catch(e){console.warn(e);refresh()}
   window.LD&&LD.set(80,'Cargando tu perfil…');
   try{await ensureProfile();listen()}catch(e){console.warn('perfil',e)}
   notify();refresh();window.LD&&LD.done()}
- else{unlisten();musicStop();uid=null;window.Cloud.name=null;window.Cloud.me=null;notify();refresh();window.LD&&LD.done()}});
+ else{unlisten();musicStop();imgStop();uid=null;window.Cloud.name=null;window.Cloud.me=null;notify();refresh();window.LD&&LD.done()}});
 /* ===== CHAT GLOBAL y SUGERENCIAS DE AMIGOS ===== */
 Object.assign(window.Cloud,{
  chatListen(cb){return onSnapshot(query(collection(db,'chat'),orderBy('t','desc'),limit(120)),sn=>{const l=sn.docs.map(d=>({id:d.id,...d.data()})).reverse();window.Cloud._chatCut=l.length>=120?l[0].t:0;cb(l)},e=>{console.warn('chat',e);cb([],e)})},
@@ -4038,6 +4041,54 @@ Object.assign(window.Cloud,{
  typingListen(cb){return onSnapshot(collection(db,'chat_typing'),sn=>cb(sn.docs.filter(d=>d.id!==uid).map(d=>d.data())),e=>console.warn('typing',e))},
  async typingSet(on){if(!uid)return;const n=Date.now();if(on&&n-(window.Cloud._tt||0)<2000)return;window.Cloud._tt=on?n:0;
   try{await setDoc(doc(db,'chat_typing',uid),{nombre:(window.Cloud.me&&window.Cloud.me.nombre)||window.Cloud.name,t:on?n:0})}catch(e){}},
+ pvpOk(){try{const e=S.b.find(b=>b.type=='est');return !!e&&(e.lv||1)>=2}catch(e){return false}},
+ _rref(o,id){return o?doc(db,'chat_priv',window.Cloud.pmPair(o),'m',id):doc(db,'chat',id)},
+ async retoSend(o){
+  if(!uid||!window.Cloud.me)throw new Error('Necesitas una cuenta.');
+  if(!team().length)throw new Error('Entra a una partida con un héroe equipado.');
+  if(!window.Cloud.pvpOk())throw new Error('La batalla en línea se desbloquea con el Establecimiento nivel 2.');
+  const n=Date.now(),rt=window.Cloud._rt;if(rt&&!rt.done&&n<rt.exp)throw new Error('Ya tienes un reto abierto. Cancélalo para enviar otro.');
+  const ref=o?doc(collection(db,'chat_priv',window.Cloud.pmPair(o),'m')):doc(collection(db,'chat'));
+  const x={ref,id:ref.id,o:o||null,exp:n+300000,done:false};window.Cloud._rt=x;
+  try{await setDoc(ref,{uid,nombre:window.Cloud.me.nombre||window.Cloud.name,color:window.Cloud.me.color||'',txt:'',tipo:'reto',estado:'abierto',exp:x.exp,t:n})}
+  catch(e){window.Cloud._rt=null;throw e}
+  x.un=onSnapshot(ref,async sn=>{const d=sn.data();if(!d||x.done)return;
+   if(d.estado=='aceptado'&&d.por){x.done=true;try{x.un()}catch(e){}clearTimeout(x.tm);
+    if(inB||!team().length){dispatchEvent(new CustomEvent('retoevent',{detail:{t:'error',msg:'No se pudo iniciar el reto porque ya estás en otra batalla.'}}));return}
+    try{await setDoc(doc(db,'batallas',uid+'_'+d.por),{a:uid,b:d.por,aN:window.Cloud.name,bN:d.porN||'Rival',ta:team(),ua:window.Cloud.supplies(),estado:'pendiente',tipo:'reto',t:Date.now()});
+     dispatchEvent(new CustomEvent('retoevent',{detail:{t:'aceptado',nombre:d.porN||'Un jugador'}}))}
+    catch(e){console.warn(e);dispatchEvent(new CustomEvent('retoevent',{detail:{t:'error',msg:'No se pudo iniciar la batalla del reto.'}}))}}
+   else if(d.estado=='cancelado'){x.done=true;try{x.un()}catch(e){}clearTimeout(x.tm)}},e=>console.warn('reto',e));
+  x.tm=setTimeout(()=>{x.done=true;try{x.un()}catch(e){}},x.exp-n+1500)},
+ async retoCancel(m,o){const ref=window.Cloud._rref(o,m.id);
+  try{await runTransaction(db,async tx=>{const sn=await tx.get(ref);if(!sn.exists())return;if(sn.data().estado!=='abierto')throw new Error('Ese reto ya fue aceptado.');tx.update(ref,{estado:'cancelado'})})}
+  catch(e){if(e&&e.code=='permission-denied')throw new Error('No se pudo cancelar el reto. Revisa las reglas de Firestore.');throw e}
+  const rt=window.Cloud._rt;if(rt&&rt.id==m.id){rt.done=true;try{rt.un()}catch(e){}clearTimeout(rt.tm)}},
+ async retoAccept(m,o){
+  if(!uid||!window.Cloud.me)throw new Error('Necesitas una cuenta.');
+  if(m.uid===uid)throw new Error('No puedes aceptar tu propio reto.');
+  if(!team().length)throw new Error('Entra a una partida con un héroe equipado.');
+  if(!window.Cloud.pvpOk())throw new Error('La batalla en línea se desbloquea con el Establecimiento nivel 2.');
+  if(inB)throw new Error('Ya estás en una batalla.');
+  const ref=window.Cloud._rref(o,m.id);window.Cloud._rw={from:m.uid};
+  try{await runTransaction(db,async tx=>{const sn=await tx.get(ref);if(!sn.exists())throw new Error('Ese reto ya no está disponible.');const d=sn.data();
+    if(d.estado!=='abierto'||Date.now()>=(d.exp||0))throw new Error('Ese reto ya no está disponible.');
+    tx.update(ref,{estado:'aceptado',por:uid,porN:window.Cloud.name})})}
+  catch(e){window.Cloud._rw=null;if(e&&e.code=='permission-denied')throw new Error('No se pudo aceptar el reto. Revisa las reglas de Firestore para la colección «chat».');throw e}
+  setTimeout(()=>{const w=window.Cloud._rw;if(w&&w.from===m.uid){window.Cloud._rw=null;dispatchEvent(new CustomEvent('retoevent',{detail:{t:'sinrespuesta',nombre:m.nombre}}))}},30000)},
+ pmPair(o){return [uid,o].sort().join('_')},
+ pmListen(o,cb){return onSnapshot(collection(db,'chat_priv',window.Cloud.pmPair(o),'m'),sn=>cb(sn.docs.map(d=>({id:d.id,...d.data()}))),e=>{console.warn('chat privado',e);cb([],e)})},
+ pmPresListen(o,cb){return onSnapshot(doc(db,'chat_priv',window.Cloud.pmPair(o),'p',o),sn=>cb(sn.exists()?sn.data():null),e=>console.warn('presencia',e))},
+ async pmSend(o,txt){txt=String(txt||'').trim().slice(0,300);if(!txt)return;
+  if(!uid||!window.Cloud.me)throw new Error('Necesitas una cuenta.');
+  const n=Date.now();if(n-(window.Cloud._pt||0)<800)throw new Error('Espera un momento antes de enviar otro mensaje.');window.Cloud._pt=n;
+  await setDoc(doc(collection(db,'chat_priv',window.Cloud.pmPair(o),'m')),{uid,nombre:window.Cloud.me.nombre||window.Cloud.name,color:window.Cloud.me.color||'',txt,t:n})},
+ async pmPing(o,ty){if(!uid)return;const n=Date.now();if(ty&&n-(window.Cloud._pg||0)<2000)return;if(ty)window.Cloud._pg=n;
+  try{await setDoc(doc(db,'chat_priv',window.Cloud.pmPair(o),'p',uid),ty?{t:n,ty:n}:{t:n,ty:0},{merge:true})}catch(e){console.warn('presencia',e)}},
+ async pmPurgeIfAlone(o){try{const pr=window.Cloud.pmPair(o),s=await getDoc(doc(db,'chat_priv',pr,'p',o));
+  if(s.exists()&&Date.now()-(s.data().t||0)<60000)return;
+  const r=await getDocs(collection(db,'chat_priv',pr,'m'));await Promise.all(r.docs.map(d=>deleteDoc(d.ref)))}catch(e){console.warn('chat privado purge',e)}},
+ async pmLeave(o){try{await deleteDoc(doc(db,'chat_priv',window.Cloud.pmPair(o),'p',uid))}catch(e){}await window.Cloud.pmPurgeIfAlone(o)},
  async suggest(){if(!uid)return [];const r=await getDocs(query(collection(db,'perfiles'),limit(80)));
   const a=r.docs.filter(d=>d.id!==uid&&d.data().nombre&&d.data().pid&&window.Cloud.relation(d.id)==null).map(d=>({uid:d.id,nombre:d.data().nombre,pid:d.data().pid,color:d.data().color||colorOf(d.data().nombre)}));
   for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}
@@ -4081,6 +4132,50 @@ Object.assign(window.Cloud,{
 });
 function musicListen(){if(mun)return;mun=onSnapshot(collection(db,'musica'),sn=>dispatchEvent(new CustomEvent('cloudmusic',{detail:{fromCache:sn.metadata.fromCache,list:sn.docs.map(d=>d.data())}})),e=>console.warn('musica',e))}
 function musicStop(){if(mun){mun();mun=null}}
+
+/* ===== IMÁGENES COMPARTIDAS: el administrador cambia una imagen y la reciben todas las cuentas y dispositivos (colección «imagenes» en Firestore) =====
+   Cubre: iconos de suministros (ciudad-supimg), botones Suministros/Alquimia (ciudad-advbtn) y el Boticario: imágenes, nombre y textos (ciudad-botic).
+   El juego sigue leyendo de localStorage como siempre; aquí solo se publica lo que cambia el administrador y se copia lo que llega de la nube. */
+const IMK={sup:'ciudad-supimg',adv:'ciudad-advbtn',bot:'ciudad-botic'},IMV=new Set(Object.values(IMK));
+let iun=null,iapply=false,iwarn=0;
+const rawSet=Storage.prototype.setItem;
+const jp=t=>{try{const o=JSON.parse(t||'{}');return o&&typeof o=='object'?o:{}}catch(e){return {}}};
+const isAdm=()=>!!uid&&window.Cloud.admUid===uid;
+const iid=(g,k)=>g+'__'+mid(k);
+const iwarnMsg=e=>{console.warn('imagenes',e);if(Date.now()-iwarn<8000)return;iwarn=Date.now();try{if(typeof notice=='function')notice('Imágenes',e&&e.code=='permission-denied'?'La imagen se guardó solo en este dispositivo: faltan las reglas de Firestore para «imagenes» (solo el administrador publica).':'La imagen se guardó solo en este dispositivo: no se pudo publicar para todos.')}catch(_){}};
+function imgPush(key,oldS,newS){
+ if(!isAdm())return;
+ const o=jp(oldS),n=jp(newS),ops=[];
+ const diff=(g,a,b)=>{for(const k in b)if(a[k]!==b[k])ops.push(setDoc(doc(db,'imagenes',iid(g,k)),{g,k,u:b[k],t:Date.now()}));for(const k in a)if(!(k in b))ops.push(deleteDoc(doc(db,'imagenes',iid(g,k))))};
+ if(key===IMK.sup)diff('sup',o,n);
+ else if(key===IMK.adv)diff('adv',o,n);
+ else if(key===IMK.bot){diff('bot',o.img||{},n.img||{});
+  if(JSON.stringify([o.name,o.txt])!==JSON.stringify([n.name,n.txt]))ops.push(setDoc(doc(db,'imagenes','botcfg'),{g:'botcfg',name:n.name||'',txt:n.txt||{},t:Date.now()}))}
+ ops.forEach(p=>p.catch(iwarnMsg))}
+Storage.prototype.setItem=function(k,v){
+ const w=this===localStorage&&IMV.has(k)&&!iapply;let old=null;
+ if(w){try{old=this.getItem(k)}catch(e){}}
+ rawSet.call(this,k,v);
+ if(w){try{imgPush(k,old,v)}catch(e){console.warn(e)}}};
+function imgApply(key,val){const cur=localStorage.getItem(key),t=JSON.stringify(val);if(cur===t)return false;iapply=true;try{rawSet.call(localStorage,key,t)}catch(e){console.warn('imagenes: no cabe en este dispositivo',e)}finally{iapply=false}return true}
+function imgListen(){if(iun)return;
+ iun=onSnapshot(collection(db,'imagenes'),sn=>{
+  if(sn.metadata.fromCache&&sn.empty)return;
+  const sup={},adv={},bimg={};let cfg=null;
+  sn.docs.forEach(d=>{const x=d.data();if(x.g=='sup')sup[x.k]=x.u;else if(x.g=='adv')adv[x.k]=x.u;else if(x.g=='bot')bimg[x.k]=x.u;else if(x.g=='botcfg')cfg=x});
+  /* una sola vez por dispositivo: el administrador sube lo que ya tenía guardado aquí y todavía no está en la nube */
+  if(!sn.metadata.fromCache&&isAdm()&&!localStorage.getItem('ciudad-imgseed')){
+   const lsup=jp(localStorage.getItem(IMK.sup)),ladv=jp(localStorage.getItem(IMK.adv)),lbot=jp(localStorage.getItem(IMK.bot)),ops=[];
+   const miss=(g,loc,cl)=>{for(const k in loc)if(loc[k]&&!(k in cl)){cl[k]=loc[k];ops.push(setDoc(doc(db,'imagenes',iid(g,k)),{g,k,u:loc[k],t:Date.now()}))}};
+   miss('sup',lsup,sup);miss('adv',ladv,adv);miss('bot',lbot.img||{},bimg);
+   if(!cfg&&(lbot.name||(lbot.txt&&Object.keys(lbot.txt).length))){cfg={g:'botcfg',name:lbot.name||'',txt:lbot.txt||{}};ops.push(setDoc(doc(db,'imagenes','botcfg'),{...cfg,t:Date.now()}))}
+   Promise.all(ops.map(p=>p.catch(e=>{iwarnMsg(e);throw e}))).then(()=>{try{rawSet.call(localStorage,'ciudad-imgseed','1')}catch(e){}}).catch(()=>{})}
+  let ch=false;
+  ch=imgApply(IMK.sup,sup)||ch;ch=imgApply(IMK.adv,adv)||ch;
+  const lb=jp(localStorage.getItem(IMK.bot)),ob={...lb,img:bimg};if(cfg){ob.name=cfg.name||lb.name;ob.txt=cfg.txt||{}}
+  ch=imgApply(IMK.bot,ob)||ch;
+  if(ch)dispatchEvent(new CustomEvent('cloudimages'))},e=>console.warn('imagenes',e))}
+function imgStop(){if(iun){iun();iun=null}}
 const flush=()=>{for(const n of Object.keys(timers))sendNow(+n)};
 addEventListener('pagehide',flush);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')flush()});
 refresh();
@@ -4386,27 +4481,38 @@ window.AR={
 window.pvpMenu=()=>AR.open('duelo'); /* el botón Batalla del menú abre la Arena */
 /* ---------- panel lateral de amistades (corazón) ---------- */
 let fOpen=false,fl=[],fsel=null,fdet=null,fload=false,ft=null;
-let fchat=false,cmsgs=[],cerr=null,cunsub=null,fsug=[],fsugLoad=false;
+let fchat=false,cmsgs=[],cerr=null,cunsub=null,fsug=[],fsugLoad=false,fpm=null,PM={};
 let fmode='list',faq='',fares=null,fanote='',faerr=false;
 const sugNo=()=>{try{return JSON.parse(localStorage.getItem('ciudad-sugno')||'[]')}catch(e){return[]}};
-function chatStop(){if(cunsub){try{cunsub()}catch(e){}cunsub=null}if(ctun){try{ctun()}catch(e){}ctun=null}clearInterval(ctiv);ctyp=[];try{C()&&C().typingSet&&C().typingSet(false)}catch(e){}}
+function chatStop(){if(cunsub){try{cunsub()}catch(e){}cunsub=null}if(ctun){try{ctun()}catch(e){}ctun=null}clearInterval(ctiv);ctyp=[];try{C()&&C().typingSet&&C().typingSet(false)}catch(e){}
+ if(fpm){const o=fpm.uid;fpm=null;clearInterval(PM.hb);try{C().pmLeave(o)}catch(e){}}PM={}}
 function chatPaint(){const l=$$('chl');if(!l)return;const near=l.scrollHeight-l.scrollTop-l.clientHeight<80,my=C()&&C().name;
  const fmt=t=>{try{return new Date(t).toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'})}catch(e){return ''}};
  const dk=t=>new Date(t||0).toDateString();
  const dl=t=>{const d=new Date(t),n=new Date(),y=new Date(n-864e5);return d.toDateString()==n.toDateString()?'Hoy':d.toDateString()==y.toDateString()?'Ayer':d.toLocaleDateString('es',{day:'numeric',month:'long'})};
- const same=(a,b)=>!!a&&!!b&&a.nombre===b.nombre&&dk(a.t)==dk(b.t)&&Math.abs((b.t||0)-(a.t||0))<3e5;
+ const same=(a,b)=>!!a&&!!b&&a.tipo!='reto'&&b.tipo!='reto'&&a.nombre===b.nombre&&dk(a.t)==dk(b.t)&&Math.abs((b.t||0)-(a.t||0))<3e5;
  let h='';
- if(cerr)h='<p class="nt er">No se pudo abrir el chat. Revisa que las reglas de Firestore permitan leer y escribir la colección «chat».</p>';
- else if(!cmsgs.length)h='<div class="che"><b>Aún no hay mensajes</b><span>Escribe el primero para empezar la conversación.</span></div>';
+ if(cerr)h=fpm?'<p class="nt er">No se pudo abrir el chat privado. Revisa que las reglas de Firestore permitan leer y escribir la colección «chat_priv».</p>':'<p class="nt er">No se pudo abrir el chat. Revisa que las reglas de Firestore permitan leer y escribir la colección «chat».</p>';
+ else if(!cmsgs.length)h=fpm?'<div class="che"><b>Chat privado</b><span>Solo ustedes dos ven esta conversación. Los mensajes no se guardan: se borran cuando ambos salen del chat.</span></div>':'<div class="che"><b>Aún no hay mensajes</b><span>Escribe el primero para empezar la conversación.</span></div>';
  else cmsgs.forEach((m,i)=>{const p=cmsgs[i-1],n=cmsgs[i+1],first=!same(p,m),last=!same(m,n),mine=m.nombre===my;
   if(!p||dk(p.t)!=dk(m.t))h+=`<div class="chd">${m.t?dl(m.t):''}</div>`;
-  h+=`<div class="cmg${mine?' me':''}${first?'':' g'}">${mine?'':last?av(m.color||colorOf(m.nombre),m.nombre,28):'<span class="avs"></span>'}<div class="cb">${first&&!mine?`<b>${admTag(m.uid)}${esc(m.nombre)}</b>`:''}<span>${esc(m.txt)}</span>${last&&m.t?`<time>${fmt(m.t)}</time>`:''}</div></div>`});
+  if(m.tipo=='reto'){h+=retoCard(m,mine);return}
+  h+=`<div class="cmg${mine?' me':''}${first?'':' g'}">${mine?'':last?av(m.color||colorOf(m.nombre),m.nombre,28):'<span class="avs"></span>'}<div class="cb">${first&&!mine&&!fpm?`<b>${admTag(m.uid)}${esc(m.nombre)}</b>`:''}<span>${esc(m.txt)}</span>${last&&m.t?`<time>${fmt(m.t)}</time>`:''}</div></div>`});
  l.innerHTML=h;
  if(near)l.scrollTop=l.scrollHeight}
 let ctyp=[],ctun=null,ctiv=null;
-function typPaint(){const e=$$('cty');if(!e)return;const n=Date.now(),L=ctyp.filter(x=>x&&x.t>0&&n-x.t<6000).map(x=>x.nombre).filter(Boolean);
+const mmss=ms=>{const t=Math.max(0,Math.ceil(ms/1000));return Math.floor(t/60)+':'+String(t%60).padStart(2,'0')};
+function retoCard(m,mine){const now=Date.now();if(m.estado=='cancelado'||(m.exp||0)<=now)return '';
+ const who=esc(m.nombre||'Jugador'),acc=m.estado=='aceptado';
+ const tt=mine?(fpm?'Enviaste un reto a '+esc(fpm.nombre):'Tu reto está abierto'):(fpm?who+' te reta':who+' lanza un reto');
+ const sub=mine?(fpm?'Esperando su respuesta.':'Cualquier jugador puede aceptarlo.'):'Batalla normal: suma o resta puntos de Arena.';
+ const act=acc?`<button disabled>Aceptado por ${esc(m.porN||'un jugador')}</button>`:mine?`<button onclick="FR.retoCan('${esc(m.id)}')">Cancelar reto</button>`:`<button class="pri" onclick="FR.retoAcc('${esc(m.id)}')">Aceptar reto</button>`;
+ return `<div class="crt${mine?' me':''}" data-exp="${m.exp}" data-st="${acc?'a':'o'}"><b>${tt}</b><span class="m">${sub}</span><div class="crt-r"><span class="crt-t">${acc?'':mmss(m.exp-now)}</span>${act}</div></div>`}
+function retoTick(){document.querySelectorAll('.crt[data-exp]').forEach(e=>{const r=+e.dataset.exp-Date.now();if(r<=0){e.remove();return}const t=e.querySelector('.crt-t');if(t&&e.dataset.st=='o')t.textContent=mmss(r)})}
+function pmStatus(){const e=$$('pms');if(!e||!fpm)return;const p=PM.op,on=!!p&&Date.now()-(p.t||0)<60000;e.textContent=on?'En el chat ahora':'Fuera del chat · no recibirá tus mensajes'}
+function typPaint(){if(fpm)pmStatus();retoTick();const e=$$('cty');if(!e)return;const n=Date.now(),L=ctyp.filter(x=>x&&x.t>0&&n-x.t<6000).map(x=>x.nombre).filter(Boolean);
  e.innerHTML=L.length?`<i></i><i></i><i></i><span>${esc(L.length>2?L.slice(0,2).join(', ')+' y otros':L.join(' y '))} ${L.length>1?'están escribiendo':'está escribiendo'}</span>`:''}
-const chatShell=()=>`<div id="chl" class="chl"></div><div id="cty" class="cty"></div><div class="chi"><input id="chi" maxlength="300" placeholder="Escribe un mensaje" autocomplete="off" oninput="FR.typ();chCnt(this)" onkeydown="if(event.key=='Enter')FR.send()"><span id="chc" class="chc"></span><button class="chs" aria-label="Enviar mensaje" onclick="FR.send()"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4z"/></svg></button></div>`;
+const chatShell=()=>`<div id="chl" class="chl"></div><div id="cty" class="cty"></div><div class="chi"><input id="chi" maxlength="300" placeholder="Escribe un mensaje" autocomplete="off" oninput="FR.typ();chCnt(this)" onkeydown="if(event.key=='Enter')FR.send()"><span id="chc" class="chc"></span><button class="chr" onclick="FR.reto()">Retar</button><button class="chs" aria-label="Enviar mensaje" onclick="FR.send()"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4z"/></svg></button></div>`;
 window.chCnt=i=>{const c=document.getElementById('chc');if(c){const n=i.value.length;c.textContent=n>220?(300-n):''}};
 const sugHtml=()=>{const L=fsug.filter(p=>!(C()&&C().relation&&C().relation(p.uid)));return `<div class="subh" style="margin-top:14px">Sugerencias de amigos</div>`+(fsugLoad&&!L.length?'<p class="m">Buscando jugadores…</p>':L.length?L.map(p=>`<div class="fr">${av(p.color,p.nombre,34)}<div class="gr"><b>${esc(p.nombre)}</b><br><span class="m">ID ${esc(p.pid||'—')}</span></div><div class="bt"><button class="sm" onclick="FR.inv('${esc(p.uid)}')">Invitar</button><button class="sm" onclick="FR.noinv('${esc(p.uid)}')">No invitar</button></div></div>`).join(''):'<p class="m">No hay más sugerencias por ahora.</p>')};
 async function sLoad(){if(!C()||!C().name||!C().suggest)return;fsugLoad=true;try{const no=sugNo();fsug=(await C().suggest()).filter(p=>!no.includes(p.uid))}catch(e){fsug=[]}fsugLoad=false;if(fOpen&&!fdet&&!fchat)fDraw()}
@@ -4416,7 +4522,7 @@ function fTabs(){const n=C().incoming?C().incoming().length:0;return `<div class
 function fList(){if(fload&&!fl.length)return '<p class="m">Cargando…</p>';
  if(!fl.length)return '<div class="fr-empty"><b>Aún no tienes amigos</b><span class="m">Búscalos por nombre o ID en la pestaña Agregar.</span><button class="pri" onclick="FR.tab(\'add\')">Agregar amigos</button></div>';
  return fl.map(d=>{const L=d.arena&&LV[d.arena.lv],on=online(d),s=fsel==d.uid;
-  return `<div class="frw2${s?' on':''}"><button class="frh2" onclick="FR.sel('${esc(d.uid)}')"><span class="frav">${av(d.color,d.nombre,40)}${on==null?'':`<i class="dot ${on?'on':''}"></i>`}</span><span class="gr"><b>${admTag(d.uid)}${esc(d.nombre)}</b><span class="m">${on==null?'':on?'En línea':'Sin conexión'}${L?` · <span style="color:${L.c}">${L.name}</span>`:''}</span></span>${CHV}</button>${s?`<div class="fra2"><button class="pri" onclick="FR.go('${esc(d.uid)}','p')">Ver perfil</button><button class="pri" onclick="FR.map('${esc(d.uid)}')">Ver mapa</button><button class="frret" onclick="FR.ret('${esc(d.uid)}')">Retar a un duelo</button><button class="frret frdel" onclick="FR.del('${esc(d.uid)}')">Quitar de amigos</button></div>`:''}</div>`}).join('')}
+  return `<div class="frw2${s?' on':''}"><button class="frh2" onclick="FR.sel('${esc(d.uid)}')"><span class="frav">${av(d.color,d.nombre,40)}${on==null?'':`<i class="dot ${on?'on':''}"></i>`}</span><span class="gr"><b>${admTag(d.uid)}${esc(d.nombre)}</b><span class="m">${on==null?'':on?'En línea':'Sin conexión'}${L?` · <span style="color:${L.c}">${L.name}</span>`:''}</span></span>${CHV}</button>${s?`<div class="fra2"><button class="pri frmsg" onclick="FR.pchat('${esc(d.uid)}')">Enviar mensaje</button><button class="pri" onclick="FR.go('${esc(d.uid)}','p')">Ver perfil</button><button class="pri" onclick="FR.map('${esc(d.uid)}')">Ver mapa</button><button class="frret" onclick="FR.ret('${esc(d.uid)}')">Retar a un duelo</button><button class="frret frdel" onclick="FR.del('${esc(d.uid)}')">Quitar de amigos</button></div>`:''}</div>`}).join('')}
 function fReq(){const inc=C().incoming(),out=C().outgoing();
  let h=`<div class="subh">Recibidas</div>`+(inc.length?inc.map(r=>frRow({nombre:r.deN,pid:r.deP,color:r.deC},`<button class="sm pri" onclick="FR.acc('${esc(r.id)}')">Aceptar</button><button class="sm" onclick="FR.rm('${esc(r.id)}')">Rechazar</button>`)).join(''):'<p class="m">No tienes solicitudes nuevas.</p>');
  if(out.length)h+=`<div class="subh">Enviadas</div>`+out.map(r=>frRow({nombre:r.paN,pid:r.paP,color:r.paC},`<button class="sm" onclick="FR.rm('${esc(r.id)}')">Cancelar</button>`)).join('');return h}
@@ -4425,11 +4531,11 @@ function fAdd(){let h=`<div class="srch"><input id="faq" value="${esc(faq)}" pla
  return h+sugHtml()}
 function fDraw(){let o=$$('frp');if(!fOpen){if(o)o.remove();const k=$$('frbk');if(k)k.remove();return}
  if(!o){const k=document.createElement('div');k.id='frbk';k.className='frbk';k.onclick=()=>FR.close();document.body.appendChild(k);o=document.createElement('div');o.id='frp';document.body.appendChild(o)}
- o.className='frp'+(fchat?' lft':'')+(fdet?' pfw':'')
+ o.className='frp'+(fchat&&!fpm?' lft':'')+(fpm?' pm':'')+(fdet?' pfw':'')
  let bellB=(!fchat&&C()&&C().name)?`<button class="sm fr-bell" aria-label="Notificaciones" title="Notificaciones" onclick="ntfOpen()"><svg class="ic" width="16" height="16" viewBox="0 0 24 24"><path d="M6 17v-6a6 6 0 0112 0v6l2 2H4zM10 21h4"/></svg>${C().incoming&&C().incoming().length?`<i class="bdg">${C().incoming().length}</i>`:''}</button>`:'';
- let h=`<div class="accx">${fchat?'<div class="chh"><h2>Chat global</h2><span class="m">Conversación abierta con todos los jugadores</span></div>':'<h2 style="margin:0">'+(fdet?'Perfil':'Amigos')+'</h2>'}<div class="fr-top">${bellB}<button class="sm" onclick="FR.close()">Cerrar</button></div></div><div class="frb2"${fchat?' style="display:flex;flex-direction:column;min-height:0"':''}>`;
+ let h=`<div class="accx">${fchat?(fpm?`<div class="chh"><h2>${esc(fpm.nombre)}</h2><span id="pms" class="m">Chat privado</span></div>`:'<div class="chh"><h2>Chat global</h2><span class="m">Conversación abierta con todos los jugadores</span></div>'):'<h2 style="margin:0">'+(fdet?'Perfil':'Amigos')+'</h2>'}<div class="fr-top">${bellB}${fpm?'<button class="sm" onclick="FR.open()">Amigos</button>':''}<button class="sm" onclick="FR.close()">Cerrar</button></div></div><div class="frb2"${fchat?' style="display:flex;flex-direction:column;min-height:0"':''}>`;
   if(fchat)h+=(C()&&C().name&&C().chatListen)?chatShell():'<p class="m">Necesitas iniciar sesión con una cuenta para usar el chat global.</p>';
- else if(fdet)h+=`<button class="sm" style="margin:0 0 10px" onclick="FR.back()">← Volver</button>`+PF.hero(fdet.d)+`<div class="pf-tabs"><button class="${fdet.m=='p'?'on':''}" onclick="FR.mode('p')">Resumen</button><button class="${fdet.m=='s'?'on':''}" onclick="FR.mode('s')">Estadísticas</button></div>`+profile(fdet.d,fdet.m,1)+`<div class="fr-acts"><button class="pri" onclick="FR.map('${esc(fdet.d.uid)}')">Ver mapa</button>`+(fl.some(x=>x.uid==fdet.d.uid)?`<button onclick="FR.ret('${esc(fdet.d.uid)}')">Retar a un duelo</button>`:'')+`</div>`;
+ else if(fdet)h+=`<button class="sm" style="margin:0 0 10px" onclick="FR.back()">← Volver</button>`+PF.hero(fdet.d)+`<div class="pf-tabs"><button class="${fdet.m=='p'?'on':''}" onclick="FR.mode('p')">Resumen</button><button class="${fdet.m=='s'?'on':''}" onclick="FR.mode('s')">Estadísticas</button></div>`+profile(fdet.d,fdet.m,1)+`<div class="fr-acts">`+(fl.some(x=>x.uid==fdet.d.uid)?`<button class="pri" onclick="FR.pchat('${esc(fdet.d.uid)}')">Enviar mensaje</button>`:'')+`<button class="pri" onclick="FR.map('${esc(fdet.d.uid)}')">Ver mapa</button>`+(fl.some(x=>x.uid==fdet.d.uid)?`<button onclick="FR.ret('${esc(fdet.d.uid)}')">Retar a un duelo</button>`:'')+`</div>`;
  else if(!C()||!C().name)h+='<p class="m">Necesitas una cuenta para tener amigos.</p>';
  else h+=fTabs()+(fmode=='req'?fReq():fmode=='add'?fAdd():fList());
   h+='</div>';
@@ -4437,12 +4543,24 @@ function fDraw(){let o=$$('frp');if(!fOpen){if(o)o.remove();const k=$$('frbk');i
 async function fLoad(){if(!C()||!C().name){fDraw();return}fload=true;try{fl=await C().friends();fl.sort((x,y)=>(online(y)?1:0)-(online(x)?1:0)||String(x.nombre).localeCompare(String(y.nombre)))}catch(e){}fload=false;if(fOpen&&!fchat)fDraw();sLoad()}
 window.FR={
  toggle:()=>fOpen?FR.close():FR.open(),
- open:t=>{fOpen=true;fchat=false;fsel=null;fdet=null;fmode=(t=='req'||t=='add')?t:'list';fDraw();fLoad();clearInterval(ft);ft=setInterval(()=>{if(fOpen&&!fdet&&!fchat)fLoad()},45000)},
+ open:t=>{chatStop();fOpen=true;fchat=false;fsel=null;fdet=null;fmode=(t=='req'||t=='add')?t:'list';fDraw();fLoad();clearInterval(ft);ft=setInterval(()=>{if(fOpen&&!fdet&&!fchat)fLoad()},45000)},
  close:()=>{fOpen=false;fchat=false;chatStop();clearInterval(ft);fDraw()},
- chat:()=>{if(fOpen&&fchat){FR.close();return}if(!C()||!C().name||!C().chatListen){fOpen=true;fchat=true;fdet=null;clearInterval(ft);fDraw();return}fOpen=true;fchat=true;fsel=null;fdet=null;cerr=null;cmsgs=[];clearInterval(ft);try{localStorage.setItem('ciudad-chatseen',String(Date.now()))}catch(e){}cbHb();fDraw();chatStop();cunsub=C().chatListen((m,e)=>{cmsgs=m;cerr=e||null;chatPaint()});if(C().typingListen){ctun=C().typingListen(l=>{ctyp=l;typPaint()});ctiv=setInterval(typPaint,1500)}},
- typ:()=>{try{C().typingSet&&C().typingSet(true)}catch(e){}},
+ chat:()=>{if(fOpen&&fchat&&!fpm){FR.close();return}chatStop();if(!C()||!C().name||!C().chatListen){fOpen=true;fchat=true;fdet=null;clearInterval(ft);fDraw();return}fOpen=true;fchat=true;fsel=null;fdet=null;cerr=null;cmsgs=[];clearInterval(ft);try{localStorage.setItem('ciudad-chatseen',String(Date.now()))}catch(e){}cbHb();fDraw();chatStop();cunsub=C().chatListen((m,e)=>{cmsgs=m;cerr=e||null;chatPaint()});if(C().typingListen){ctun=C().typingListen(l=>{ctyp=l;typPaint()});ctiv=setInterval(typPaint,1500)}},
+ typ:()=>{if(fpm){try{C().pmPing(fpm.uid,true)}catch(e){}return}try{C().typingSet&&C().typingSet(true)}catch(e){}},
  chatBack:()=>{FR.close()},
- send:async()=>{const i=$$('chi');if(!i)return;const v=i.value.trim();if(!v)return;try{await C().chatSend(v);i.value='';i.focus();C().typingSet&&C().typingSet(false)}catch(e){notice('Chat',e.message||'No se pudo enviar')}},
+ reto:async()=>{try{await C().retoSend(fpm?fpm.uid:null)}catch(e){notice('Reto',e.message||'No se pudo enviar el reto')}},
+ retoAcc:async id=>{const m=cmsgs.find(x=>x.id==id);if(!m)return;try{await C().retoAccept(m,fpm?fpm.uid:null);notice('Reto aceptado','Esperando a que '+m.nombre+' inicie la batalla.')}catch(e){notice('Reto',e.message||'No se pudo aceptar el reto')}},
+ retoCan:async id=>{const m=cmsgs.find(x=>x.id==id);if(!m)return;try{await C().retoCancel(m,fpm?fpm.uid:null)}catch(e){notice('Reto',e.message||'No se pudo cancelar el reto')}},
+ pchat:async u=>{const d=fl.find(x=>x.uid==u)||(fdet&&fdet.d&&fdet.d.uid==u?fdet.d:null);if(!d||!C()||!C().name||!C().pmListen)return;
+  chatStop();fOpen=true;fchat=true;fpm=d;fdet=null;fsel=null;cerr=null;cmsgs=[];PM={hide:null,op:null};clearInterval(ft);fDraw();
+  const o=d.uid;PM.ready=(async()=>{await C().pmPurgeIfAlone(o);await C().pmPing(o,false)})();await PM.ready;
+  if(!fpm||fpm.uid!==o)return;
+  PM.hb=setInterval(()=>{try{C().pmPing(o,false)}catch(e){}},20000);
+  cunsub=C().pmListen(o,(l,e)=>{if(!fpm||fpm.uid!==o)return;cerr=e||null;if(!PM.hide)PM.hide=new Set(l.map(m=>m.id));
+   cmsgs=l.filter(m=>!PM.hide.has(m.id)).sort((a,b)=>(a.t||0)-(b.t||0)).slice(-100);chatPaint()});
+  ctun=C().pmPresListen(o,p=>{if(!fpm||fpm.uid!==o)return;PM.op=p;ctyp=p&&p.ty?[{nombre:d.nombre,t:p.ty}]:[];typPaint()});
+  ctiv=setInterval(typPaint,1500);typPaint()},
+ send:async()=>{const i=$$('chi');if(!i)return;const v=i.value.trim();if(!v)return;try{if(fpm){await PM.ready;if(!fpm)return;await C().pmSend(fpm.uid,v);i.value='';i.focus();C().pmPing(fpm.uid,false)}else{await C().chatSend(v);i.value='';i.focus();C().typingSet&&C().typingSet(false)}}catch(e){notice('Chat',e.message||'No se pudo enviar')}},
  inv:async u=>{const p=fsug.find(x=>x.uid==u);if(!p)return;try{await C().request(p);fsug=fsug.filter(x=>x.uid!=u);notice('Solicitud enviada','Le llegará una notificación a '+p.nombre+'.')}catch(e){notice('No se pudo invitar',e.message||'Error')}if(fOpen)fDraw()},
  noinv:u=>{try{const a=sugNo();a.push(u);localStorage.setItem('ciudad-sugno',JSON.stringify(a.slice(-300)))}catch(e){}fsug=fsug.filter(x=>x.uid!=u);fDraw()},
  sel:u=>{fsel=fsel==u?null:u;fDraw()},
@@ -4488,11 +4606,16 @@ function cbHb(){const b=$$('chb');if(!b)return;const my=C()&&C().name;b.style.di
 function bgSync(){const my=C()&&C().name;
  if(!my){if(bgun){try{bgun()}catch(e){}bgun=null}bgm=[];cbHb();return}
  if(!bgun&&C().chatListen){try{if(!chSeen())localStorage.setItem('ciudad-chatseen',String(Date.now()))}catch(e){}
-  bgun=C().chatListen((m,e)=>{if(e)return;bgm=m.slice(-30);if(fOpen&&fchat)try{localStorage.setItem('ciudad-chatseen',String(Date.now()))}catch(x){}cbHb()})}
+  bgun=C().chatListen((m,e)=>{if(e)return;bgm=m.slice(-30);if(fOpen&&fchat&&!fpm)try{localStorage.setItem('ciudad-chatseen',String(Date.now()))}catch(x){}cbHb()})}
  cbHb()}
 function hb(){const b=$$('frb');if(!b)return;const n=C()&&C().incoming?C().incoming().length:0;b.innerHTML=HEART+(n?`<b>${n}</b>`:'')}
 {const h=document.querySelector('header');if(h&&!$$('frb')){const b=document.createElement('button');b.id='frb';b.className='frb';b.title='Amigos y jugadores';b.setAttribute('aria-label','Amigos');b.onclick=()=>FR.toggle();const c=$$('cc');h.insertBefore(b,c);hb()}
  if(h&&!$$('chb')){const k=document.createElement('button');k.id='chb';k.className='chb';k.title='Chat global';k.setAttribute('aria-label','Chat global');k.onclick=()=>FR.chat();h.insertBefore(k,$$('frb'));cbHb()}}
+addEventListener('retoevent',e=>{const d=e.detail||{};
+ if(d.t=='aceptado')notice('Reto aceptado',d.nombre+' aceptó tu reto. Iniciando la batalla.');
+ else if(d.t=='sinrespuesta')notice('Reto sin respuesta',d.nombre+' no pudo iniciar la batalla. Inténtalo de nuevo.');
+ else if(d.t=='error')notice('Reto',d.msg||'No se pudo iniciar el reto.')});
+addEventListener('pagehide',()=>{try{if(fpm)C().pmLeave(fpm.uid)}catch(e){}});
 addEventListener('cloudchange',()=>{hb();bgSync();if(fOpen&&!fdet&&!fchat)fLoad()});
 setInterval(()=>{try{const g=$$('game');if(!g||g.classList.contains('hide')||typeof S==='undefined'||!S||S.slot==null)return;
  ensure();push();const nv=$$('nvb');if(nv&&nv.title!='Arena'){nv.title='Arena';nv.setAttribute('aria-label','Arena')}
@@ -5846,6 +5969,18 @@ addEventListener('cloudevt',e=>{const d=e.detail||{},r=d.r||{};
 </script>
 <style id="patch-pf-css">
 .frp.pfw{width:min(400px,94vw)}
+.frp.lft,.frp.pm{width:min(380px,94vw)}
+.chh h2{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.frmsg{grid-column:1/-1}
+.chr{flex:none;padding:6px 12px;border-radius:99px;font-size:12px;background:transparent;border:1px solid var(--l);color:var(--t)}
+.chr:hover:not(:disabled){border-color:var(--a)}
+.crt{align-self:stretch;margin:12px 0 4px;padding:12px 14px;border:1px solid var(--l);border-radius:14px;background:color-mix(in srgb,var(--t) 5%,transparent);display:flex;flex-direction:column;gap:4px}
+.crt.me{border-color:var(--a)}
+.crt b{font-size:13px}
+.crt .m{font-size:11px}
+.crt-r{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:8px;padding-top:8px;border-top:1px solid var(--l)}
+.crt-t{font-size:11px;color:var(--m);font-variant-numeric:tabular-nums}
+.crt button{padding:8px 14px;border-radius:10px;font-size:12px}
 .pf-h{position:relative;overflow:hidden;border-radius:18px;padding:14px;margin-bottom:12px;box-shadow:inset 0 0 0 1px var(--l);background:var(--s)}
 .pf-bn{position:absolute;left:0;right:0;top:0;height:62px;background:linear-gradient(135deg,var(--pc),color-mix(in srgb,var(--pc) 35%,var(--s)))}
 .pf-top{position:relative;display:flex;align-items:flex-end;gap:12px;margin-top:16px}
