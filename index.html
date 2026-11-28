@@ -4050,7 +4050,7 @@ Object.assign(window.Cloud,{
   const n=Date.now(),rt=window.Cloud._rt;if(rt&&!rt.done&&n<rt.exp)throw new Error('Ya tienes un reto abierto. Cancélalo para enviar otro.');
   const ref=o?doc(collection(db,'chat_priv',window.Cloud.pmPair(o),'m')):doc(collection(db,'chat'));
   const x={ref,id:ref.id,o:o||null,exp:n+300000,done:false};window.Cloud._rt=x;
-  try{await setDoc(ref,{uid,nombre:window.Cloud.me.nombre||window.Cloud.name,color:window.Cloud.me.color||'',txt:'',tipo:'reto',estado:'abierto',exp:x.exp,t:n})}
+  try{await setDoc(ref,{uid,nombre:window.Cloud.me.nombre||window.Cloud.name,color:window.Cloud.me.color||'',txt:'Reto de batalla',tipo:'reto',estado:'abierto',exp:x.exp,t:n})}
   catch(e){window.Cloud._rt=null;throw e}
   x.un=onSnapshot(ref,async sn=>{const d=sn.data();if(!d||x.done)return;
    if(d.estado=='aceptado'&&d.por){x.done=true;try{x.un()}catch(e){}clearTimeout(x.tm);
